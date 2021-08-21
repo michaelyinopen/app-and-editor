@@ -1,6 +1,5 @@
 import {
   createReducer,
-  createSelector,
   EntityState
 } from '@reduxjs/toolkit'
 import {
