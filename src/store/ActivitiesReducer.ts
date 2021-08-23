@@ -35,12 +35,15 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
       for (const eventHeader of activityHeaders) {
         if (!(eventHeader.id in state.entities)) {
           hasCreated = true
+          const newEntity = {
+            id: eventHeader.id,
+            name: eventHeader.name
+          }
+          state.entities[eventHeader.id] = newEntity
+        } else {
+          state.entities[eventHeader.id]!.id = eventHeader.id
+          state.entities[eventHeader.id]!.name = eventHeader.name
         }
-        const newEntity = {
-          id: eventHeader.id,
-          name: eventHeader.name
-        }
-        state.entities[eventHeader.id] = newEntity
       }
 
       state.ids = hasCreated

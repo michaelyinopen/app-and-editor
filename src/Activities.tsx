@@ -1,14 +1,40 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom'
+import {
+  activitiesIsLoadingSelector,
+  getActivitiesTakingThunkAction
+} from './getActivitiesTakingThunkAction';
 import { useAppDispatch, useAppSelector } from "./store";
-import { getSingleActivitySucceeded } from "./store/actions";
 
 export const Activities = () => {
   const activities = useAppSelector(state => state.activities.entities)
   const dispatch = useAppDispatch()
+
+  const loadActivitiesCallback = useRef(() => {
+    dispatch(getActivitiesTakingThunkAction)
+      .then(result => {
+        if (result === false) {
+          alert('get jobSets failed')
+        }
+      })
+      .catch(() => {
+        alert('get jobSets failed catch')
+      })
+  }).current
+  useEffect(() => {
+    loadActivitiesCallback()
+  }, [loadActivitiesCallback])
+
+  const isLoading = useAppSelector(activitiesIsLoadingSelector)
+
   return (
     <div>
       <h1>Activities</h1>
-      <Link to={`/activities/new`}>New</Link>
+      <div>
+        <button onClick={() => { loadActivitiesCallback() }}>referesh</button>
+        {isLoading && <span> Loading...</span>}
+      </div>
+      <div><Link to={`/activities/new`}>New</Link></div>
       <ol>
         {Object.values(activities).map(a => (
           <li key={a!.id}>
@@ -18,17 +44,6 @@ export const Activities = () => {
           </li>
         ))}
       </ol>
-      
-      {/* todo remove */}
-      <button onClick={() => {
-        dispatch(getSingleActivitySucceeded({
-          id: 1,
-          name: 'some activity',
-          person: 'some person',
-          place: 'some place',
-          cost: 99
-        }))
-      }}>Add Activity</button>
     </div>
   )
 }

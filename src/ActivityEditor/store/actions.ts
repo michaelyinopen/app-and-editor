@@ -1,14 +1,15 @@
 import { createAction } from '@reduxjs/toolkit'
+import { ActivityHeader, Activity } from '../../types'
 
 export const resetActivityEditor = createAction('resetActivityEditor')
-export const setActivityEditorId = createAction<number>('setActivityEditorId')
+export const setActivityEditorId = createAction<number | undefined>('setActivityEditorId')
 export const setActivityEditorIsEdit = createAction<boolean>('setActivityEditorIsEdit')
 export const loadedActivity = createAction('loadedActivity')
 export const failedToLoadActivity = createAction('failedToLoadActivity')
 
 export const setActivityFromAppStore = createAction(
   'setActivityFromAppStore',
-  (activity) => ({
+  (activity: ActivityHeader & Partial<Activity>) => ({
     payload: {
       activity
     }
@@ -16,6 +17,6 @@ export const setActivityFromAppStore = createAction(
 )
 
 export const setName = createAction<string>('setName')
-export const setWho = createAction<string>('setName')
-export const setWhere = createAction<string>('setName')
+export const setWho = createAction<string>('setWho')
+export const setWhere = createAction<string>('setWhere')
 export const setHowMuch = createAction<undefined | number>('setHowMuch')

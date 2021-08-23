@@ -7,17 +7,18 @@ export async function getActivitiesApiAsync() {
     if (!response.ok) {
       return [false]
     }
+    // console.log(await response.text())
     responseBody = await response.json()
   }
   catch (e) {
+    alert(e)
     return [false]
   }
   return [true, responseBody]
 }
 
-
-export const getSingleActivityUrlTemplate = '/api/job-sets/{id}'
-export async function getJobSetApiAsync(id: number) {
+export const getSingleActivityUrlTemplate = '/api/activities/{id}'
+export async function getSingleActivityApiAsync(id: number) {
   const url = template.parse(getSingleActivityUrlTemplate).expand({ id })
   let responseBody
   try {

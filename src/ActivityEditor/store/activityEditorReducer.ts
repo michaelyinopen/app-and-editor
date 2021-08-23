@@ -34,11 +34,7 @@ const activityEditorControlInitialState: ActivityEditorControlState = {
 const controlReducer = createReducer(activityEditorControlInitialState, (builder) => {
   builder
     .addCase(resetActivityEditor, (state) => {
-      state.id = undefined
-      state.isEdit = false
-      state.loaded = false
-      state.setFromAppStore = false
-      state.failedToLoad = false
+      return activityEditorControlInitialState
     })
     .addCase(setActivityEditorId, (state, { payload: id }) => {
       state.id = id
@@ -58,8 +54,7 @@ const controlReducer = createReducer(activityEditorControlInitialState, (builder
       if (!state.loaded) {
         return
       }
-      // todo implement
-      // state.jobSet = jobSet //todo remove
+      state.setFromAppStore = true
     })
 })
 
@@ -80,10 +75,15 @@ const activityEditorFormDataInitialState: ActivityEditorFormDataState = {
 const formDataReducer = createReducer(activityEditorFormDataInitialState, (builder) => {
   builder
     .addCase(resetActivityEditor, (state) => {
-      // todo
+      return activityEditorFormDataInitialState
     })
-    .addCase(setActivityFromAppStore, (state) => {
-      // todo
+    .addCase(setActivityFromAppStore, (state, { payload: { activity } }) => {
+      if (activity) {
+        state.name = activity.name
+        state.who = activity.person ?? ''
+        state.where = activity.place ?? ''
+        state.howMuch = activity.cost
+      }
     })
     .addCase(setName, (state, { payload }) => {
       state.name = payload
