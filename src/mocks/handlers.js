@@ -36,6 +36,7 @@ export const handlers = [
           name: 'some activity',
           person: 'some person',
           place: 'some place',
+          cost: 99,
           versionToken: '1',
         }),
       )
