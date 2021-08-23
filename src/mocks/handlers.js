@@ -9,14 +9,17 @@ export const handlers = [
         {
           id: 1,
           name: 'some activity',
+          versionToken: '1',
         },
         {
           id: 2,
           name: 'slow',
+          versionToken: '1',
         },
         {
           id: 3,
           name: 'error',
+          versionToken: '1',
         }
       ]),
     )
@@ -33,7 +36,7 @@ export const handlers = [
           name: 'some activity',
           person: 'some person',
           place: 'some place',
-          cost: 99
+          versionToken: '1',
         }),
       )
     } else if (id === '2') {
@@ -45,7 +48,8 @@ export const handlers = [
           name: 'slow',
           person: 'snail',
           place: 'leaf',
-          cost: 8
+          cost: 8,
+          versionToken: '1',
         }),
       )
     } else if (id === '3') {

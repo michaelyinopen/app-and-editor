@@ -9,8 +9,8 @@ export const ActivityEditorForm = ({ disabled }) => {
   const where = useActivityEditorSelector(s => s.formData.where)
   const howMuch = useActivityEditorSelector(s => s.formData.howMuch)
 
-  const failedToLoad = useActivityEditorSelector(es => es.control.failedToLoad)
-  const setFromAppStore = useActivityEditorSelector(es => es.control.setFromAppStore)
+  const failedToLoad = useActivityEditorSelector(es => es.loadStatus) === 'failed'
+  const setFromAppStore = useActivityEditorSelector(es => es.initialized)
   return (
     <form onSubmit={() => { }}>
       <fieldset disabled={disabled} >

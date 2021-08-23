@@ -1,7 +1,4 @@
-import {
-  combineReducers,
-  createReducer,
-} from '@reduxjs/toolkit'
+import { createReducer } from '@reduxjs/toolkit'
 import {
   failedToLoadActivity,
   loadedActivity,
@@ -15,26 +12,38 @@ import {
   setWho
 } from './actions'
 
-type ActivityEditorControlState = {
+type ActivityEditorState = {
   id?: number
+  versionToken: string
   isEdit: boolean
-  loaded: boolean
-  setFromAppStore: boolean
-  failedToLoad: boolean
+  loadStatus: 'not loaded' | 'loaded' | 'failed'
+  initialized: boolean,
+  formData: {
+    name: string,
+    who: string,
+    where: string,
+    howMuch?: number,
+  }
 }
 
-const activityEditorControlInitialState: ActivityEditorControlState = {
+const activityEditorInitialState: ActivityEditorState = {
   id: undefined,
+  versionToken: '',
   isEdit: false,
-  loaded: false,
-  setFromAppStore: false,
-  failedToLoad: false,
+  loadStatus: 'not loaded',
+  initialized: false,
+  formData: {
+    name: '',
+    who: '',
+    where: '',
+    howMuch: undefined,
+  }
 }
 
-const controlReducer = createReducer(activityEditorControlInitialState, (builder) => {
+export const activityEditorReducer = createReducer(activityEditorInitialState, (builder) => {
   builder
     .addCase(resetActivityEditor, (state) => {
-      return activityEditorControlInitialState
+      return activityEditorInitialState
     })
     .addCase(setActivityEditorId, (state, { payload: id }) => {
       state.id = id
@@ -43,63 +52,44 @@ const controlReducer = createReducer(activityEditorControlInitialState, (builder
       state.isEdit = isEdit
     })
     .addCase(loadedActivity, (state) => {
-      state.loaded = true
-      state.failedToLoad = false
+      state.loadStatus = 'loaded'
     })
     .addCase(failedToLoadActivity, (state) => {
-      state.loaded = false
-      state.failedToLoad = true
+      state.loadStatus = 'failed'
     })
-    .addCase(setActivityFromAppStore, (state, { payload: activity }) => {
-      if (!state.loaded) {
+    .addCase(setActivityFromAppStore, (state, action) => {
+      const { payload: { activity, loaded } } = action
+      if (!state.initialized) {
+        if (loaded) {
+          state.initialized = true
+        }
+        state.versionToken = activity?.versionToken ?? activityEditorInitialState.versionToken
+        state.formData.name = activity?.name ?? activityEditorInitialState.formData.name
+        state.formData.who = activity && activity.hasDetail
+          ? activity.person!
+          : activityEditorInitialState.formData.who
+        state.formData.where = activity && activity.hasDetail
+          ? activity.place!
+          : activityEditorInitialState.formData.where
+        state.formData.howMuch = activity && activity.hasDetail
+          ? activity.cost!
+          : activityEditorInitialState.formData.howMuch
         return
       }
-      state.setFromAppStore = true
-    })
-})
 
-type ActivityEditorFormDataState = {
-  name: string,
-  who: string,
-  where: string,
-  howMuch?: number,
-}
-
-const activityEditorFormDataInitialState: ActivityEditorFormDataState = {
-  name: '',
-  who: '',
-  where: '',
-  howMuch: undefined,
-}
-
-const formDataReducer = createReducer(activityEditorFormDataInitialState, (builder) => {
-  builder
-    .addCase(resetActivityEditor, (state) => {
-      return activityEditorFormDataInitialState
-    })
-    .addCase(setActivityFromAppStore, (state, { payload: { activity } }) => {
-      if (activity) {
-        state.name = activity.name
-        state.who = activity.person ?? ''
-        state.where = activity.place ?? ''
-        state.howMuch = activity.cost
-      }
+      // already initialized
+      //todo
     })
     .addCase(setName, (state, { payload }) => {
-      state.name = payload
+      state.formData.name = payload
     })
     .addCase(setWho, (state, { payload }) => {
-      state.who = payload
+      state.formData.who = payload
     })
     .addCase(setWhere, (state, { payload }) => {
-      state.where = payload
+      state.formData.where = payload
     })
     .addCase(setHowMuch, (state, { payload }) => {
-      state.howMuch = payload
+      state.formData.howMuch = payload
     })
-})
-
-export const activityEditorReducer = combineReducers({
-  control: controlReducer,
-  formData: formDataReducer,
 })

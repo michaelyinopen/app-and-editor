@@ -1,6 +1,7 @@
 export type ActivityHeader = {
   id: number,
   name: string,
+  versionToken: string,
 }
 
 export type Activity = {
@@ -8,5 +9,6 @@ export type Activity = {
   name: string,
   person: string,
   place: string,
-  cost: number
+  cost: number,
+  versionToken: string,
 }

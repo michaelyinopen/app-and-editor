@@ -71,16 +71,13 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     const appActivity = useAppSelector(s => id !== undefined ? s.activities.entities[id] : undefined)
 
-    const loaded = useActivityEditorSelector(es => es.control.loaded)
-    const failedToLoad = useActivityEditorSelector(es => es.control.failedToLoad)
-    const setFromAppStore = useActivityEditorSelector(es => es.control.setFromAppStore)
+    const loadStatus = useActivityEditorSelector(es => es.loadStatus)
+    const initialized = useActivityEditorSelector(es => es.initialized)
     const loading = useAppSelector(createSingleActivityIsLoadingSelector(id))
 
     useEffect(() => {
-      if (appActivity) {
-        editorDispatch(setActivityFromAppStore(appActivity))
-      }
-    }, [editorDispatch, appActivity, loaded])
+      editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
+    }, [editorDispatch, appActivity, loadStatus])
 
     return (
       <div>
@@ -100,10 +97,10 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           >
             referesh
           </button>
-          {failedToLoad && <span> Failed to load!!!</span>}
+          {loadStatus === 'failed' && <span> Failed to load!!!</span>}
           {loading && <span> Loading...</span>}
         </div>
-        <ActivityEditorForm disabled={!edit || !setFromAppStore} />
+        <ActivityEditorForm disabled={!edit || !initialized} />
       </div>
     )
   }
