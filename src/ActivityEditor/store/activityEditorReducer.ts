@@ -16,6 +16,7 @@ type ActivityEditorState = {
   id?: number
   versionToken: string
   isEdit: boolean
+  hasDetail: boolean
   loadStatus: 'not loaded' | 'loaded' | 'failed'
   initialized: boolean,
   formData: {
@@ -30,6 +31,7 @@ const activityEditorInitialState: ActivityEditorState = {
   id: undefined,
   versionToken: '',
   isEdit: false,
+  hasDetail: false,
   loadStatus: 'not loaded',
   initialized: false,
   formData: {
@@ -64,6 +66,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           state.initialized = true
         }
         state.versionToken = activity?.versionToken ?? activityEditorInitialState.versionToken
+        state.hasDetail = activity?.hasDetail ?? activityEditorInitialState.hasDetail
         state.formData.name = activity?.name ?? activityEditorInitialState.formData.name
         state.formData.who = activity && activity.hasDetail
           ? activity.person!
