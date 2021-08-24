@@ -3,6 +3,7 @@ import {
   FunctionComponent,
   useEffect,
 } from "react"
+import { Link } from 'react-router-dom'
 import {
   createSingleActivityIsLoadingSelector,
   getActivityTakingThunkAction
@@ -45,12 +46,21 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const editorDispatch = useActivityEditorDispatch()
 
     useEffect(() => {
+      editorDispatch(setActivityEditorId(id))
+      return () => { editorDispatch(resetActivityEditor()) }
+    }, [editorDispatch, id])
+
+    useEffect(() => {
+      editorDispatch(setActivityEditorIsEdit(edit))
+    }, [editorDispatch, edit])
+
+    useEffect(() => {
       if (id) {
         dispatch(getActivityTakingThunkAction(id))
           .then(result => {
             if (result === true) {
               editorDispatch(loadedActivity())
-            } else if (result === false) {
+            } else {
               editorDispatch(failedToLoadActivity())
             }
           })
@@ -60,24 +70,17 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
       }
     }, [dispatch, editorDispatch, id])
 
-    useEffect(() => {
-      editorDispatch(setActivityEditorId(id))
-      return () => { editorDispatch(resetActivityEditor()) }
-    }, [editorDispatch, id])
-
-    useEffect(() => {
-      editorDispatch(setActivityEditorIsEdit(edit))
-    }, [editorDispatch, edit])
-
     const appActivity = useAppSelector(s => id !== undefined ? s.activities.entities[id] : undefined)
 
     const loadStatus = useActivityEditorSelector(es => es.loadStatus)
     const initialized = useActivityEditorSelector(es => es.initialized)
-    const loading = useAppSelector(createSingleActivityIsLoadingSelector(id))
+    const thunkLoading = useAppSelector(createSingleActivityIsLoadingSelector(id))
 
     useEffect(() => {
       editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
     }, [editorDispatch, appActivity, loadStatus])
+
+    const showLoading = thunkLoading || (!initialized && loadStatus !== 'failed')
 
     return (
       <div>
@@ -97,9 +100,13 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           >
             referesh
           </button>
-          {loadStatus === 'failed' && <span> Failed to load!!!</span>}
-          {loading && <span> Loading...</span>}
+          {loadStatus === 'failed' && <span> Please try again.</span>}
+          {showLoading && <span> Loading...</span>}
         </div>
+        {edit
+          ? <Link to={`/activities/${id}`}>readonly</Link>
+          : <Link to={`/activities/${id}/edit`}>edit</Link>
+        }
         <ActivityEditorForm disabled={!edit || !initialized} />
       </div>
     )

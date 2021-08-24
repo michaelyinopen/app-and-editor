@@ -1,5 +1,13 @@
-import { setHowMuch, setName, setWhere, setWho } from "./store/actions"
-import { useActivityEditorDispatch, useActivityEditorSelector } from "./store/store"
+import {
+  setHowMuch,
+  setName,
+  setWhere,
+  setWho
+} from "./store/actions"
+import {
+  useActivityEditorDispatch,
+  useActivityEditorSelector
+} from "./store/store"
 
 
 export const ActivityEditorForm = ({ disabled }) => {
@@ -9,15 +17,14 @@ export const ActivityEditorForm = ({ disabled }) => {
   const where = useActivityEditorSelector(s => s.formData.where)
   const howMuch = useActivityEditorSelector(s => s.formData.howMuch)
 
-  const failedToLoad = useActivityEditorSelector(es => es.loadStatus) === 'failed'
-  const setFromAppStore = useActivityEditorSelector(es => es.initialized)
+  const hasDetail = useActivityEditorSelector(es => es.hasDetail)
   return (
     <form onSubmit={() => { }}>
       <fieldset disabled={disabled} >
         <label htmlFor="name">name:</label><br />
         <input type="text" id="name" value={name} onChange={e => { editorDispatch(setName(e.target.value ?? '')) }} /><br />
 
-        {setFromAppStore && !failedToLoad &&
+        {hasDetail &&
           <>
             <label htmlFor="who">who:</label><br />
             <input type="text" id="who" value={who} onChange={e => { editorDispatch(setWho(e.target.value ?? '')) }} /><br />
