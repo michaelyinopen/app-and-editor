@@ -42,6 +42,7 @@ const WithJobSetEditorProvider: WithActivityEditorProviderType = (Component) => 
 
 export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSetEditorProvider(
   ({ id, edit }) => {
+    const isNew = id === undefined
     const dispatch = useAppDispatch()
     const editorDispatch = useActivityEditorDispatch()
 
@@ -55,7 +56,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     }, [editorDispatch, edit])
 
     useEffect(() => {
-      if (id) {
+      if (!isNew && id) {
         dispatch(getActivityTakingThunkAction(id))
           .then(result => {
             if (result === true) {
@@ -72,7 +73,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
             //notification
           })
       }
-    }, [dispatch, editorDispatch, id])
+    }, [dispatch, editorDispatch, isNew, id])
 
     const appActivity = useAppSelector(s => id !== undefined ? s.activities.entities[id] : undefined)
 
@@ -81,8 +82,10 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const thunkLoading = useAppSelector(createSingleActivityIsLoadingSelector(id))
 
     useEffect(() => {
-      editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
-    }, [editorDispatch, appActivity, loadStatus])
+      if (!isNew) {
+        editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
+      }
+    }, [editorDispatch, appActivity, loadStatus, isNew])
 
     const showLoading = thunkLoading || (!initialized && loadStatus !== 'failed')
 
@@ -90,33 +93,36 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
       <div>
         {id ? <h1>Activity #{id}</h1> : <h1>New Activity</h1>}
         <div>
-          <button
-            onClick={() => {
-              if (id) {
-                dispatch(getActivityTakingThunkAction(id))
-                  .then(result => {
-                    if (result === true) {
-                      editorDispatch(loadedActivity())
-                    }
-                    // else if(result === false){
-                    //   notification
-                    // }
-                  })
-                // .catch(() => {
-                //   //notification
-                // })
-              }
-            }}
-          >
-            referesh
-          </button>
-          {loadStatus === 'failed' && <span> Please try again.</span>}
-          {showLoading && <span> Loading...</span>}
+          {!isNew && (
+            <button
+              onClick={() => {
+                if (id) {
+                  dispatch(getActivityTakingThunkAction(id))
+                    .then(result => {
+                      if (result === true) {
+                        editorDispatch(loadedActivity())
+                      }
+                      // else if(result === false){
+                      //   notification
+                      // }
+                    })
+                  // .catch(() => {
+                  //   //notification
+                  // })
+                }
+              }}
+            >
+              referesh
+            </button>
+          )}
+          {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
+          {!isNew && showLoading && <span> Loading...</span>}
         </div>
-        {edit
-          ? <Link to={`/activities/${id}`}>readonly</Link>
-          : <Link to={`/activities/${id}/edit`}>edit</Link>
-        }
+        {!isNew && (
+          edit
+            ? <Link to={`/activities/${id}`}>readonly</Link>
+            : <Link to={`/activities/${id}/edit`}>edit</Link>
+        )}
         <ActivityEditorForm disabled={!edit || !initialized} />
       </div>
     )

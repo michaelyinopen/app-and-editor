@@ -49,6 +49,13 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(setActivityEditorId, (state, { payload: id }) => {
       state.id = id
+      if (!id) {
+        // isNew
+        state.initialized = true
+        state.loadStatus = 'loaded'
+        state.isEdit = true
+        state.hasDetail = true
+      }
     })
     .addCase(setActivityEditorIsEdit, (state, { payload: isEdit }) => {
       state.isEdit = isEdit
