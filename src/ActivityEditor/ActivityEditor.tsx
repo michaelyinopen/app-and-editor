@@ -61,11 +61,15 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
             if (result === true) {
               editorDispatch(loadedActivity())
             } else {
+              // if(result === false){
+              //   notification
+              // }
               editorDispatch(failedToLoadActivity())
             }
           })
           .catch(() => {
             editorDispatch(failedToLoadActivity())
+            //notification
           })
       }
     }, [dispatch, editorDispatch, id])
@@ -94,7 +98,13 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                     if (result === true) {
                       editorDispatch(loadedActivity())
                     }
+                    // else if(result === false){
+                    //   notification
+                    // }
                   })
+                // .catch(() => {
+                //   //notification
+                // })
               }
             }}
           >
