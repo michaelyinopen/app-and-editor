@@ -1,4 +1,4 @@
-export type State = {
+export type FormData = {
   name: string,
   who: string,
   where: string,
@@ -23,29 +23,29 @@ export type Step = {
   operations: Operation[],
 }
 
-const defaultState = {
+const defaultFormData = {
   name: '',
   who: '',
   where: '',
   howMuch: undefined,
 }
 
-function getFieldChanges(previousState: State, currentState: State): FieldChange[] {
-  if (previousState === currentState) {
+function getFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
+  if (previousFormData === currentFormData) {
     return []
   }
   const fieldChanges: FieldChange[] = []
-  if (previousState.name !== currentState.name) {
-    fieldChanges.push({ path: '/name', previousValue: previousState.name, newValue: currentState.name })
+  if (previousFormData.name !== currentFormData.name) {
+    fieldChanges.push({ path: '/name', previousValue: previousFormData.name, newValue: currentFormData.name })
   }
-  if (previousState.who !== currentState.who) {
-    fieldChanges.push({ path: '/who', previousValue: previousState.who, newValue: currentState.who })
+  if (previousFormData.who !== currentFormData.who) {
+    fieldChanges.push({ path: '/who', previousValue: previousFormData.who, newValue: currentFormData.who })
   }
-  if (previousState.where !== currentState.where) {
-    fieldChanges.push({ path: '/where', previousValue: previousState.where, newValue: currentState.where })
+  if (previousFormData.where !== currentFormData.where) {
+    fieldChanges.push({ path: '/where', previousValue: previousFormData.where, newValue: currentFormData.where })
   }
-  if (previousState.howMuch !== currentState.howMuch) {
-    fieldChanges.push({ path: '/howMuch', previousValue: previousState.howMuch, newValue: currentState.howMuch })
+  if (previousFormData.howMuch !== currentFormData.howMuch) {
+    fieldChanges.push({ path: '/howMuch', previousValue: previousFormData.howMuch, newValue: currentFormData.howMuch })
   }
   return fieldChanges
 }
@@ -54,7 +54,7 @@ function mergeFieldChanges(a: FieldChange, b: FieldChange): Operation[] {
   return (a.path === b.path)
     ? a.previousValue === b.newValue
       ? [] // merged resulting in no-op
-      : [b] // merged
+      : [{ path: a.path, previousValue: a.previousValue, newValue: b.newValue }] // merged
     : [a, b] // not merged
 }
 
@@ -67,16 +67,16 @@ function calculateStepName(operations: Operation[]): string {
   }
   const operation = operations[0]
   if (operation.path === '/name') {
-    return 'Edit Name'
+    return 'Edit name'
   }
   if (operation.path === '/who') {
-    return 'Edit update'
+    return 'Edit who'
   }
   if (operation.path === '/where') {
-    return 'Edit update'
+    return 'Edit where'
   }
   if (operation.path === '/howMuch') {
-    return 'Edit How Much'
+    return 'Edit how Much'
   }
   // should not reach here
   return ''
@@ -84,10 +84,10 @@ function calculateStepName(operations: Operation[]): string {
 
 export function calculateSteps(
   previousStep: Step | undefined,
-  previousState: State = defaultState,
-  currentState: State)
+  previousFormData: FormData = defaultFormData,
+  currentFormData: FormData)
   : Step[] {
-  const fieldChanges = getFieldChanges(previousState, currentState)
+  const fieldChanges = getFieldChanges(previousFormData, currentFormData)
   if (fieldChanges.length === 0) {
     return previousStep ? [previousStep] : []
   }
