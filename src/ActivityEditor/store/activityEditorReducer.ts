@@ -9,8 +9,10 @@ import {
   setHowMuch,
   setName,
   setWhere,
-  setWho
+  setWho,
+  replaceLastStep,
 } from './actions'
+import { Step } from './undoHistory'
 
 type ActivityEditorState = {
   id?: number
@@ -24,7 +26,8 @@ type ActivityEditorState = {
     who: string,
     where: string,
     howMuch?: number,
-  }
+  },
+  steps: Step[]
 }
 
 const activityEditorInitialState: ActivityEditorState = {
@@ -39,7 +42,8 @@ const activityEditorInitialState: ActivityEditorState = {
     who: '',
     where: '',
     howMuch: undefined,
-  }
+  },
+  steps: []
 }
 
 export const activityEditorReducer = createReducer(activityEditorInitialState, (builder) => {
@@ -101,5 +105,9 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(setHowMuch, (state, { payload }) => {
       state.formData.howMuch = payload
+    })
+    .addCase(replaceLastStep, (state, { payload }) => {
+      state.steps.pop()
+      state.steps.push(...payload)
     })
 })

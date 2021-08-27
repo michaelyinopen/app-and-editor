@@ -1,4 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
+import { Step } from './undoHistory'
 
 export const resetActivityEditor = createAction('resetActivityEditor')
 export const setActivityEditorId = createAction<number | undefined>('setActivityEditorId')
@@ -31,3 +32,5 @@ export const setName = createAction<string>('setName')
 export const setWho = createAction<string>('setWho')
 export const setWhere = createAction<string>('setWhere')
 export const setHowMuch = createAction<undefined | number>('setHowMuch')
+
+export const replaceLastStep = createAction<Step[]>('replaceLastStep')
