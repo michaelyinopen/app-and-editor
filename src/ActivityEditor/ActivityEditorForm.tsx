@@ -18,35 +18,30 @@ export const ActivityEditorForm = ({ disabled }) => {
   const howMuch = useActivityEditorSelector(s => s.formData.howMuch)
 
   const hasDetail = useActivityEditorSelector(es => es.hasDetail)
-
-  const steps = useActivityEditorSelector(es => es.steps)
   return (
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <form onSubmit={() => { }} >
-        <fieldset disabled={disabled} >
-          <label htmlFor="name">name:</label><br />
-          <input type="text" id="name" value={name} onChange={e => { editorDispatch(setName(e.target.value ?? '')) }} /><br />
+    <form onSubmit={() => { }} >
+      <fieldset disabled={disabled} >
+        <label htmlFor="name">name:</label><br />
+        <input type="text" id="name" value={name} onChange={e => { editorDispatch(setName(e.target.value ?? '')) }} /><br />
 
-          {hasDetail &&
-            <>
-              <label htmlFor="who">who:</label><br />
-              <input type="text" id="who" value={who} onChange={e => { editorDispatch(setWho(e.target.value ?? '')) }} /><br />
+        {hasDetail &&
+          <>
+            <label htmlFor="who">who:</label><br />
+            <input type="text" id="who" value={who} onChange={e => { editorDispatch(setWho(e.target.value ?? '')) }} /><br />
 
-              <label htmlFor="where">where:</label><br />
-              <input type="text" id="where" value={where} onChange={e => { editorDispatch(setWhere(e.target.value ?? '')) }} /><br />
+            <label htmlFor="where">where:</label><br />
+            <input type="text" id="where" value={where} onChange={e => { editorDispatch(setWhere(e.target.value ?? '')) }} /><br />
 
-              <label htmlFor="how-much">how much:</label><br />
-              <input type="number" id="how-much" value={howMuch} onChange={e => { editorDispatch(setHowMuch(+e.target.value ?? undefined)) }} /><br />
-            </>
-          }
-        </fieldset>
-        {/* 
+            <label htmlFor="how-much">how much:</label><br />
+            <input type="number" id="how-much" value={howMuch} onChange={e => { editorDispatch(setHowMuch(+e.target.value ?? undefined)) }} /><br />
+          </>
+        }
+      </fieldset>
+      {/* 
       <fieldset {...(disabled ? { disabled: true } : {})}>
         <input type="Submit">Save</input>
       </fieldset>
       */}
-      </form>
-      <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(steps, null, 2)}</pre>
-    </div>
+    </form>
   )
 }

@@ -11,6 +11,9 @@ import {
   setWhere,
   setWho,
   replaceLastStep,
+  undo,
+  redo,
+  jumpToStep,
 } from './actions'
 import { Step } from './undoHistory'
 
@@ -27,7 +30,8 @@ type ActivityEditorState = {
     where: string,
     howMuch?: number,
   },
-  steps: Step[]
+  steps: Step[],
+  currentStepIndex: number,
 }
 
 const activityEditorInitialState: ActivityEditorState = {
@@ -43,12 +47,13 @@ const activityEditorInitialState: ActivityEditorState = {
     where: '',
     howMuch: undefined,
   },
-  steps: []
+  steps: [{ name: 'initial', operations: [] }],
+  currentStepIndex: 0,
 }
 
 export const activityEditorReducer = createReducer(activityEditorInitialState, (builder) => {
   builder
-    .addCase(resetActivityEditor, (state) => {
+    .addCase(resetActivityEditor, (_state) => {
       return activityEditorInitialState
     })
     .addCase(setActivityEditorId, (state, { payload: id }) => {
@@ -107,7 +112,21 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.formData.howMuch = payload
     })
     .addCase(replaceLastStep, (state, { payload }) => {
+      state.steps.splice(state.currentStepIndex + 1)
       state.steps.pop()
       state.steps.push(...payload)
+      state.currentStepIndex = state.steps.length - 1
+    })
+    .addCase(undo, (state) => {
+      state.currentStepIndex = Math.max(0, state.currentStepIndex - 1)
+      //todo
+    })
+    .addCase(redo, (state) => {
+      state.currentStepIndex = Math.min(state.steps.length - 1, state.currentStepIndex + 1)
+      //todo
+    })
+    .addCase(jumpToStep, (state, { payload }) => {
+      state.currentStepIndex = Math.max(-1, Math.min(state.steps.length - 1, payload))
+      //todo
     })
 })

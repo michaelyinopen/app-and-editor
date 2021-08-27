@@ -34,3 +34,6 @@ export const setWhere = createAction<string>('setWhere')
 export const setHowMuch = createAction<undefined | number>('setHowMuch')
 
 export const replaceLastStep = createAction<Step[]>('replaceLastStep')
+export const undo = createAction('undo')
+export const redo = createAction('redo')
+export const jumpToStep = createAction<number>('jumpToStep')

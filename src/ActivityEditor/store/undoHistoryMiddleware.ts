@@ -1,14 +1,23 @@
 import type { Middleware } from 'redux'
 import {
+  jumpToStep,
+  redo,
   replaceLastStep,
+  resetActivityEditor,
   setActivityFromAppStore,
+  undo,
 } from './actions'
 import { calculateSteps } from './undoHistory'
 
 const excludeActionTypes = [
-  replaceLastStep.type,
-  setActivityFromAppStore.type,
-]
+  replaceLastStep,
+  setActivityFromAppStore,
+  resetActivityEditor,
+
+  undo,
+  redo,
+  jumpToStep,
+].map(a => a.type)
 
 export const undoHistoryMiddleware: Middleware = store => next => action => {
   const dispatch = store.dispatch

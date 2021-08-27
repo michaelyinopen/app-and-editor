@@ -23,6 +23,7 @@ import {
   useActivityEditorSelector
 } from "./store/store"
 import { ActivityEditorForm } from './ActivityEditorForm'
+import { UndoHistory } from "./UndoHistory"
 
 type ActivityEditorProps = {
   id: number | undefined
@@ -81,6 +82,8 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const initialized = useActivityEditorSelector(es => es.initialized)
     const thunkLoading = useAppSelector(createSingleActivityIsLoadingSelector(id))
 
+    const steps = useActivityEditorSelector(es => es.steps) //todo remove
+
     useEffect(() => {
       if (!isNew) {
         editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
@@ -123,7 +126,11 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
             ? <Link to={`/activities/${id}`}>readonly</Link>
             : <Link to={`/activities/${id}/edit`}>edit</Link>
         )}
-        <ActivityEditorForm disabled={!edit || !initialized} />
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <ActivityEditorForm disabled={!edit || !initialized} />
+          <UndoHistory />
+          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(steps, null, 2)}</pre>{/*todo remove */}
+        </div>
       </div>
     )
   }

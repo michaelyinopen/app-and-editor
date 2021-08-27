@@ -76,7 +76,7 @@ function calculateStepName(operations: Operation[]): string {
     return 'Edit where'
   }
   if (operation.path === '/howMuch') {
-    return 'Edit how Much'
+    return 'Edit how much'
   }
   // should not reach here
   return ''
