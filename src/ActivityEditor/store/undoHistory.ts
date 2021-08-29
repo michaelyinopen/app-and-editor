@@ -1,3 +1,5 @@
+import { produce, isDraft, Draft } from "immer"
+
 export type FormData = {
   name: string,
   who: string,
@@ -124,4 +126,72 @@ export function calculateSteps(
       return [previousStep, newStep]
     }
   }
+}
+
+function undoOperation(operation: Operation, formData: Draft<FormData>): FormData | undefined {
+  return produce(formData, (draft) => {
+    if (operation.path === '/name') {
+      draft.name = operation.previousValue
+    }
+    else if (operation.path === '/who') {
+      draft.who = operation.previousValue
+    }
+    else if (operation.path === '/where') {
+      draft.where = operation.previousValue
+    }
+    else if (operation.path === '/howMuch') {
+      draft.howMuch = operation.previousValue
+    }
+  })
+}
+
+export function undoStep(step: Step, previousFormData: FormData): FormData {
+  let formData = previousFormData
+  for (const operation of step.operations) {
+    if (isDraft(formData)) {
+      const undoResult = undoOperation(operation, formData)
+      formData = typeof undoResult === 'undefined'
+        ? formData
+        : undoResult
+    } else {
+      formData = produce(formData, (draft) => {
+        return undoOperation(operation, draft)
+      })
+    }
+  }
+  return formData
+}
+
+function redoOperation(operation: Operation, formData: FormData): FormData | undefined {
+  return produce(formData, (draft) => {
+    if (operation.path === '/name') {
+      draft.name = operation.newValue
+    }
+    else if (operation.path === '/who') {
+      draft.who = operation.newValue
+    }
+    else if (operation.path === '/where') {
+      draft.where = operation.newValue
+    }
+    else if (operation.path === '/howMuch') {
+      draft.howMuch = operation.newValue
+    }
+  })
+}
+
+export function redoStep(step: Step, previousFormData: FormData): FormData {
+  let formData = previousFormData
+  for (const operation of step.operations) {
+    if (isDraft(formData)) {
+      const undoResult = redoOperation(operation, formData)
+      formData = typeof undoResult === 'undefined'
+        ? formData
+        : undoResult
+    } else {
+      formData = produce(formData, (draft) => {
+        return redoOperation(operation, draft)
+      })
+    }
+  }
+  return formData
 }

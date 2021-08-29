@@ -23,7 +23,7 @@ export const undoHistoryMiddleware: Middleware = store => next => action => {
   const dispatch = store.dispatch
 
   const previousState = store.getState()
-  const previousStep = previousState.steps[previousState.steps.length - 1]
+  const previousStep = previousState.steps[previousState.currentStepIndex]
   const previousFormData = previousState.formData
 
   const nextResult = next(action)

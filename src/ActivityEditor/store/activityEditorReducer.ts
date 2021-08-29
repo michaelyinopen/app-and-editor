@@ -15,7 +15,7 @@ import {
   redo,
   jumpToStep,
 } from './actions'
-import { Step } from './undoHistory'
+import { redoStep, Step, undoStep } from './undoHistory'
 
 type ActivityEditorState = {
   id?: number
@@ -112,21 +112,42 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.formData.howMuch = payload
     })
     .addCase(replaceLastStep, (state, { payload }) => {
-      state.steps.splice(state.currentStepIndex + 1)
-      state.steps.pop()
+      state.steps.splice(state.currentStepIndex)
       state.steps.push(...payload)
       state.currentStepIndex = state.steps.length - 1
     })
     .addCase(undo, (state) => {
-      state.currentStepIndex = Math.max(0, state.currentStepIndex - 1)
-      //todo
+      if (state.currentStepIndex > 0) {
+        state.formData = undoStep(state.steps[state.currentStepIndex], state.formData)
+        state.currentStepIndex = state.currentStepIndex - 1
+      }
     })
     .addCase(redo, (state) => {
-      state.currentStepIndex = Math.min(state.steps.length - 1, state.currentStepIndex + 1)
-      //todo
+      if (state.currentStepIndex < state.steps.length - 1) {
+        state.formData = redoStep(state.steps[state.currentStepIndex + 1], state.formData)
+        state.currentStepIndex = state.currentStepIndex + 1
+      }
     })
-    .addCase(jumpToStep, (state, { payload }) => {
-      state.currentStepIndex = Math.max(-1, Math.min(state.steps.length - 1, payload))
-      //todo
+    .addCase(jumpToStep, (state, { payload: targetStepIndex }) => {
+      if (targetStepIndex >= 0 && targetStepIndex <= state.steps.length - 1) {
+        let formData = state.formData
+        if (targetStepIndex < state.currentStepIndex) {
+          const stepsToUndo = state.steps
+            .slice(targetStepIndex + 1, state.currentStepIndex + 1)
+            .reverse()
+          for (const stepToUndo of stepsToUndo) {
+            formData = undoStep(stepToUndo, formData)
+          }
+        }
+        else if (targetStepIndex > state.currentStepIndex) {
+          const stepsToRedo = state.steps
+            .slice(state.currentStepIndex + 1, targetStepIndex + 1)
+          for (const stepToRedo of stepsToRedo) {
+            formData = redoStep(stepToRedo, formData)
+          }
+        }
+        state.formData = formData
+        state.currentStepIndex = targetStepIndex
+      }
     })
 })

@@ -45,7 +45,7 @@ export const UndoHistory = () => {
                 onClick={() => { editorDispatch(jumpToStep(si.index)) }}
                 {...(si.index > currentStepIndex ? { style: { color: 'grey' } } : {})}
               >
-                {si.step.name}{si.index}
+                {si.step.name}
               </button>
             </li>
           ))
