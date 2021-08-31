@@ -4,7 +4,7 @@ import { getSingleActivityApiAsync } from './api'
 import { getSingleActivitySucceeded } from './store/actions'
 
 export const getActivityTakingThunkAction = (id: number): AppTakingThunkAction => ({
-  name: `activity/${id}`,
+  name: `getActivity/${id}`,
   takeType: 'latest',
   thunk: function* (dispatch: AppDispatch) {
     const getActivityResult: any = yield getSingleActivityApiAsync(id)
@@ -17,4 +17,4 @@ export const getActivityTakingThunkAction = (id: number): AppTakingThunkAction =
   }
 })
 
-export const createSingleActivityIsLoadingSelector = id => createIsLoadingSelector(`activity/${id}`)
+export const createSingleActivityIsLoadingSelector = id => createIsLoadingSelector(`getActivity/${id}`)

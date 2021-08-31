@@ -24,6 +24,7 @@ import {
 } from "./store/store"
 import { ActivityEditorForm } from './ActivityEditorForm'
 import { UndoHistory } from "./UndoHistory"
+import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
 
 type ActivityEditorProps = {
   id: number | undefined
@@ -92,6 +93,9 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     const showLoading = thunkLoading || (!initialized && loadStatus !== 'failed')
 
+    const formData = useActivityEditorSelector(es => es.formData)
+    const versionToken = useActivityEditorSelector(es => es.versionToken)
+
     return (
       <div>
         {id ? <h1>Activity #{id}</h1> : <h1>New Activity</h1>}
@@ -118,6 +122,39 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
               referesh
             </button>
           )}
+          {' '}
+          <button
+            disabled={!edit || !initialized || loadStatus === 'failed'}
+            onClick={() => {
+              if (id) {
+                const activity = {
+                  id,
+                  name: formData.name,
+                  person: formData.who,
+                  place: formData.where,
+                  cost: formData.howMuch,
+                  versionToken,
+                }
+                dispatch(updateActivityTakingThunkAction(id, activity))
+                  .then(result => {
+                    if (result === 'success') {
+                      //todo
+                    }
+                    else if (result === 'versionConditionFailed') {
+                      //todo notification?
+                    }
+                    else if (result === 'failed') {
+                      //   notification
+                    }
+                  })
+                // .catch(() => {
+                //   //notification
+                // })
+              }
+            }}
+          >
+            save
+          </button>
           {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
           {!isNew && showLoading && <span> Loading...</span>}
         </div>

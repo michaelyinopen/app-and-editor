@@ -1,4 +1,5 @@
 import template from 'url-template'
+import { Activity } from './types'
 
 export async function getActivitiesApiAsync() {
   let responseBody
@@ -25,6 +26,32 @@ export async function getSingleActivityApiAsync(id: number) {
     const response = await fetch(url)
     if (!response.ok) {
       return [false]
+    }
+    responseBody = await response.json()
+  }
+  catch (e) {
+    return [false]
+  }
+  return [true, responseBody]
+}
+
+export type UpdateActivityResponseBody = {
+  versionConditionFailed?: boolean
+  activity: Activity //activity after update, or latest activity if versionConditionFailed
+}
+
+export const updateActivityUrlTemplate = '/api/activities/{id}'
+export async function updateActivityApiAsync(id: number, activity: Activity) {
+  const url = template.parse(updateActivityUrlTemplate).expand({ id })
+  let responseBody: UpdateActivityResponseBody
+  try {
+    const init = {
+      method: "PUT",
+      body: JSON.stringify(activity)
+    }
+    const response = await fetch(url, init)
+    if (!response.ok) {
+      return [false, undefined]
     }
     responseBody = await response.json()
   }

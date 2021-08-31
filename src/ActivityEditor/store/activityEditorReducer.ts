@@ -95,9 +95,10 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           : activityEditorInitialState.formData.howMuch
         return
       }
-
-      // already initialized
-      //todo
+      else {
+        // already initialized
+        // todo
+      }
     })
     .addCase(setName, (state, { payload }) => {
       state.formData.name = payload
