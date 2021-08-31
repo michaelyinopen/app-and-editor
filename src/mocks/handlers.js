@@ -93,8 +93,8 @@ export const handlers = [
           name: 'might update',
           person: 'chance',
           place: 'casino',
-          cost: Math.floor(activityFourUpdateMarker / 3),
-          versionToken: Math.floor(activityFourUpdateMarker / 3).toString(),
+          cost: (Math.floor(activityFourUpdateMarker / 3) + 1),
+          versionToken: (Math.floor(activityFourUpdateMarker / 3) + 1).toString(),
         }),
       )
     }

@@ -6,7 +6,6 @@ import { store } from './store/store';
 import { Provider } from 'react-redux';
 
 if (process.env.REACT_APP_MSW_MOCK) {
-  console.log('mocking')
   const { worker } = require('./mocks/browser')
   worker.start()
 }
