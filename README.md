@@ -1,6 +1,19 @@
 # app-and-editor
 Proof of concept of job-shop-collection's Job Set Editor's interactions with other parts of the app.
 
+## Run with MSW mocked responses
+Can query but will not save.
+```
+npm start
+```
+
+## Run with a server
+Can query and save.
+```
+npm run start-server
+npm run start-web
+```
+
 ## Collaborative Editing
 
 ### Version Token
