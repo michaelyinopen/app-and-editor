@@ -33,7 +33,17 @@ export const ActivityEditorForm = ({ disabled }) => {
             <input type="text" id="where" value={where} onChange={e => { editorDispatch(setWhere(e.target.value ?? '')) }} /><br />
 
             <label htmlFor="how-much">how much:</label><br />
-            <input type="number" id="how-much" value={howMuch} onChange={e => { editorDispatch(setHowMuch(+e.target.value ?? undefined)) }} /><br />
+            <input
+              type="number"
+              id="how-much"
+              value={howMuch}
+              onChange={e => {
+                const intValue = parseInt(e.target.value)
+                const finalValue = isNaN(intValue) ? undefined : intValue
+                editorDispatch(setHowMuch(finalValue))
+              }}
+            />
+            <br />
           </>
         }
       </fieldset>

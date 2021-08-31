@@ -36,6 +36,7 @@ let activities = {
   }
 }
 
+//#region utilities for tirst four activities
 function incrementActivityFourUpdateMarker() {
   activityFourUpdateMarker = activityFourUpdateMarker + 1
   if (activities[4]) {
@@ -53,8 +54,6 @@ function incrementActivityFourUpdateMarker() {
   }
 }
 
-module.exports.getActivities = () => activities
-
 module.exports.callingGetActivities = () => {
   incrementActivityFourUpdateMarker()
 }
@@ -68,3 +67,50 @@ module.exports.callingGetActivity = (id) => {
 }
 
 module.exports.getIsThreeError = () => activityThreeErrorMarker % 3 !== 0
+//#endregion utilities for tirst four activities
+
+module.exports.getActivities = () => {
+  return Object.values(activities).map(a => ({
+    id: a.id,
+    name: a.name,
+    versionToken: a.versionToken,
+  }))
+}
+
+module.exports.getActivity = (id) => {
+  return activities[id]
+}
+
+let nextId = Math.max(...Object.keys(activities)) + 1
+
+const getNextIdAndIncrement = () => {
+  const result = nextId
+  nextId = nextId + 1
+  return result
+}
+
+module.exports.addActivity = (activity) => {
+  const id = getNextIdAndIncrement()
+  const activityWithId = {
+    ...activity,
+    id,
+    versionToken: '1'
+  }
+  activities[id] = activityWithId
+  return activityWithId
+}
+
+module.exports.updateActivity = (id, activity) => {
+  const activityWithId = {
+    ...activity,
+    id,
+    versionToken: (parseInt(activity) + 1).toString
+  }
+  activities[id] = activityWithId
+  return activityWithId
+}
+
+module.exports.deleteActivity = (id) => {
+  const { [id]: deleteActivity, ...remainingActivities } = activities
+  activities = remainingActivities
+}

@@ -3,6 +3,7 @@ import {
   EntityState
 } from '@reduxjs/toolkit'
 import {
+  deleteActivitySucceeded,
   getActivitiesSucceeded,
   getSingleActivitySucceeded,
 } from './actions'
@@ -85,6 +86,14 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
         state.entities[activity.id]!.place = activity.place
         state.entities[activity.id]!.cost = activity.cost
         state.entities[activity.id]!.hasDetail = true
+      }
+    })
+    .addCase(deleteActivitySucceeded, (state, action) => {
+      const { payload: id } = action
+      const index = state.ids.findIndex(sId => sId === id)
+      if (index !== -1) {
+        state.ids.splice(index, 1)
+        delete state.entities[id]
       }
     })
 })

@@ -1,5 +1,5 @@
 import template from 'url-template'
-import { Activity } from './types'
+import { Activity, ActivityHeader } from './types'
 
 export async function getActivitiesApiAsync() {
   let responseBody
@@ -59,4 +59,22 @@ export async function updateActivityApiAsync(id: number, activity: Activity) {
     return [false]
   }
   return [true, responseBody]
+}
+
+export const deleteActivityUrlTemplate = '/api/activities/{id}'
+export async function deleteActivityApiAsync(id: number) {
+  const url = template.parse(deleteActivityUrlTemplate).expand({ id })
+  try {
+    const init = {
+      method: "DELETE"
+    }
+    const response = await fetch(url, init)
+    if (!response.ok) {
+      return false
+    }
+  }
+  catch (e) {
+    return false
+  }
+  return true
 }

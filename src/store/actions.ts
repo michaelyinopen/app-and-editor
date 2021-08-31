@@ -11,3 +11,5 @@ export const getActivitiesSucceeded = createAction(
 )
 
 export const getSingleActivitySucceeded = createAction<Activity>('getSingleActivitySucceeded')
+
+export const deleteActivitySucceeded = createAction<number>('deleteActivitySucceeded')

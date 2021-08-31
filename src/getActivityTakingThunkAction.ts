@@ -10,10 +10,10 @@ export const getActivityTakingThunkAction = (id: number): AppTakingThunkAction =
     const getActivityResult: any = yield getSingleActivityApiAsync(id)
     if (getActivityResult[0] === true) {
       dispatch(getSingleActivitySucceeded(getActivityResult[1]))
+      return true
     } else {
       return false
     }
-    return true
   }
 })
 

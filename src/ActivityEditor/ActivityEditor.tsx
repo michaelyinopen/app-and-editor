@@ -3,7 +3,7 @@ import {
   FunctionComponent,
   useEffect,
 } from "react"
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import {
   createSingleActivityIsLoadingSelector,
   getActivityTakingThunkAction
@@ -25,6 +25,7 @@ import {
 import { ActivityEditorForm } from './ActivityEditorForm'
 import { UndoHistory } from "./UndoHistory"
 import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
+import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
 
 type ActivityEditorProps = {
   id: number | undefined
@@ -47,6 +48,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const isNew = id === undefined
     const dispatch = useAppDispatch()
     const editorDispatch = useActivityEditorDispatch()
+    const history = useHistory()
 
     useEffect(() => {
       editorDispatch(setActivityEditorId(id))
@@ -91,7 +93,9 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
       }
     }, [editorDispatch, appActivity, loadStatus, isNew])
 
+    const isDeleting = useAppSelector(createActivityIsDeletingSelector(id))
     const showLoading = thunkLoading || (!initialized && loadStatus !== 'failed')
+    const disabled = isDeleting || !edit || !initialized || loadStatus === 'failed'
 
     const formData = useActivityEditorSelector(es => es.formData)
     const versionToken = useActivityEditorSelector(es => es.versionToken)
@@ -124,7 +128,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           )}
           {' '}
           <button
-            disabled={!edit || !initialized || loadStatus === 'failed'}
+            disabled={disabled}
             onClick={() => {
               if (id) {
                 const activity = {
@@ -157,6 +161,31 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           </button>
           {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
           {!isNew && showLoading && <span> Loading...</span>}
+          {!isNew && (
+            <>
+              {' '}
+              <button
+                onClick={() => {
+                  dispatch(deleteActivityTakingThunkAction(id!))
+                    .then(result => {
+                      if (result === true) {
+                        //todo notify
+                        history.push('/activities')
+                      }
+                      if (result === false) {
+                        //todo notify
+                      }
+                    })
+                    .catch(() => {
+                      //todo notify
+                    })
+                }}
+              >
+                Delete
+              </button>
+            </>
+          )}
+          {isDeleting && <span> Deleting...</span>}
         </div>
         {!isNew && (
           edit

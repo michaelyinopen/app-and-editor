@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom'
+import { deleteActivityTakingThunkAction } from './deleteActivityTakingThunkAction';
 import {
   activitiesIsLoadingSelector,
   getActivitiesTakingThunkAction
@@ -40,7 +41,26 @@ export const Activities = () => {
           <li key={a!.id}>
             {a!.name}{' '}
             <Link to={`/activities/${a!.id}`}>View</Link>{' '}
-            <Link to={`/activities/${a!.id}/edit`}>Edit</Link>
+            <Link to={`/activities/${a!.id}/edit`}>Edit</Link>{' '}
+            <button
+              onClick={() => {
+                dispatch(deleteActivityTakingThunkAction(a!.id))
+                  .then(result => {
+                    if (result === true) {
+                      //todo notify
+                    }
+                    if (result === false) {
+                      //todo notify
+                    }
+                  })
+                  .catch(() => {
+                    //todo notify
+                  })
+              }}
+            >
+              Delete
+            </button>
+            {/*deleting*/}
           </li>
         ))}
       </ol>

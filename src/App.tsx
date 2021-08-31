@@ -1,4 +1,4 @@
-import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
+import { BrowserRouter, Switch, Route, Link, Redirect } from 'react-router-dom'
 import { Home } from './Home'
 import { Activities } from './Activities'
 import { ActivityEditor } from './ActivityEditor'
@@ -9,12 +9,21 @@ function App() {
     <div style={{ margin: 16 }}>
       <BrowserRouter>
         <div>
-          <Link to='/'>Home</Link>
+          <Link to='/home'>Home</Link>
           {' '}
           <Link to='/activities' >Activities</Link>
+          {process.env.REACT_APP_MSW_MOCK
+            ? (
+              <div>
+                MSW mock, can only query, and cannot create or save<br />
+                use with server for all operations
+              </div>
+            )
+            : <div>use with server, can perform all operations</div>}
         </div>
         <Switch>
-          <Route exact path={'/'} component={Home} />
+          <Redirect exact from='/' to='/activities' />
+          <Route exact path={'/home'} component={Home} />
           <Route exact path={'/activities'} component={Activities} />
           <Route exact path={'/activities/new'}
             render={() => (
@@ -27,7 +36,7 @@ function App() {
           <Route exact path={'/activities/:id(\\d+)/:edit(edit)?'}
             render={({ match }) => (
               <ActivityEditor
-                id={+match.params.id}
+                id={parseInt(match.params.id)}
                 edit={Boolean(match.params.edit)}
               />
             )}
