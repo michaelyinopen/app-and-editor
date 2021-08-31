@@ -27,7 +27,6 @@ function App() {
           <Route exact path={'/activities/:id(\\d+)/:edit(edit)?'}
             render={({ match }) => (
               <ActivityEditor
-                key={match.params.id}
                 id={+match.params.id}
                 edit={Boolean(match.params.edit)}
               />

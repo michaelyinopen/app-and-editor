@@ -37,7 +37,7 @@ type WithActivityEditorProviderType =
 const WithJobSetEditorProvider: WithActivityEditorProviderType = (Component) => (props) => {
   return (
     <ActivityEditorProvider>
-      <Component {...props} />
+      <Component key={props.id} {...props} />
     </ActivityEditorProvider>
   )
 }
