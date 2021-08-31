@@ -79,6 +79,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       const { payload: { activity, loaded } } = action
       if (!state.initialized) {
         if (loaded) {
+          // if loaded, it is garunteed that (activity && activity.hasDetail) === true
           state.initialized = true
         }
         state.versionToken = activity?.versionToken ?? activityEditorInitialState.versionToken
@@ -95,7 +96,13 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           : activityEditorInitialState.formData.howMuch
         return
       }
-      else {
+      else { //state.initialized === true
+        if (!activity) {
+          return
+        }
+        if (activity.versionToken === state.versionToken) {
+          return
+        }
         // already initialized
         // todo
       }

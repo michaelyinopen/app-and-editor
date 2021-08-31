@@ -162,28 +162,28 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
           {!isNew && showLoading && <span> Loading...</span>}
           {!isNew && (
-            <>
-              {' '}
-              <button
-                onClick={() => {
-                  dispatch(deleteActivityTakingThunkAction(id!))
-                    .then(result => {
-                      if (result === true) {
-                        //todo notify
-                        history.push('/activities')
-                      }
-                      if (result === false) {
-                        //todo notify
-                      }
-                    })
-                    .catch(() => {
+          <>
+            {' '}
+            <button
+              onClick={() => {
+                dispatch(deleteActivityTakingThunkAction(id!))
+                  .then(result => {
+                    if (result === true) {
                       //todo notify
-                    })
-                }}
-              >
-                Delete
-              </button>
-            </>
+                      history.push('/activities')
+                    }
+                    if (result === false) {
+                      //todo notify
+                    }
+                  })
+                  .catch(() => {
+                    //todo notify
+                  })
+              }}
+            >
+              Delete
+            </button>
+          </>
           )}
           {isDeleting && <span> Deleting...</span>}
         </div>
