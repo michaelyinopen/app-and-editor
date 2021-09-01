@@ -14,6 +14,7 @@ import {
   undo,
   redo,
   jumpToStep,
+  addSteps,
 } from './actions'
 import { redoStep, Step, undoStep } from './undoHistory'
 
@@ -76,6 +77,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.loadStatus = 'failed'
     })
     .addCase(setActivityFromAppStore, (state, action) => {
+      console.log('setActivityFromAppStore')
       const { payload: { activity, loaded } } = action
       if (!state.initialized) {
         if (loaded) {
@@ -103,7 +105,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         if (activity.versionToken === state.versionToken) {
           return
         }
-
+        console.log('action')
         // todo
         if (activity.hasDetail) {
           state.versionToken = activity.versionToken
@@ -128,6 +130,11 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(replaceLastStep, (state, { payload }) => {
       state.steps.splice(state.currentStepIndex)
+      state.steps.push(...payload)
+      state.currentStepIndex = state.steps.length - 1
+    })
+    .addCase(addSteps, (state, { payload }) => {
+      state.steps.splice(state.currentStepIndex + 1)
       state.steps.push(...payload)
       state.currentStepIndex = state.steps.length - 1
     })

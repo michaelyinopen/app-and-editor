@@ -89,6 +89,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     useEffect(() => {
       if (!isNew) {
+        console.log('setActivityFromAppStore effect')
         editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
       }
     }, [editorDispatch, appActivity, loadStatus, isNew])

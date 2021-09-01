@@ -87,14 +87,15 @@ function calculateStepName(operations: Operation[]): string {
 export function calculateSteps(
   previousStep: Step | undefined,
   previousFormData: FormData = defaultFormData,
-  currentFormData: FormData)
+  currentFormData: FormData,
+  stepName?: string)
   : Step[] {
   const fieldChanges = getFieldChanges(previousFormData, currentFormData)
   if (fieldChanges.length === 0) {
     return previousStep ? [previousStep] : []
   }
   if (!previousStep || previousStep.operations.length !== 1 || fieldChanges.length !== 1) {
-    const name = calculateStepName(fieldChanges)
+    const name = stepName || calculateStepName(fieldChanges)
     const newStep = {
       name,
       operations: fieldChanges
@@ -110,7 +111,7 @@ export function calculateSteps(
       return []
     }
     else if (mergedOperations.length === 1) {
-      const name = calculateStepName(mergedOperations)
+      const name = stepName || calculateStepName(mergedOperations)
       const mergedStep = {
         name,
         operations: mergedOperations
@@ -118,7 +119,7 @@ export function calculateSteps(
       return [mergedStep]
     }
     else {// mergedOperations.length === 2
-      const name = calculateStepName(fieldChanges)
+      const name = stepName || calculateStepName(fieldChanges)
       const newStep = {
         name,
         operations: fieldChanges

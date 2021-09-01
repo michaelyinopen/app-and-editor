@@ -1,5 +1,6 @@
 import type { Middleware } from 'redux'
 import {
+  addSteps,
   jumpToStep,
   redo,
   replaceLastStep,
@@ -25,19 +26,34 @@ export const undoHistoryMiddleware: Middleware = store => next => action => {
   const previousState = store.getState()
   const previousStep = previousState.steps[previousState.currentStepIndex]
   const previousFormData = previousState.formData
+  const previousInitialized = previousState.initialized
 
   const nextResult = next(action)
 
   const currentFormData = store.getState().formData
 
-  if (!excludeActionTypes.includes(action.type)) {
-    const steps = calculateSteps(
-      previousStep,
-      previousFormData,
-      currentFormData
-    )
-    if (steps.length !== 1 || steps[0] !== previousStep) {
-      dispatch(replaceLastStep(steps))
+  if (previousInitialized && !excludeActionTypes.includes(action.type)) {
+    if (action.type !== setActivityFromAppStore.type) {
+      const steps = calculateSteps(
+        previousStep,
+        previousFormData,
+        currentFormData
+      )
+      if (steps.length !== 1 || steps[0] !== previousStep) {
+        dispatch(replaceLastStep(steps))
+      }
+    } else {
+      // action.type === setActivityFromAppStore.type
+      // do not merge with previous step
+      const steps = calculateSteps(
+        undefined,
+        previousFormData,
+        currentFormData,
+        'Refresh'
+      )
+      if (steps.length !== 0) {
+        dispatch(addSteps(steps))
+      }
     }
   }
 
