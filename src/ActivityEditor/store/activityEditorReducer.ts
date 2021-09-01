@@ -103,8 +103,15 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         if (activity.versionToken === state.versionToken) {
           return
         }
-        // already initialized
+
         // todo
+        if (activity.hasDetail) {
+          state.versionToken = activity.versionToken
+          state.formData.name = activity.name
+          state.formData.who = activity.person!
+          state.formData.where = activity.place!
+          state.formData.howMuch = activity.cost!
+        }
       }
     })
     .addCase(setName, (state, { payload }) => {

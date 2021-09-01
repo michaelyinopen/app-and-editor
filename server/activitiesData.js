@@ -100,14 +100,20 @@ module.exports.addActivity = (activity) => {
   return activityWithId
 }
 
-module.exports.updateActivity = (id, activity) => {
-  const activityWithId = {
-    ...activity,
-    id,
-    versionToken: (parseInt(activity) + 1).toString
+module.exports.updateActivity = (activity) => {
+  const previousActivity = activities[activity.id]
+  if (!previousActivity) {
+    return { status: 'not found' }
   }
-  activities[id] = activityWithId
-  return activityWithId
+  if (previousActivity.versionToken !== activity.versionToken) {
+    return { status: 'version condition failed', activity: previousActivity }
+  }
+  const updatedActivity = {
+    ...activity,
+    versionToken: (parseInt(previousActivity.versionToken) + 1).toString()
+  }
+  activities[activity.id] = updatedActivity
+  return { status: 'done', updatedActivity }
 }
 
 module.exports.deleteActivity = (id) => {

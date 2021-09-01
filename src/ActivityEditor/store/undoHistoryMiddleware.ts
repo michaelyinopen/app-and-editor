@@ -11,7 +11,7 @@ import { calculateSteps } from './undoHistory'
 
 const excludeActionTypes = [
   replaceLastStep,
-  setActivityFromAppStore,
+  //setActivityFromAppStore,
   resetActivityEditor,
 
   undo,

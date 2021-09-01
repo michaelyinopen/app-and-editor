@@ -51,6 +51,22 @@ router.post('/api/activities', (ctx, next) => {
   ctx.body = addedActivity
 })
 
+router.put('/api/activities/:id', (ctx, next) => {
+  const updatingActivity = ctx.request.body
+  const { status, activity, updatedActivity } = activitiesData.updateActivity(updatingActivity)
+  if (status === 'not found') {
+    ctx.status = 200
+    ctx.body = { status: 'not found' }
+  } else if (status === 'version condition failed') {
+    ctx.status = 200
+    ctx.body = { status: 'version condition failed', activity }
+  } else if (status === 'done') {
+    ctx.status = 200
+    ctx.body = { status: 'done', updatedActivity }
+    return
+  }
+})
+
 router.delete('/api/activities/:id', (ctx, next) => {
   const id = parseInt(ctx.params.id)
   activitiesData.deleteActivity(id)
