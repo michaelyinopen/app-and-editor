@@ -18,26 +18,31 @@ import {
 } from './actions'
 import { redoStep, Step, undoStep } from './undoHistory'
 
+type FormDataState = {
+  name: string,
+  who: string,
+  where: string,
+  howMuch?: number,
+}
+
 type ActivityEditorState = {
   id?: number
-  versionToken: string
+  versions: {
+    versionToken: string,
+    formData: FormDataState
+  }[],
   isEdit: boolean
   hasDetail: boolean
   loadStatus: 'not loaded' | 'loaded' | 'failed'
   initialized: boolean,
-  formData: {
-    name: string,
-    who: string,
-    where: string,
-    howMuch?: number,
-  },
+  formData: FormDataState,
   steps: Step[],
   currentStepIndex: number,
 }
 
 const activityEditorInitialState: ActivityEditorState = {
   id: undefined,
-  versionToken: '',
+  versions: [],
   isEdit: false,
   hasDetail: false,
   loadStatus: 'not loaded',
@@ -77,14 +82,23 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.loadStatus = 'failed'
     })
     .addCase(setActivityFromAppStore, (state, action) => {
-      console.log('setActivityFromAppStore')
       const { payload: { activity, loaded } } = action
       if (!state.initialized) {
         if (loaded) {
           // if loaded, it is garunteed that (activity && activity.hasDetail) === true
           state.initialized = true
+          state.versions = [
+            {
+              versionToken: activity!.versionToken,
+              formData: {
+                name: activity!.name,
+                who: activity!.person!,
+                where: activity!.place!,
+                howMuch: activity!.cost!,
+              }
+            }
+          ]
         }
-        state.versionToken = activity?.versionToken ?? activityEditorInitialState.versionToken
         state.hasDetail = activity?.hasDetail ?? activityEditorInitialState.hasDetail
         state.formData.name = activity?.name ?? activityEditorInitialState.formData.name
         state.formData.who = activity && activity.hasDetail
@@ -102,13 +116,20 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         if (!activity) {
           return
         }
-        if (activity.versionToken === state.versionToken) {
+        if (activity.versionToken === state.versions[state.versions.length - 1].versionToken) {
           return
         }
-        console.log('action')
         // todo
         if (activity.hasDetail) {
-          state.versionToken = activity.versionToken
+          state.versions.push({
+            versionToken: activity.versionToken,
+            formData: {
+              name: activity.name,
+              who: activity.person!,
+              where: activity.place!,
+              howMuch: activity.cost!,
+            }
+          })
           state.formData.name = activity.name
           state.formData.who = activity.person!
           state.formData.where = activity.place!

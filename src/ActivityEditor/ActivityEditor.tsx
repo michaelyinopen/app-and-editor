@@ -89,7 +89,6 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     useEffect(() => {
       if (!isNew) {
-        console.log('setActivityFromAppStore effect')
         editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
       }
     }, [editorDispatch, appActivity, loadStatus, isNew])
@@ -99,7 +98,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const disabled = isDeleting || !edit || !initialized || loadStatus === 'failed'
 
     const formData = useActivityEditorSelector(es => es.formData)
-    const versionToken = useActivityEditorSelector(es => es.versionToken)
+    const versionToken = useActivityEditorSelector(es => es.versions[es.versions.length - 1]?.versionToken)
 
     return (
       <div>
@@ -163,28 +162,28 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
           {!isNew && showLoading && <span> Loading...</span>}
           {!isNew && (
-          <>
-            {' '}
-            <button
-              onClick={() => {
-                dispatch(deleteActivityTakingThunkAction(id!))
-                  .then(result => {
-                    if (result === true) {
+            <>
+              {' '}
+              <button
+                onClick={() => {
+                  dispatch(deleteActivityTakingThunkAction(id!))
+                    .then(result => {
+                      if (result === true) {
+                        //todo notify
+                        history.push('/activities')
+                      }
+                      if (result === false) {
+                        //todo notify
+                      }
+                    })
+                    .catch(() => {
                       //todo notify
-                      history.push('/activities')
-                    }
-                    if (result === false) {
-                      //todo notify
-                    }
-                  })
-                  .catch(() => {
-                    //todo notify
-                  })
-              }}
-            >
-              Delete
-            </button>
-          </>
+                    })
+                }}
+              >
+                Delete
+              </button>
+            </>
           )}
           {isDeleting && <span> Deleting...</span>}
         </div>

@@ -2,13 +2,12 @@ import template from 'url-template'
 import { Activity, ActivityHeader } from './types'
 
 export async function getActivitiesApiAsync() {
-  let responseBody
+  let responseBody: ActivityHeader[]
   try {
     const response = await fetch('/api/activities')
     if (!response.ok) {
       return [false]
     }
-    // console.log(await response.text())
     responseBody = await response.json()
   }
   catch (e) {
