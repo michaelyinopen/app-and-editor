@@ -10,6 +10,7 @@ import {
 } from "../getActivityTakingThunkAction"
 import { useAppDispatch, useAppSelector } from "../store"
 import {
+  ActivityFromStore,
   failedToLoadActivity,
   loadedActivity,
   resetActivityEditor,
@@ -89,7 +90,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     useEffect(() => {
       if (!isNew) {
-        editorDispatch(setActivityFromAppStore(appActivity, loadStatus === 'loaded'))
+        editorDispatch(setActivityFromAppStore(appActivity as ActivityFromStore, loadStatus === 'loaded'))
       }
     }, [editorDispatch, appActivity, loadStatus, isNew])
 

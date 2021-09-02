@@ -7,20 +7,28 @@ export const setActivityEditorIsEdit = createAction<boolean>('setActivityEditorI
 export const loadedActivity = createAction('loadedActivity')
 export const failedToLoadActivity = createAction('failedToLoadActivity')
 
-type activityFromStore =
-  {
-    id: number,
-    name: string,
-    versionToken: string,
-    person?: string,
-    place?: string,
-    cost?: number,
-    hasDetail: boolean,
-  }
+export type ActivityWithoutDetailFromStore = {
+  id: number,
+  name: string,
+  versionToken: string,
+  hasDetail: false,
+}
+
+export type ActivityWithDetailFromStore = {
+  id: number,
+  name: string,
+  versionToken: string,
+  person: string,
+  place: string,
+  cost: number,
+  hasDetail: true,
+}
+
+export type ActivityFromStore = ActivityWithoutDetailFromStore | ActivityWithDetailFromStore
 
 export const setActivityFromAppStore = createAction(
   'setActivityFromAppStore',
-  (activity: activityFromStore | undefined, loaded: boolean) => ({
+  (activity: ActivityFromStore | undefined, loaded: boolean) => ({
     payload: {
       activity,
       loaded
@@ -34,7 +42,6 @@ export const setWhere = createAction<string>('setWhere')
 export const setHowMuch = createAction<undefined | number>('setHowMuch')
 
 export const replaceLastStep = createAction<Step[]>('replaceLastStep')
-export const addSteps = createAction<Step[]>('addSteps')
 export const undo = createAction('undo')
 export const redo = createAction('redo')
 export const jumpToStep = createAction<number>('jumpToStep')

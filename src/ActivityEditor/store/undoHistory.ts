@@ -1,4 +1,5 @@
 import { produce, isDraft, Draft } from "immer"
+import { ActivityWithDetailFromStore } from "./actions"
 
 export type FormData = {
   name: string,
@@ -23,6 +24,11 @@ export type Operation = {
 export type Step = {
   name: string,
   operations: Operation[],
+  versionToken?: string,
+  conflicts?: {
+    fieldChange: FieldChange,
+    applied: boolean,
+  }[]
 }
 
 const defaultFormData = {
@@ -85,47 +91,46 @@ function calculateStepName(operations: Operation[]): string {
 }
 
 export function calculateSteps(
-  previousStep: Step | undefined,
+  previousStep: Step,
   previousFormData: FormData = defaultFormData,
-  currentFormData: FormData,
-  stepName?: string)
+  currentFormData: FormData)
   : Step[] {
   const fieldChanges = getFieldChanges(previousFormData, currentFormData)
   if (fieldChanges.length === 0) {
     return previousStep ? [previousStep] : []
   }
-  if (!previousStep || previousStep.operations.length !== 1 || fieldChanges.length !== 1) {
-    const name = stepName || calculateStepName(fieldChanges)
+  if (previousStep.operations.length !== 1
+    || fieldChanges.length !== 1
+    || previousStep.versionToken) {
+    const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
       operations: fieldChanges
     }
     return previousStep ? [previousStep, newStep] : [newStep]
-  } else {
-    // previousStep && previousOperations.length === 1 && fieldChanges.length === 1
-    const mergedOperations = mergeFieldChanges(
-      previousStep.operations[0],
-      fieldChanges[0]
-    )
-    if (mergedOperations.length === 0) {
-      return []
+  }
+  const mergedOperations = mergeFieldChanges(
+    previousStep.operations[0],
+    fieldChanges[0]
+  )
+  if (mergedOperations.length === 0) {
+    return []
+  }
+  else if (mergedOperations.length === 1) {
+    const name = calculateStepName(mergedOperations)
+    const mergedStep = {
+      name,
+      operations: mergedOperations
     }
-    else if (mergedOperations.length === 1) {
-      const name = stepName || calculateStepName(mergedOperations)
-      const mergedStep = {
-        name,
-        operations: mergedOperations
-      }
-      return [mergedStep]
+    return [mergedStep]
+  }
+  else {// mergedOperations.length === 2
+    const name = calculateStepName(fieldChanges)
+    const newStep = {
+      name,
+      operations: fieldChanges
     }
-    else {// mergedOperations.length === 2
-      const name = stepName || calculateStepName(fieldChanges)
-      const newStep = {
-        name,
-        operations: fieldChanges
-      }
-      return [previousStep, newStep]
-    }
+    return [previousStep, newStep]
   }
 }
 
@@ -146,9 +151,12 @@ function undoOperation(operation: Operation, formData: Draft<FormData>): FormDat
   })
 }
 
-export function undoStep(step: Step, previousFormData: FormData): FormData {
+export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
   let formData = previousFormData
-  for (const operation of step.operations) {
+  const allOperations = step.operations.concat(
+    step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
+  )
+  for (const operation of allOperations) {
     if (isDraft(formData)) {
       const undoResult = undoOperation(operation, formData)
       formData = typeof undoResult === 'undefined'
@@ -163,7 +171,7 @@ export function undoStep(step: Step, previousFormData: FormData): FormData {
   return formData
 }
 
-function redoOperation(operation: Operation, formData: FormData): FormData | undefined {
+function redoOperation(operation: Operation, formData: Draft<FormData>): FormData | undefined {
   return produce(formData, (draft) => {
     if (operation.path === '/name') {
       draft.name = operation.newValue
@@ -182,7 +190,10 @@ function redoOperation(operation: Operation, formData: FormData): FormData | und
 
 export function redoStep(step: Step, previousFormData: FormData): FormData {
   let formData = previousFormData
-  for (const operation of step.operations) {
+  const allOperations = step.operations.concat(
+    step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
+  )
+  for (const operation of allOperations) {
     if (isDraft(formData)) {
       const undoResult = redoOperation(operation, formData)
       formData = typeof undoResult === 'undefined'
@@ -195,4 +206,49 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
     }
   }
   return formData
+}
+
+export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
+  return {
+    name: activity.name,
+    who: activity.person,
+    where: activity.place,
+    howMuch: activity.cost,
+  }
+}
+
+export function CalculateRefreshStep(
+  previousVersionFormData: FormData,
+  currentFormData: FormData,
+  storeActivity: ActivityWithDetailFromStore
+): Step {
+  const storeFormData = ActivityToFormData(storeActivity)
+
+  const storeVsCurrent = getFieldChanges(previousVersionFormData, storeFormData)
+  const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
+  const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
+
+  const nonConflictFieldChanges: FieldChange[] = []
+  const conflictFieldChanges: FieldChange[] = []
+
+  for (const change of storeVsCurrent) {
+    if (!currentVsPreviousVersion.find(c => c.path === change.path)) {
+      // store activity changed and there are no current edits
+      nonConflictFieldChanges.push(change)
+    }
+    else if (storeVsPreviousVersion.find(c => c.path === change.path)) {
+      // store activity and current both changed
+      conflictFieldChanges.push(change)
+    }
+  }
+
+  return {
+    name: 'Refresh',
+    operations: nonConflictFieldChanges,
+    versionToken: storeActivity.versionToken,
+    conflicts: conflictFieldChanges.map(c => ({
+      fieldChange: c,
+      applied: true
+    }))
+  }
 }

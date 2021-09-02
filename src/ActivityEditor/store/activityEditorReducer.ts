@@ -14,9 +14,9 @@ import {
   undo,
   redo,
   jumpToStep,
-  addSteps,
+  ActivityWithDetailFromStore,
 } from './actions'
-import { redoStep, Step, undoStep } from './undoHistory'
+import { CalculateRefreshStep, redoStep, Step, undoStep } from './undoHistory'
 
 type FormDataState = {
   name: string,
@@ -84,57 +84,60 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     .addCase(setActivityFromAppStore, (state, action) => {
       const { payload: { activity, loaded } } = action
       if (!state.initialized) {
+        state.hasDetail = activity?.hasDetail ?? activityEditorInitialState.hasDetail
+        state.formData.name = activity?.name ?? activityEditorInitialState.formData.name
+        state.formData.who = activity && activity.hasDetail
+          ? activity.person
+          : activityEditorInitialState.formData.who
+        state.formData.where = activity && activity.hasDetail
+          ? activity.place
+          : activityEditorInitialState.formData.where
+        state.formData.howMuch = activity && activity.hasDetail
+          ? activity.cost
+          : activityEditorInitialState.formData.howMuch
+
         if (loaded) {
           // if loaded, it is garunteed that (activity && activity.hasDetail) === true
+          const activityWithDetail = activity as ActivityWithDetailFromStore
           state.initialized = true
           state.versions = [
             {
-              versionToken: activity!.versionToken,
+              versionToken: activityWithDetail.versionToken,
               formData: {
-                name: activity!.name,
-                who: activity!.person!,
-                where: activity!.place!,
-                howMuch: activity!.cost!,
+                name: activityWithDetail.name,
+                who: activityWithDetail.person,
+                where: activityWithDetail.place,
+                howMuch: activityWithDetail.cost,
               }
             }
           ]
         }
-        state.hasDetail = activity?.hasDetail ?? activityEditorInitialState.hasDetail
-        state.formData.name = activity?.name ?? activityEditorInitialState.formData.name
-        state.formData.who = activity && activity.hasDetail
-          ? activity.person!
-          : activityEditorInitialState.formData.who
-        state.formData.where = activity && activity.hasDetail
-          ? activity.place!
-          : activityEditorInitialState.formData.where
-        state.formData.howMuch = activity && activity.hasDetail
-          ? activity.cost!
-          : activityEditorInitialState.formData.howMuch
         return
       }
       else { //state.initialized === true
-        if (!activity) {
+        if (!activity
+          || activity.versionToken === state.versions[state.versions.length - 1].versionToken
+          || !activity.hasDetail) {
           return
         }
-        if (activity.versionToken === state.versions[state.versions.length - 1].versionToken) {
-          return
-        }
-        // todo
-        if (activity.hasDetail) {
-          state.versions.push({
-            versionToken: activity.versionToken,
-            formData: {
-              name: activity.name,
-              who: activity.person!,
-              where: activity.place!,
-              howMuch: activity.cost!,
-            }
-          })
-          state.formData.name = activity.name
-          state.formData.who = activity.person!
-          state.formData.where = activity.place!
-          state.formData.howMuch = activity.cost!
-        }
+        const refreshStep = CalculateRefreshStep(
+          state.versions[state.versions.length - 1].formData,
+          state.formData,
+          activity
+        )
+        state.formData = redoStep(refreshStep, state.formData)
+        state.versions.push({
+          versionToken: activity.versionToken,
+          formData: {
+            name: activity.name,
+            who: activity.person,
+            where: activity.place,
+            howMuch: activity.cost,
+          }
+        })
+        state.steps.splice(state.currentStepIndex + 1)
+        state.steps.push(refreshStep)
+        state.currentStepIndex = state.steps.length - 1
       }
     })
     .addCase(setName, (state, { payload }) => {
@@ -151,11 +154,6 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(replaceLastStep, (state, { payload }) => {
       state.steps.splice(state.currentStepIndex)
-      state.steps.push(...payload)
-      state.currentStepIndex = state.steps.length - 1
-    })
-    .addCase(addSteps, (state, { payload }) => {
-      state.steps.splice(state.currentStepIndex + 1)
       state.steps.push(...payload)
       state.currentStepIndex = state.steps.length - 1
     })
