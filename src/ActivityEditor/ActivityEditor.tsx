@@ -24,7 +24,7 @@ import {
   useActivityEditorSelector
 } from "./store/store"
 import { ActivityEditorForm } from './ActivityEditorForm'
-import { UndoHistory } from "./UndoHistory"
+import { EditHistory } from "./EditHistory"
 import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
 import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
 
@@ -195,7 +195,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
         )}
         <div style={{ display: 'flex', flexDirection: 'row' }}>
           <ActivityEditorForm disabled={!edit || !initialized} />
-          <UndoHistory />
+          <EditHistory />
           <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(steps, null, 2)}</pre>{/*todo remove */}
         </div>
       </div>

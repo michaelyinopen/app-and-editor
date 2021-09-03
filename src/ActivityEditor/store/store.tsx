@@ -6,14 +6,14 @@ import {
   createSelectorHook
 } from 'react-redux'
 import { activityEditorReducer } from './activityEditorReducer'
-import { undoHistoryMiddleware } from './undoHistoryMiddleware'
+import { editHistoryMiddleware } from './editHistoryMiddleware'
 
 const activityEditorContext = React.createContext<any>(null)
 
 export const useActivityEditorDispatch = createDispatchHook(activityEditorContext)
 export const useActivityEditorSelector = createSelectorHook(activityEditorContext)
 
-const activityEditorStore = createStore(activityEditorReducer, applyMiddleware(undoHistoryMiddleware))
+const activityEditorStore = createStore(activityEditorReducer, applyMiddleware(editHistoryMiddleware))
 
 export type ActivityEditorState = ReturnType<typeof activityEditorStore.getState>
 

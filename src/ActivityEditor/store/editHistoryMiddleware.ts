@@ -7,7 +7,7 @@ import {
   setActivityFromAppStore,
   undo,
 } from './actions'
-import { calculateSteps } from './undoHistory'
+import { calculateSteps } from './editHistory'
 
 const excludeActionTypes = [
   replaceLastStep,
@@ -19,7 +19,7 @@ const excludeActionTypes = [
   jumpToStep,
 ].map(a => a.type)
 
-export const undoHistoryMiddleware: Middleware = store => next => action => {
+export const editHistoryMiddleware: Middleware = store => next => action => {
   const dispatch = store.dispatch
 
   const previousState = store.getState()

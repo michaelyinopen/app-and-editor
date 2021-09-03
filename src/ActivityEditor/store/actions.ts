@@ -1,5 +1,5 @@
 import { createAction } from '@reduxjs/toolkit'
-import { Step } from './undoHistory'
+import { Step } from './editHistory'
 
 export const resetActivityEditor = createAction('resetActivityEditor')
 export const setActivityEditorId = createAction<number | undefined>('setActivityEditorId')

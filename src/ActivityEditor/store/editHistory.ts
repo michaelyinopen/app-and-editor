@@ -197,10 +197,10 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
   )
   for (const operation of allOperations) {
     if (isDraft(formData)) {
-      const undoResult = redoOperation(operation, formData)
-      formData = typeof undoResult === 'undefined'
+      const redoResult = redoOperation(operation, formData)
+      formData = typeof redoResult === 'undefined'
         ? formData
-        : undoResult
+        : redoResult
     } else {
       formData = produce(formData, (draft) => {
         return redoOperation(operation, draft)

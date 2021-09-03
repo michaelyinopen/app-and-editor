@@ -16,7 +16,7 @@ import {
   jumpToStep,
   ActivityWithDetailFromStore,
 } from './actions'
-import { CalculateRefreshStep, redoStep, Step, undoStep } from './undoHistory'
+import { CalculateRefreshStep, redoStep, Step, undoStep } from './editHistory'
 
 type FormDataState = {
   name: string,

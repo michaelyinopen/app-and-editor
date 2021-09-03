@@ -8,7 +8,7 @@ import {
   useActivityEditorSelector
 } from "./store/store"
 
-export const UndoHistory = () => {
+export const EditHistory = () => {
   const editorDispatch = useActivityEditorDispatch()
 
   const steps = useActivityEditorSelector(es => es.steps)
@@ -16,7 +16,7 @@ export const UndoHistory = () => {
 
   return (
     <div>
-      Undo History<br />
+      Edit History<br />
       currentStepIndex: {currentStepIndex}
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <button
