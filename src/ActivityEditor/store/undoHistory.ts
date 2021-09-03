@@ -221,17 +221,17 @@ export function CalculateRefreshStep(
   previousVersionFormData: FormData,
   currentFormData: FormData,
   storeActivity: ActivityWithDetailFromStore
-): Step {
+): Step | undefined {
   const storeFormData = ActivityToFormData(storeActivity)
 
-  const storeVsCurrent = getFieldChanges(previousVersionFormData, storeFormData)
+  const currentVsStore = getFieldChanges(currentFormData, storeFormData)
   const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
   const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: FieldChange[] = []
 
-  for (const change of storeVsCurrent) {
+  for (const change of currentVsStore) {
     if (!currentVsPreviousVersion.find(c => c.path === change.path)) {
       // store activity changed and there are no current edits
       nonConflictFieldChanges.push(change)
@@ -241,7 +241,9 @@ export function CalculateRefreshStep(
       conflictFieldChanges.push(change)
     }
   }
-
+  if (nonConflictFieldChanges.length === 0 && conflictFieldChanges.length === 0) {
+    return undefined
+  }
   return {
     name: 'Refresh',
     operations: nonConflictFieldChanges,

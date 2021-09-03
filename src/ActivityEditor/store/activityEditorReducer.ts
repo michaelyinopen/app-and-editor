@@ -125,7 +125,12 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           state.formData,
           activity
         )
-        state.formData = redoStep(refreshStep, state.formData)
+        if (refreshStep) {
+          state.formData = redoStep(refreshStep, state.formData)
+          state.steps.splice(state.currentStepIndex + 1)
+          state.steps.push(refreshStep)
+          state.currentStepIndex = state.steps.length - 1
+        }
         state.versions.push({
           versionToken: activity.versionToken,
           formData: {
@@ -135,9 +140,6 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
             howMuch: activity.cost,
           }
         })
-        state.steps.splice(state.currentStepIndex + 1)
-        state.steps.push(refreshStep)
-        state.currentStepIndex = state.steps.length - 1
       }
     })
     .addCase(setName, (state, { payload }) => {

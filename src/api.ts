@@ -35,8 +35,9 @@ export async function getSingleActivityApiAsync(id: number) {
 }
 
 export type UpdateActivityResponseBody = {
-  versionConditionFailed?: boolean
-  activity: Activity //activity after update, or latest activity if versionConditionFailed
+  status: 'done' | 'not found' | 'version condition failed'
+  activity?: Activity //activity after update, or latest activity if versionConditionFailed
+  updatedActivity?: Activity
 }
 
 export const updateActivityUrlTemplate = '/api/activities/{id}'
@@ -46,6 +47,9 @@ export async function updateActivityApiAsync(id: number, activity: Activity) {
   try {
     const init = {
       method: "PUT",
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(activity)
     }
     const response = await fetch(url, init)

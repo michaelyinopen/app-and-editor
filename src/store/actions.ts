@@ -11,5 +11,6 @@ export const getActivitiesSucceeded = createAction(
 )
 
 export const getSingleActivitySucceeded = createAction<Activity>('getSingleActivitySucceeded')
+// todo create another action for version condition failed, and updated
 
 export const deleteActivitySucceeded = createAction<number>('deleteActivitySucceeded')

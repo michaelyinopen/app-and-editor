@@ -4,7 +4,7 @@ import { updateActivityApiAsync, UpdateActivityResponseBody } from './api'
 import { getSingleActivitySucceeded } from './store/actions'
 import { Activity } from './types'
 
-export type UpdateActivityTakingThunkActionResult = 'failed' | 'success' | 'versionConditionFailed'
+export type UpdateActivityTakingThunkActionResult = 'version condition failed' | 'not found' | 'failed' | 'success'
 
 export const updateActivityTakingThunkAction = (id: number, activity: Activity): AppTakingThunkAction => ({
   name: `updateActivity/${id}`,
@@ -13,11 +13,13 @@ export const updateActivityTakingThunkAction = (id: number, activity: Activity):
     const updateActivityResult: any = yield updateActivityApiAsync(id, activity)
     if (updateActivityResult[0] === true) {
       const updateActivityResponseBody: UpdateActivityResponseBody = updateActivityResult[1]
-      if (updateActivityResponseBody.versionConditionFailed) {
-        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.activity))
-        return 'versionConditionFailed'
+      if (updateActivityResponseBody.status === 'version condition failed') {
+        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.activity!))
+        return 'version condition failed'
+      } else if (updateActivityResponseBody.status === 'not found') {
+        return 'not found'
       } else {
-        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.activity))
+        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.updatedActivity!))
         return 'success'
       }
     } else {
