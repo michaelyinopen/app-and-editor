@@ -4,6 +4,7 @@ import { Activities } from './Activities'
 import { ActivityEditor } from './ActivityEditor'
 import { PageNotFound } from './PageNotFound'
 import { resetServer } from './api'
+import { Notifications } from './Notifications'
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           />
           <Route component={PageNotFound} />
         </Switch>
+        <Notifications />
       </BrowserRouter>
     </div>
   );
