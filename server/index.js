@@ -28,7 +28,7 @@ router.get('/api/activities/:id', async (ctx, next) => {
 
   if (id === 2) {
     await new Promise(resolve => setTimeout(resolve, 5000))
-    ctx.body = activitiesData.getActivities()[id]
+    ctx.body = activitiesData.getActivity(id)
     return
   }
 
@@ -36,7 +36,7 @@ router.get('/api/activities/:id', async (ctx, next) => {
     if (activitiesData.getIsThreeError()) {
       ctx.status = 500
     } else {
-      ctx.body = activitiesData.getActivities()[id]
+      ctx.body = activitiesData.getActivity(id)
     }
     return
   }
