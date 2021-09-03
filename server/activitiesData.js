@@ -1,7 +1,6 @@
 let activityThreeErrorMarker = 0
 let activityFourUpdateMarker = 0
-
-let activities = {
+const initialActivity = {
   1: {
     id: 1,
     name: 'some activity',
@@ -36,7 +35,15 @@ let activities = {
   }
 }
 
-//#region utilities for tirst four activities
+let activities = { ...initialActivity }
+
+module.exports.reset = () => {
+  activityThreeErrorMarker = 0
+  activityFourUpdateMarker = 0
+  activities = { ...initialActivity }
+}
+
+//#region utilities for first four activities
 function incrementActivityFourUpdateMarker() {
   activityFourUpdateMarker = activityFourUpdateMarker + 1
   if (activities[4]) {

@@ -11,6 +11,11 @@ app.use(bodyParser())
 
 const activitiesData = require('./activitiesData')
 
+router.post('/api/reset', (ctx, next) => {
+  activitiesData.reset()
+  ctx.status = 200
+})
+
 router.get('/api/activities', (ctx, next) => {
   activitiesData.callingGetActivities()
   ctx.body = activitiesData.getActivities()

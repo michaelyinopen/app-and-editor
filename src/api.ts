@@ -1,6 +1,12 @@
 import template from 'url-template'
 import { Activity, ActivityHeader } from './types'
 
+export async function resetServer() {
+  await fetch('/api/reset', {
+    method: "POST",
+  })
+}
+
 export async function getActivitiesApiAsync() {
   let responseBody: ActivityHeader[]
   try {

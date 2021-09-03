@@ -229,9 +229,6 @@ export function CalculateRefreshStep(
   const storeVsCurrent = getFieldChanges(currentFormData, storeFormData)
   const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
   const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
-  console.log({ storeVsCurrent })
-  console.log({ currentVsPreviousVersion })
-  console.log({ storeVsPreviousVersion })
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: FieldChange[] = []

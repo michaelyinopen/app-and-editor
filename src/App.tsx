@@ -3,6 +3,7 @@ import { Home } from './Home'
 import { Activities } from './Activities'
 import { ActivityEditor } from './ActivityEditor'
 import { PageNotFound } from './PageNotFound'
+import { resetServer } from './api'
 
 function App() {
   return (
@@ -19,7 +20,19 @@ function App() {
                 use with server for all operations
               </div>
             )
-            : <div>use with server, can perform all operations</div>}
+            : (
+              <div>
+                use with server, can perform all operations<br />
+                <button
+                  onClick={() => {
+                    resetServer()
+                  }}
+                >
+                  reset server
+                </button>
+              </div>
+            )
+          }
         </div>
         <Switch>
           <Redirect exact from='/' to='/activities' />
