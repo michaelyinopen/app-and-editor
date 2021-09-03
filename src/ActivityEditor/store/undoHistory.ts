@@ -25,10 +25,12 @@ export type Step = {
   name: string,
   operations: Operation[],
   versionToken?: string,
+  mergeBehaviour?: 'merge' | 'discard local changes',
   conflicts?: {
     fieldChange: FieldChange,
     applied: boolean,
-  }[]
+  }[],
+  reverseCurrentOperations?: FieldChange[],
 }
 
 const defaultFormData = {
@@ -224,14 +226,18 @@ export function CalculateRefreshStep(
 ): Step | undefined {
   const storeFormData = ActivityToFormData(storeActivity)
 
-  const currentVsStore = getFieldChanges(currentFormData, storeFormData)
+  const storeVsCurrent = getFieldChanges(currentFormData, storeFormData)
   const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
   const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
+  console.log({ storeVsCurrent })
+  console.log({ currentVsPreviousVersion })
+  console.log({ storeVsPreviousVersion })
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: FieldChange[] = []
+  const reverseCurrentFieldChanges: FieldChange[] = []
 
-  for (const change of currentVsStore) {
+  for (const change of storeVsCurrent) {
     if (!currentVsPreviousVersion.find(c => c.path === change.path)) {
       // store activity changed and there are no current edits
       nonConflictFieldChanges.push(change)
@@ -239,6 +245,10 @@ export function CalculateRefreshStep(
     else if (storeVsPreviousVersion.find(c => c.path === change.path)) {
       // store activity and current both changed
       conflictFieldChanges.push(change)
+    }
+    else {
+      // only current changed
+      reverseCurrentFieldChanges.push(change)
     }
   }
   if (nonConflictFieldChanges.length === 0 && conflictFieldChanges.length === 0) {
@@ -248,9 +258,11 @@ export function CalculateRefreshStep(
     name: 'Refresh',
     operations: nonConflictFieldChanges,
     versionToken: storeActivity.versionToken,
+    mergeBehaviour: 'merge',
     conflicts: conflictFieldChanges.map(c => ({
       fieldChange: c,
       applied: true
-    }))
+    })),
+    reverseCurrentOperations: reverseCurrentFieldChanges,
   }
 }
