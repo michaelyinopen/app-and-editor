@@ -1,0 +1,11 @@
+.notificationItem {
+  margin: 0 5px;
+  border-style: outset;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notificationItem:hover {
+  white-space: normal;
+}
