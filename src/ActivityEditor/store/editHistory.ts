@@ -27,6 +27,7 @@ export type Step = {
   versionToken?: string,
   mergeBehaviour?: 'merge' | 'discard local changes',
   conflicts?: {
+    name: string,
     fieldChange: FieldChange,
     applied: boolean,
   }[],
@@ -136,6 +137,7 @@ export function calculateSteps(
   }
 }
 
+//#region formData maipulation
 function undoOperation(operation: Operation, formData: Draft<FormData>): FormData | undefined {
   return produce(formData, (draft) => {
     if (operation.path === '/name') {
@@ -232,7 +234,6 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
   return formData
 }
 
-//todo undo and redo
 export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
   let formData = currentFormData
   const allOperations = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
@@ -252,7 +253,6 @@ export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
   return formData
 }
 
-//todo undo and redo
 export function SwitchToDiscardLocalChange(step: Step, currentFormData: FormData): FormData {
   let formData = currentFormData
   const allOperations = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
@@ -271,6 +271,39 @@ export function SwitchToDiscardLocalChange(step: Step, currentFormData: FormData
   }
   return formData
 }
+
+export function applyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData {
+  let formData = currentFormData
+  const operation = conflict
+  if (isDraft(formData)) {
+    const redoResult = redoOperation(operation, formData)
+    formData = typeof redoResult === 'undefined'
+      ? formData
+      : redoResult
+  } else {
+    formData = produce(formData, (draft) => {
+      return redoOperation(operation, draft)
+    })
+  }
+  return formData
+}
+
+export function unApplyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData {
+  let formData = currentFormData
+  const operation = conflict
+  if (isDraft(formData)) {
+    const undoResult = undoOperation(operation, formData)
+    formData = typeof undoResult === 'undefined'
+      ? formData
+      : undoResult
+  } else {
+    formData = produce(formData, (draft) => {
+      return undoOperation(operation, draft)
+    })
+  }
+  return formData
+}
+//#endregion formData maipulation
 
 export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
   return {
@@ -319,6 +352,7 @@ export function CalculateRefreshStep(
     versionToken: storeActivity.versionToken,
     mergeBehaviour: 'merge',
     conflicts: conflictFieldChanges.map(c => ({
+      name: calculateStepName([c]),
       fieldChange: c,
       applied: true
     })),

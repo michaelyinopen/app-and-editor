@@ -17,8 +17,19 @@ import {
   ActivityWithDetailFromStore,
   setMergeBehaviourMerge,
   setMergeBehaviourDiscardLocal,
+  applyConflict,
+  unApplyConflict,
 } from './actions'
-import { CalculateRefreshStep, redoStep, Step, SwitchToDiscardLocalChange, SwitchToMerge, undoStep } from './editHistory'
+import {
+  unApplyConflictToFromData,
+  applyConflictToFromData,
+  CalculateRefreshStep,
+  redoStep,
+  Step,
+  SwitchToDiscardLocalChange,
+  SwitchToMerge,
+  undoStep
+} from './editHistory'
 
 type FormDataState = {
   name: string,
@@ -195,9 +206,10 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         state.currentStepIndex = targetStepIndex
       }
     })
-    ////
     .addCase(setMergeBehaviourMerge, (state, { payload: { stepIndex } }) => {
-      if (state.currentStepIndex !== stepIndex) {
+      if (state.currentStepIndex !== stepIndex
+        || state.steps[stepIndex].mergeBehaviour === 'merge'
+      ) {
         return
       }
       state.steps.splice(state.currentStepIndex + 1)
@@ -205,11 +217,35 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.formData = SwitchToMerge(state.steps[stepIndex], state.formData)
     })
     .addCase(setMergeBehaviourDiscardLocal, (state, { payload: { stepIndex } }) => {
-      if (state.currentStepIndex !== stepIndex) {
+      if (state.currentStepIndex !== stepIndex
+        || state.steps[stepIndex].mergeBehaviour === 'discard local changes'
+      ) {
         return
       }
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'discard local changes'
       state.formData = SwitchToDiscardLocalChange(state.steps[stepIndex], state.formData)
+    })
+    .addCase(applyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
+      if (
+        state.steps[stepIndex].mergeBehaviour !== 'merge'
+        || state.steps[stepIndex].conflicts![conflictIndex].applied
+      ) {
+        return
+      }
+      state.steps[stepIndex].conflicts![conflictIndex].applied = true
+      //todo
+      state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
+    })
+    .addCase(unApplyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
+      if (
+        state.steps[stepIndex].mergeBehaviour !== 'merge'
+        || !state.steps[stepIndex].conflicts![conflictIndex].applied
+      ) {
+        return
+      }
+      state.steps[stepIndex].conflicts![conflictIndex].applied = false
+      //todo
+      state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
     })
 })

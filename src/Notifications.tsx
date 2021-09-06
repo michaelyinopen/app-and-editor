@@ -1,12 +1,12 @@
 import { useAppDispatch, useAppSelector } from "./store"
-import { addNotification, clearNotifications } from "./store/actions"
+import { clearNotifications } from "./store/actions"
 import styles from './Notifications.module.css';
 
 export const Notifications = () => {
   const dispatch = useAppDispatch()
   const notifications = useAppSelector(state => state.notifications)
   return (
-    <details style={{ position: 'fixed', bottom: 0, borderStyle: 'ridge', display: 'block', backgroundColor: 'white' }}>
+    <details open style={{ position: 'fixed', bottom: 0, borderStyle: 'ridge', display: 'block', backgroundColor: 'white' }}>
       <summary>
         <span style={{ userSelect: 'none', fontSize: '1.2rem' }}>
           Notifications ({notifications.length})
@@ -16,11 +16,6 @@ export const Notifications = () => {
         onClick={() => { dispatch(clearNotifications()) }}
       >
         clear
-      </button>
-      <button
-        onClick={() => { dispatch(addNotification("a notification")) }}
-      >
-        add notification
       </button>
       <div
         style={{
