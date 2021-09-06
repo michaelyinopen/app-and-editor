@@ -233,8 +233,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       ) {
         return
       }
+      state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = true
-      //todo
       state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
     })
     .addCase(unApplyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
@@ -244,8 +244,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       ) {
         return
       }
+      state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = false
-      //todo
       state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
     })
 })

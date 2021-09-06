@@ -1,4 +1,9 @@
-import { applyConflict, jumpToStep, setMergeBehaviourDiscardLocal, setMergeBehaviourMerge, unApplyConflict } from './store/actions'
+import { Conflict } from './Conflict'
+import {
+  jumpToStep,
+  setMergeBehaviourDiscardLocal,
+  setMergeBehaviourMerge,
+} from './store/actions'
 import { Step as StepType } from './store/editHistory'
 import { useActivityEditorDispatch, useActivityEditorSelector } from './store/store'
 
@@ -72,22 +77,12 @@ const VersionedStep = ({
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 32 }}>
           <b>Conflicts</b>
           {step.conflicts!.map((conflict, conflictIndex) => (
-            <div>
-              <input
-                type="checkbox"
-                id={`conflict-${stepIndex}-${conflictIndex}`}
-                checked={conflict.applied}
-                onChange={e => {
-                  if (e.target.checked) {
-                    editorDispatch(applyConflict(stepIndex, conflictIndex))
-                  } else {
-                    editorDispatch(unApplyConflict(stepIndex, conflictIndex))
-                  }
-                }}
-                disabled={stepIndex > currentStepIndex/*no later changes*/}
-              />
-              <label htmlFor={`conflict-${stepIndex}-${conflictIndex}`}>{conflict.name}</label>
-            </div>
+            <Conflict
+              key={`conflict-${stepIndex}-${conflictIndex}`}
+              stepIndex={stepIndex}
+              conflictIndex={conflictIndex}
+              conflict={conflict}
+            />
           ))}
         </div>
       )}

@@ -21,16 +21,18 @@ export type Operation = {
   newValue: any,
 }
 
+export type Conflict = {
+  name: string,
+  fieldChange: FieldChange,
+  applied: boolean,
+}
+
 export type Step = {
   name: string,
   operations: Operation[],
   versionToken?: string,
   mergeBehaviour?: 'merge' | 'discard local changes',
-  conflicts?: {
-    name: string,
-    fieldChange: FieldChange,
-    applied: boolean,
-  }[],
+  conflicts?: Conflict[],
   reverseCurrentOperations?: FieldChange[],
 }
 
