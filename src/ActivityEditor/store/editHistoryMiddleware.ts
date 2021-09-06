@@ -1,10 +1,14 @@
 import type { Middleware } from 'redux'
 import {
+  applyConflict,
   jumpToStep,
   redo,
   replaceLastStep,
   resetActivityEditor,
   setActivityFromAppStore,
+  setMergeBehaviourDiscardLocal,
+  setMergeBehaviourMerge,
+  unApplyConflict,
   undo,
 } from './actions'
 import { calculateSteps } from './editHistory'
@@ -17,6 +21,10 @@ const excludeActionTypes = [
   undo,
   redo,
   jumpToStep,
+  setMergeBehaviourMerge,
+  setMergeBehaviourDiscardLocal,
+  applyConflict,
+  unApplyConflict,
 ].map(a => a.type)
 
 export const editHistoryMiddleware: Middleware = store => next => action => {

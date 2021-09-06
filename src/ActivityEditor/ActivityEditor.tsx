@@ -27,6 +27,7 @@ import { ActivityEditorForm } from './ActivityEditorForm'
 import { EditHistory } from "./EditHistory"
 import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
 import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
+import { addNotification } from "../store/actions"
 
 type ActivityEditorProps = {
   id: number | undefined
@@ -143,18 +144,21 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                 dispatch(updateActivityTakingThunkAction(id, activity))
                   .then(result => {
                     if (result === 'success') {
-                      //todo
+                      dispatch(addNotification(`Saved Activity #${id}`))
                     }
-                    else if (result === 'versionConditionFailed') {
-                      //todo notification?
+                    else if (result === 'version condition failed') {
+                      dispatch(addNotification(`Activity #${id} was updated oy others, check the merged changes and save again`))
+                    }
+                    else if (result === 'not found') {
+                      dispatch(addNotification(`Activity #${id} was deleted and cannot be saved`))
                     }
                     else if (result === 'failed') {
-                      //   notification
+                      dispatch(addNotification(`Failed to saved Activity #${id}`))
                     }
                   })
-                // .catch(() => {
-                //   //notification
-                // })
+                  .catch(() => {
+                    dispatch(addNotification(`Failed to saved Activity #${id}`))
+                  })
               }
             }}
           >

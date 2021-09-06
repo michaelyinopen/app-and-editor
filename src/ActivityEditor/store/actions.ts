@@ -45,3 +45,38 @@ export const replaceLastStep = createAction<Step[]>('replaceLastStep')
 export const undo = createAction('undo')
 export const redo = createAction('redo')
 export const jumpToStep = createAction<number>('jumpToStep')
+
+export const setMergeBehaviourMerge = createAction(
+  'setMergeBehaviourMerge',
+  (stepIndex: number) => ({
+    payload: {
+      stepIndex,
+    }
+  })
+)
+export const setMergeBehaviourDiscardLocal = createAction(
+  'setMergeBehaviourDiscardLocal',
+  (stepIndex: number) => ({
+    payload: {
+      stepIndex,
+    }
+  })
+)
+export const applyConflict = createAction(
+  'applyConflict',
+  (stepIndex: number, conflictIndex: number) => ({
+    payload: {
+      stepIndex,
+      conflictIndex,
+    }
+  })
+)
+export const unApplyConflict = createAction(
+  'unApplyConflict',
+  (stepIndex: number, conflictIndex: number) => ({
+    payload: {
+      stepIndex,
+      conflictIndex,
+    }
+  })
+)

@@ -15,8 +15,10 @@ import {
   redo,
   jumpToStep,
   ActivityWithDetailFromStore,
+  setMergeBehaviourMerge,
+  setMergeBehaviourDiscardLocal,
 } from './actions'
-import { CalculateRefreshStep, redoStep, Step, undoStep } from './editHistory'
+import { CalculateRefreshStep, redoStep, Step, SwitchToDiscardLocalChange, SwitchToMerge, undoStep } from './editHistory'
 
 type FormDataState = {
   name: string,
@@ -192,5 +194,22 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         state.formData = formData
         state.currentStepIndex = targetStepIndex
       }
+    })
+    ////
+    .addCase(setMergeBehaviourMerge, (state, { payload: { stepIndex } }) => {
+      if (state.currentStepIndex !== stepIndex) {
+        return
+      }
+      state.steps.splice(state.currentStepIndex + 1)
+      state.steps[stepIndex].mergeBehaviour = 'merge'
+      state.formData = SwitchToMerge(state.steps[stepIndex], state.formData)
+    })
+    .addCase(setMergeBehaviourDiscardLocal, (state, { payload: { stepIndex } }) => {
+      if (state.currentStepIndex !== stepIndex) {
+        return
+      }
+      state.steps.splice(state.currentStepIndex + 1)
+      state.steps[stepIndex].mergeBehaviour = 'discard local changes'
+      state.formData = SwitchToDiscardLocalChange(state.steps[stepIndex], state.formData)
     })
 })

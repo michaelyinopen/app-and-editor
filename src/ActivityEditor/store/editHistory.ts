@@ -155,9 +155,20 @@ function undoOperation(operation: Operation, formData: Draft<FormData>): FormDat
 
 export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
   let formData = previousFormData
-  const allOperations = step.operations.concat(
-    step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
-  )
+  const allOperations = step.mergeBehaviour === 'merge'
+    ? step.operations
+      .concat(
+        step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
+      )
+    : step.mergeBehaviour === 'discard local changes'
+      ? step.operations
+        .concat(
+          step.conflicts?.map(c => c.fieldChange) ?? []
+        )
+        .concat(
+          step.reverseCurrentOperations ?? []
+        )
+      : step.operations
   for (const operation of allOperations) {
     if (isDraft(formData)) {
       const undoResult = undoOperation(operation, formData)
@@ -192,9 +203,60 @@ function redoOperation(operation: Operation, formData: Draft<FormData>): FormDat
 
 export function redoStep(step: Step, previousFormData: FormData): FormData {
   let formData = previousFormData
-  const allOperations = step.operations.concat(
-    step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
-  )
+  const allOperations = step.mergeBehaviour === 'merge'
+    ? step.operations
+      .concat(
+        step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
+      )
+    : step.mergeBehaviour === 'discard local changes'
+      ? step.operations
+        .concat(
+          step.conflicts?.map(c => c.fieldChange) ?? []
+        )
+        .concat(
+          step.reverseCurrentOperations ?? []
+        )
+      : step.operations
+  for (const operation of allOperations) {
+    if (isDraft(formData)) {
+      const redoResult = redoOperation(operation, formData)
+      formData = typeof redoResult === 'undefined'
+        ? formData
+        : redoResult
+    } else {
+      formData = produce(formData, (draft) => {
+        return redoOperation(operation, draft)
+      })
+    }
+  }
+  return formData
+}
+
+//todo undo and redo
+export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
+  let formData = currentFormData
+  const allOperations = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
+    .concat(step.reverseCurrentOperations ?? [])
+  for (const operation of allOperations) {
+    if (isDraft(formData)) {
+      const undoResult = undoOperation(operation, formData)
+      formData = typeof undoResult === 'undefined'
+        ? formData
+        : undoResult
+    } else {
+      formData = produce(formData, (draft) => {
+        return undoOperation(operation, draft)
+      })
+    }
+  }
+  return formData
+}
+
+//todo undo and redo
+export function SwitchToDiscardLocalChange(step: Step, currentFormData: FormData): FormData {
+  let formData = currentFormData
+  const allOperations = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
+    .concat(step.reverseCurrentOperations ?? [])
   for (const operation of allOperations) {
     if (isDraft(formData)) {
       const redoResult = redoOperation(operation, formData)

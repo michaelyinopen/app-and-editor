@@ -1,7 +1,7 @@
+import { Step } from "./Step"
 import {
   undo,
   redo,
-  jumpToStep,
 } from "./store/actions"
 import {
   useActivityEditorDispatch,
@@ -41,12 +41,11 @@ export const EditHistory = () => {
           .reverse()
           .map(si => (
             <li key={si.index}>
-              <button
-                onClick={() => { editorDispatch(jumpToStep(si.index)) }}
-                {...(si.index > currentStepIndex ? { style: { color: 'grey' } } : {})}
-              >
-                {si.step.name}
-              </button>
+              <Step
+                stepIndex={si.index}
+                step={si.step}
+                disabled={si.index > currentStepIndex}
+              />
             </li>
           ))
         }
