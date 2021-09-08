@@ -5,7 +5,7 @@ import {
   useState,
 } from "react"
 import { nanoid } from 'nanoid'
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, Prompt } from 'react-router-dom'
 import {
   createSingleActivityIsLoadingSelector,
   getActivityTakingThunkAction
@@ -123,9 +123,15 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     const formData = useActivityEditorSelector(es => es.formData)
     const versionToken = useActivityEditorSelector(es => es.versions[es.versions.length - 1]?.versionToken)
+    const promptWhen = (edit && isNew && steps[currentStepIndex].saveStatus !== 'saved')
+      || (edit && !isNew && steps.length !== 1 && steps[currentStepIndex].saveStatus !== 'saved')
 
     return (
       <div>
+        <Prompt
+          when={promptWhen}
+          message={'Exit without saving?\nAll changes will be lost.'}
+        />
         {id ? <h1>Activity #{id}</h1> : <h1>New Activity</h1>}
         <div>
           {!isNew && (

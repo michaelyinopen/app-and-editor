@@ -26,6 +26,7 @@ export const Notifications = () => {
       >
         {notifications.map((n, index) => (
           <div
+            key={index}
             className={styles.notificationItem}
           >
             {index + 1}. {n}
