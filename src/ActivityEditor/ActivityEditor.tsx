@@ -29,7 +29,7 @@ import {
 } from "./store/store"
 import { ActivityEditorForm } from './ActivityEditorForm'
 import { EditHistory } from "./EditHistory"
-import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
+import { createUpdateActivityIsLoadingSelector, updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
 import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
 import { createActivityTakingThunkAction, createCreateActivityIsLoadingSelector } from '../createActivityTakingThunkAction'
 import { addNotification } from "../store/actions"
@@ -106,6 +106,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
     const initialized = useActivityEditorSelector(es => es.initialized)
     const thunkLoading = useAppSelector(createSingleActivityIsLoadingSelector(id))
     const isCreating = useAppSelector(createCreateActivityIsLoadingSelector(creationToken))
+    const isSaving = useAppSelector(createUpdateActivityIsLoadingSelector(id ?? 0))
 
     const steps = useActivityEditorSelector(es => es.steps) //todo remove
     const currentStepIndex = useActivityEditorSelector(es => es.currentStepIndex)
@@ -194,6 +195,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
               Save
             </button>
           )}
+          {!isNew && isSaving && <span> Saving...</span>}
           {isNew && (
             <button
               disabled={isCreating}
