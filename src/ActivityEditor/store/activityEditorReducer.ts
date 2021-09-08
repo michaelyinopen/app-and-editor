@@ -19,11 +19,12 @@ import {
   setMergeBehaviourDiscardLocal,
   applyConflict,
   unApplyConflict,
+  savedStep,
 } from './actions'
 import {
   unApplyConflictToFromData,
   applyConflictToFromData,
-  CalculateRefreshStep,
+  CalculateRefreshedStep,
   redoStep,
   Step,
   SwitchToDiscardLocalChange,
@@ -77,13 +78,6 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(setActivityEditorId, (state, { payload: id }) => {
       state.id = id
-      if (!id) {
-        // isNew
-        state.initialized = true
-        state.loadStatus = 'loaded'
-        state.isEdit = true
-        state.hasDetail = true
-      }
     })
     .addCase(setActivityEditorIsEdit, (state, { payload: isEdit }) => {
       state.isEdit = isEdit
@@ -133,16 +127,19 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           || !activity.hasDetail) {
           return
         }
-        const refreshStep = CalculateRefreshStep(
+        const refreshedStep = CalculateRefreshedStep(
           state.versions[state.versions.length - 1].formData,
           state.formData,
           activity
         )
-        if (refreshStep) {
-          state.formData = redoStep(refreshStep, state.formData)
+        if (refreshedStep) {
+          state.formData = redoStep(refreshedStep, state.formData)
           state.steps.splice(state.currentStepIndex + 1)
-          state.steps.push(refreshStep)
+          state.steps.push(refreshedStep)
           state.currentStepIndex = state.steps.length - 1
+          for (const step of state.steps.filter(s => s.saved)) {
+            step.saved = false
+          }
         }
         state.versions.push({
           versionToken: activity.versionToken,
@@ -206,6 +203,15 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         state.currentStepIndex = targetStepIndex
       }
     })
+    .addCase(savedStep, (state, { payload: { stepIndex } }) => {
+      if (stepIndex > state.steps.length - 1) {
+        return
+      }
+      for (const step of state.steps.filter(s => s.saved)) {
+        step.saved = false
+      }
+      state.steps[stepIndex].saved = true
+    })
     .addCase(setMergeBehaviourMerge, (state, { payload: { stepIndex } }) => {
       if (state.currentStepIndex !== stepIndex
         || state.steps[stepIndex].mergeBehaviour === 'merge'
@@ -215,6 +221,9 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'merge'
       state.formData = SwitchToMerge(state.steps[stepIndex], state.formData)
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
+        step.saved = false
+      }
     })
     .addCase(setMergeBehaviourDiscardLocal, (state, { payload: { stepIndex } }) => {
       if (state.currentStepIndex !== stepIndex
@@ -225,6 +234,9 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'discard local changes'
       state.formData = SwitchToDiscardLocalChange(state.steps[stepIndex], state.formData)
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
+        step.saved = false
+      }
     })
     .addCase(applyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
       if (
@@ -236,6 +248,9 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = true
       state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
+        step.saved = false
+      }
     })
     .addCase(unApplyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
       if (
@@ -247,5 +262,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = false
       state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
+        step.saved = false
+      }
     })
 })

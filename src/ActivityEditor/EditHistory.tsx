@@ -16,7 +16,8 @@ export const EditHistory = () => {
 
   return (
     <div>
-      Edit History<br />
+      <b>Edit History</b>
+      <br />
       currentStepIndex: {currentStepIndex}
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <button

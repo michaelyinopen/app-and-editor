@@ -18,13 +18,15 @@ export const ActivityEditorForm = ({ disabled }) => {
   const howMuch = useActivityEditorSelector(s => s.formData.howMuch)
 
   const hasDetail = useActivityEditorSelector(es => es.hasDetail)
+  const id = useActivityEditorSelector(es => es.id)
+  const isNew = id === undefined
   return (
     <form onSubmit={() => { }} >
       <fieldset disabled={disabled} >
         <label htmlFor="name">name:</label><br />
         <input type="text" id="name" value={name} onChange={e => { editorDispatch(setName(e.target.value ?? '')) }} /><br />
 
-        {hasDetail &&
+        {(isNew || hasDetail) &&
           <>
             <label htmlFor="who">who:</label><br />
             <input type="text" id="who" value={who} onChange={e => { editorDispatch(setWho(e.target.value ?? '')) }} /><br />
@@ -36,7 +38,7 @@ export const ActivityEditorForm = ({ disabled }) => {
             <input
               type="number"
               id="how-much"
-              value={howMuch}
+              value={howMuch ?? ''}
               onChange={e => {
                 const intValue = parseInt(e.target.value)
                 const finalValue = isNaN(intValue) ? undefined : intValue

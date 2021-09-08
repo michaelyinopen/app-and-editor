@@ -2,7 +2,9 @@ import {
   ComponentType,
   FunctionComponent,
   useEffect,
+  useState,
 } from "react"
+import { nanoid } from 'nanoid'
 import { Link, useHistory } from 'react-router-dom'
 import {
   createSingleActivityIsLoadingSelector,
@@ -14,6 +16,7 @@ import {
   failedToLoadActivity,
   loadedActivity,
   resetActivityEditor,
+  savedStep,
   setActivityEditorId,
   setActivityEditorIsEdit,
   setActivityFromAppStore,
@@ -27,6 +30,7 @@ import { ActivityEditorForm } from './ActivityEditorForm'
 import { EditHistory } from "./EditHistory"
 import { updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
 import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
+import { createActivityTakingThunkAction, createCreateActivityIsLoadingSelector } from '../createActivityTakingThunkAction'
 import { addNotification } from "../store/actions"
 
 type ActivityEditorProps = {
@@ -54,15 +58,30 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     useEffect(() => {
       editorDispatch(setActivityEditorId(id))
-      return () => { editorDispatch(resetActivityEditor()) }
+      return () => {
+        if (id) {
+          editorDispatch(resetActivityEditor())
+        }
+      }
     }, [editorDispatch, id])
 
     useEffect(() => {
       editorDispatch(setActivityEditorIsEdit(edit))
     }, [editorDispatch, edit])
 
+    const [creationToken, setCreationToken] = useState<string | undefined>(undefined)
     useEffect(() => {
-      if (!isNew && id) {
+      if (!id) {
+        setCreationToken(nanoid())
+      }
+      return () => setCreationToken(undefined)
+    }, [id])
+
+    const loadStatus = useActivityEditorSelector(es => es.loadStatus)
+    const isLoaded = loadStatus === 'loaded'
+
+    useEffect(() => {
+      if (!isNew && id && !isLoaded) {
         dispatch(getActivityTakingThunkAction(id))
           .then(result => {
             if (result === true) {
@@ -79,15 +98,16 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
             //notification
           })
       }
-    }, [dispatch, editorDispatch, isNew, id])
+    }, [dispatch, editorDispatch, isNew, id, isLoaded])
 
     const appActivity = useAppSelector(s => id !== undefined ? s.activities.entities[id] : undefined)
 
-    const loadStatus = useActivityEditorSelector(es => es.loadStatus)
     const initialized = useActivityEditorSelector(es => es.initialized)
     const thunkLoading = useAppSelector(createSingleActivityIsLoadingSelector(id))
+    const isCreating = useAppSelector(createCreateActivityIsLoadingSelector(creationToken))
 
     const steps = useActivityEditorSelector(es => es.steps) //todo remove
+    const currentStepIndex = useActivityEditorSelector(es => es.currentStepIndex)
 
     useEffect(() => {
       if (!isNew) {
@@ -97,7 +117,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
 
     const isDeleting = useAppSelector(createActivityIsDeletingSelector(id))
     const showLoading = thunkLoading || (!initialized && loadStatus !== 'failed')
-    const disabled = isDeleting || !edit || !initialized || loadStatus === 'failed'
+    const disabled = !isNew && (isDeleting || !edit || !initialized || loadStatus === 'failed')
 
     const formData = useActivityEditorSelector(es => es.formData)
     const versionToken = useActivityEditorSelector(es => es.versions[es.versions.length - 1]?.versionToken)
@@ -125,14 +145,17 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                 }
               }}
             >
-              referesh
+              Referesh
             </button>
           )}
           {' '}
-          <button
-            disabled={disabled}
-            onClick={() => {
-              if (id) {
+          {!isNew && (
+            <button
+              disabled={disabled}
+              onClick={() => {
+                if (!id) {
+                  return
+                }
                 const activity = {
                   id,
                   name: formData.name,
@@ -145,9 +168,10 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                   .then(result => {
                     if (result === 'success') {
                       dispatch(addNotification(`Saved Activity #${id}`))
+                      editorDispatch(savedStep(currentStepIndex))
                     }
                     else if (result === 'version condition failed') {
-                      dispatch(addNotification(`Activity #${id} was updated oy others, check the merged changes and save again`))
+                      dispatch(addNotification(`Activity #${id} was updated by another user, check the merged changes and save again`))
                     }
                     else if (result === 'not found') {
                       dispatch(addNotification(`Activity #${id} was deleted and cannot be saved`))
@@ -160,10 +184,45 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                     dispatch(addNotification(`Failed to saved Activity #${id}`))
                   })
               }
-            }}
-          >
-            save
-          </button>
+              }
+            >
+              Save
+            </button>
+          )}
+          {isNew && (
+            <button
+              disabled={isCreating}
+              onClick={() => {
+                const activity = {
+                  name: formData.name,
+                  person: formData.who,
+                  place: formData.where,
+                  cost: formData.howMuch,
+                }
+                dispatch(createActivityTakingThunkAction(activity, creationToken))
+                  .then(result => {
+                    if (result[0] === true) {
+                      const createdActivity = result[1]
+                      const createdId = createdActivity.id
+                      dispatch(addNotification(`Created Activity #${createdId}`))
+                      editorDispatch(loadedActivity())
+                      editorDispatch(savedStep(currentStepIndex))
+                      history.push(`/activities/${createdId}/edit`)
+                    }
+                    else {
+                      dispatch(addNotification('Failed to create Activity'))
+                    }
+                  })
+                  .catch(() => {
+                    dispatch(addNotification('Failed to create Activity'))
+                  })
+              }
+              }
+            >
+              Create
+            </button>
+          )}
+          {isNew && isCreating && <span> Creating...</span>}
           {!isNew && loadStatus === 'failed' && <span> Please try again.</span>}
           {!isNew && showLoading && <span> Loading...</span>}
           {!isNew && (
@@ -198,7 +257,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
             : <Link to={`/activities/${id}/edit`}>edit</Link>
         )}
         <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <ActivityEditorForm disabled={!edit || !initialized} />
+          <ActivityEditorForm disabled={!isNew && (!edit || !initialized)} />
           <EditHistory />
           <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(steps, null, 2)}</pre>{/*todo remove */}
         </div>

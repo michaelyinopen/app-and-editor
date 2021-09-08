@@ -34,12 +34,13 @@ export const editHistoryMiddleware: Middleware = store => next => action => {
   const previousStep = previousState.steps[previousState.currentStepIndex]
   const previousFormData = previousState.formData
   const previousInitialized = previousState.initialized
+  const previousIsNew = previousState.id === undefined
 
   const nextResult = next(action)
 
   const currentFormData = store.getState().formData
 
-  if (previousInitialized && !excludeActionTypes.includes(action.type)) {
+  if ((previousIsNew || previousInitialized) && !excludeActionTypes.includes(action.type)) {
     const steps = calculateSteps(
       previousStep,
       previousFormData,

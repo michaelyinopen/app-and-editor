@@ -34,6 +34,7 @@ export type Step = {
   mergeBehaviour?: 'merge' | 'discard local changes',
   conflicts?: Conflict[],
   reverseCurrentOperations?: FieldChange[],
+  saved?: boolean,
 }
 
 const defaultFormData = {
@@ -106,7 +107,8 @@ export function calculateSteps(
   }
   if (previousStep.operations.length !== 1
     || fieldChanges.length !== 1
-    || previousStep.versionToken) {
+    || previousStep.versionToken
+    || previousStep.saved) {
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
@@ -316,7 +318,7 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
   }
 }
 
-export function CalculateRefreshStep(
+export function CalculateRefreshedStep(
   previousVersionFormData: FormData,
   currentFormData: FormData,
   storeActivity: ActivityWithDetailFromStore
@@ -349,7 +351,7 @@ export function CalculateRefreshStep(
     return undefined
   }
   return {
-    name: 'Refresh',
+    name: 'Refreshed',
     operations: nonConflictFieldChanges,
     versionToken: storeActivity.versionToken,
     mergeBehaviour: 'merge',

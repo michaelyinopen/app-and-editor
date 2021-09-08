@@ -45,6 +45,14 @@ export const replaceLastStep = createAction<Step[]>('replaceLastStep')
 export const undo = createAction('undo')
 export const redo = createAction('redo')
 export const jumpToStep = createAction<number>('jumpToStep')
+export const savedStep = createAction(
+  'savedStep',
+  (stepIndex: number) => ({
+    payload: {
+      stepIndex,
+    }
+  })
+)
 
 export const setMergeBehaviourMerge = createAction(
   'setMergeBehaviourMerge',

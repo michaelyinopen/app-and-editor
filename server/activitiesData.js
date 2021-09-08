@@ -37,10 +37,13 @@ const initialActivity = {
 
 let activities = { ...initialActivity }
 
+let nextId = Math.max(...Object.keys(activities)) + 1
+
 module.exports.reset = () => {
   activityThreeErrorMarker = 0
   activityFourUpdateMarker = 0
   activities = { ...initialActivity }
+  nextId = Math.max(...Object.keys(activities)) + 1
 }
 
 //#region utilities for first four activities
@@ -87,8 +90,6 @@ module.exports.getActivities = () => {
 module.exports.getActivity = (id) => {
   return activities[id]
 }
-
-let nextId = Math.max(...Object.keys(activities)) + 1
 
 const getNextIdAndIncrement = () => {
   const result = nextId

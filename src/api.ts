@@ -40,6 +40,28 @@ export async function getSingleActivityApiAsync(id: number) {
   return [true, responseBody]
 }
 
+export async function createActivityApiAsync(activity: Partial<Activity>) {
+  let responseBody
+  try {
+    const init = {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(activity)
+    }
+    const response = await fetch('/api/activities', init)
+    if (!response.ok) {
+      return [false, undefined]
+    }
+    responseBody = await response.json()
+  }
+  catch (e) {
+    return [false]
+  }
+  return [true, responseBody]
+}
+
 export type UpdateActivityResponseBody = {
   status: 'done' | 'not found' | 'version condition failed'
   activity?: Activity //activity after update, or latest activity if versionConditionFailed
