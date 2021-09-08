@@ -17,6 +17,7 @@ import {
   loadedActivity,
   resetActivityEditor,
   savedStep,
+  savingStep,
   setActivityEditorId,
   setActivityEditorIsEdit,
   setActivityFromAppStore,
@@ -164,11 +165,13 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                   cost: formData.howMuch,
                   versionToken,
                 }
+                editorDispatch(savingStep(currentStepIndex, true))
                 dispatch(updateActivityTakingThunkAction(id, activity))
                   .then(result => {
                     if (result === 'success') {
                       dispatch(addNotification(`Saved Activity #${id}`))
                       editorDispatch(savedStep(currentStepIndex))
+                      return
                     }
                     else if (result === 'version condition failed') {
                       dispatch(addNotification(`Activity #${id} was updated by another user, check the merged changes and save again`))
@@ -179,9 +182,11 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                     else if (result === 'failed') {
                       dispatch(addNotification(`Failed to saved Activity #${id}`))
                     }
+                    editorDispatch(savingStep(currentStepIndex, false))
                   })
                   .catch(() => {
                     dispatch(addNotification(`Failed to saved Activity #${id}`))
+                    editorDispatch(savingStep(currentStepIndex, false))
                   })
               }
               }
@@ -199,6 +204,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                   place: formData.where,
                   cost: formData.howMuch,
                 }
+                editorDispatch(savingStep(currentStepIndex, true))
                 dispatch(createActivityTakingThunkAction(activity, creationToken))
                   .then(result => {
                     if (result[0] === true) {
@@ -211,10 +217,12 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
                     }
                     else {
                       dispatch(addNotification('Failed to create Activity'))
+                      editorDispatch(savingStep(currentStepIndex, false))
                     }
                   })
                   .catch(() => {
                     dispatch(addNotification('Failed to create Activity'))
+                    editorDispatch(savingStep(currentStepIndex, false))
                   })
               }
               }

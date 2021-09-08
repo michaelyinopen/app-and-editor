@@ -24,7 +24,7 @@ const NormalStep = ({
       onClick={() => { editorDispatch(jumpToStep(stepIndex)) }}
       {...(disabled ? { style: { color: 'grey' } } : {})}
     >
-      {step.name}{step.saved ? ' (saved)' : undefined}
+      {step.name}{step.saveStatus === 'saved' ? ' (saved)' : undefined}
     </button>
   )
 }
@@ -44,7 +44,7 @@ const VersionedStep = ({
         onClick={() => { editorDispatch(jumpToStep(stepIndex)) }}
         {...(disabled ? { style: { color: 'grey' } } : {})}
       >
-        {step.name}{step.saved ? ' (saved)' : undefined}
+        {step.name}{step.saveStatus === 'saved' ? ' (saved)' : undefined}
       </button>
       <div>
         <input

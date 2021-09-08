@@ -45,6 +45,15 @@ export const replaceLastStep = createAction<Step[]>('replaceLastStep')
 export const undo = createAction('undo')
 export const redo = createAction('redo')
 export const jumpToStep = createAction<number>('jumpToStep')
+export const savingStep = createAction(
+  'savingStep',
+  (stepIndex: number, saving: boolean) => ({
+    payload: {
+      stepIndex,
+      saving
+    }
+  })
+)
 export const savedStep = createAction(
   'savedStep',
   (stepIndex: number) => ({

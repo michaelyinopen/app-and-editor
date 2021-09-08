@@ -34,7 +34,7 @@ export type Step = {
   mergeBehaviour?: 'merge' | 'discard local changes',
   conflicts?: Conflict[],
   reverseCurrentOperations?: FieldChange[],
-  saved?: boolean,
+  saveStatus?: 'saving' | 'saved',
 }
 
 const defaultFormData = {
@@ -108,7 +108,7 @@ export function calculateSteps(
   if (previousStep.operations.length !== 1
     || fieldChanges.length !== 1
     || previousStep.versionToken
-    || previousStep.saved) {
+    || previousStep.saveStatus) {
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,

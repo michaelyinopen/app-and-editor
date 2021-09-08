@@ -19,6 +19,7 @@ import {
   setMergeBehaviourDiscardLocal,
   applyConflict,
   unApplyConflict,
+  savingStep,
   savedStep,
 } from './actions'
 import {
@@ -137,8 +138,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           state.steps.splice(state.currentStepIndex + 1)
           state.steps.push(refreshedStep)
           state.currentStepIndex = state.steps.length - 1
-          for (const step of state.steps.filter(s => s.saved)) {
-            step.saved = false
+          for (const step of state.steps.filter(s => s.saveStatus)) {
+            step.saveStatus = undefined
           }
         }
         state.versions.push({
@@ -203,14 +204,23 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         state.currentStepIndex = targetStepIndex
       }
     })
+    .addCase(savingStep, (state, { payload: { stepIndex, saving } }) => {
+      if (stepIndex > state.steps.length - 1) {
+        return
+      }
+      for (const step of state.steps.filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
+      }
+      state.steps[stepIndex].saveStatus = saving ? 'saving' : undefined
+    })
     .addCase(savedStep, (state, { payload: { stepIndex } }) => {
       if (stepIndex > state.steps.length - 1) {
         return
       }
-      for (const step of state.steps.filter(s => s.saved)) {
-        step.saved = false
+      for (const step of state.steps.filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
       }
-      state.steps[stepIndex].saved = true
+      state.steps[stepIndex].saveStatus = 'saved'
     })
     .addCase(setMergeBehaviourMerge, (state, { payload: { stepIndex } }) => {
       if (state.currentStepIndex !== stepIndex
@@ -221,8 +231,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'merge'
       state.formData = SwitchToMerge(state.steps[stepIndex], state.formData)
-      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
-        step.saved = false
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
       }
     })
     .addCase(setMergeBehaviourDiscardLocal, (state, { payload: { stepIndex } }) => {
@@ -234,8 +244,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'discard local changes'
       state.formData = SwitchToDiscardLocalChange(state.steps[stepIndex], state.formData)
-      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
-        step.saved = false
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
       }
     })
     .addCase(applyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
@@ -248,8 +258,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = true
       state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
-      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
-        step.saved = false
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
       }
     })
     .addCase(unApplyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
@@ -262,8 +272,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = false
       state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
-      for (const step of state.steps.slice(stepIndex).filter(s => s.saved)) {
-        step.saved = false
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
       }
     })
 })
