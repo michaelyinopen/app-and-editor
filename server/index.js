@@ -7,7 +7,13 @@ const app = new Koa()
 const router = new Router()
 app.use(logger())
 app.use(bodyParser())
+app
+  .use(router.routes())
+  .use(router.allowedMethods())
 
+app.listen(3001, () => {
+  console.log('Server running at PORT 3001')
+})
 
 const activitiesData = require('./activitiesData')
 
@@ -76,12 +82,4 @@ router.delete('/api/activities/:id', (ctx, next) => {
   const id = parseInt(ctx.params.id)
   activitiesData.deleteActivity(id)
   ctx.status = 200
-})
-
-app
-  .use(router.routes())
-  .use(router.allowedMethods())
-
-app.listen(3001, () => {
-  console.log('Server running at PORT 3001')
 })

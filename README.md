@@ -1,5 +1,5 @@
 # app-and-editor
-Proof of concept of job-shop-collection's Job Set Editor's interactions with other parts of the app.
+Proof of concept of job-shop-collection's Job Set Editor's edit history and interactions with other parts of the app.
 
 ## Run with MSW mocked responses
 Can query but will not save.
@@ -36,21 +36,38 @@ Detect changes using `versionToken`, that updates everytime the data is saved.
 
 Merge changes, manully resolve conflicts, and save again.
 
-### Vs block saving
+### Comparison: block saving
+Block saving if data was updated by someone else would lose all local changes.
 
-### Vs naive last save wins
+### Comparison: naive last save wins
+If any save just overrides other user's changes, user might miss important changes.
 
-## Collaborative Editing?
+This project's implementation is also "last save wins", but the experience is improved by notifying the user, and providing change merging and conflict resolution.
+
+//////////////////////////////////
+
+### Example: use local
+
+### Example: merge changes
+
+### Example: merge changes with conflict resolution(apply/unapply + manual edit)
+
+### Example: discard local changes
 
 ### Version Token
-Token for a specific version. If data changed, version token will change, therefore can detect change by comparing the version tokens.
+Token for a specific version. If data is saved, version token changes, therefore can detect change by comparing the version tokens.
 
-### Field
-
-#### Collection Field
+### Field Change
 
 ### Operation
 Field change (might be merged, e.g.typing)
+
+### Step
+
+### Conflict
+
+//////////////////////////////////
+
 
 ### Special Steps
 insert
