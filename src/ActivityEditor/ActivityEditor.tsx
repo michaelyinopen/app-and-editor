@@ -6,10 +6,6 @@ import {
 } from "react"
 import { nanoid } from 'nanoid'
 import { Link, useHistory, Prompt } from 'react-router-dom'
-import {
-  createSingleActivityIsLoadingSelector,
-  getActivityTakingThunkAction
-} from "../getActivityTakingThunkAction"
 import { useAppDispatch, useAppSelector } from "../store"
 import {
   ActivityFromStore,
@@ -29,9 +25,22 @@ import {
 } from "./store/store"
 import { ActivityEditorForm } from './ActivityEditorForm'
 import { EditHistory } from "./EditHistory"
-import { createUpdateActivityIsLoadingSelector, updateActivityTakingThunkAction } from "../updateActivityTakingThunkAction"
-import { createActivityIsDeletingSelector, deleteActivityTakingThunkAction } from "../deleteActivityTakingThunkAction"
-import { createActivityTakingThunkAction, createCreateActivityIsLoadingSelector } from '../createActivityTakingThunkAction'
+import {
+  createSingleActivityIsLoadingSelector,
+  getActivityTakingThunkAction
+} from "../takingThunkActions/getActivityTakingThunkAction"
+import {
+  createUpdateActivityIsLoadingSelector,
+  updateActivityTakingThunkAction
+} from "../takingThunkActions/updateActivityTakingThunkAction"
+import {
+  createActivityIsDeletingSelector,
+  deleteActivityTakingThunkAction
+} from "../takingThunkActions/deleteActivityTakingThunkAction"
+import {
+  createActivityTakingThunkAction,
+  createCreateActivityIsLoadingSelector
+} from '../takingThunkActions/createActivityTakingThunkAction'
 import { addNotification } from "../store/actions"
 
 type ActivityEditorProps = {

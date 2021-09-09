@@ -1,7 +1,7 @@
-import { createIsLoadingSelector } from './redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from './store/store'
-import { deleteActivityApiAsync } from './api'
-import { deleteActivitySucceeded } from './store/actions'
+import { createIsLoadingSelector } from '../redux-taking-thunk'
+import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { deleteActivityApiAsync } from '../api'
+import { deleteActivitySucceeded } from '../store/actions'
 
 export const deleteActivityTakingThunkAction = (id: number): AppTakingThunkAction => ({
   name: `deleteActivity/${id}`,

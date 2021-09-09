@@ -1,7 +1,7 @@
-import { createIsLoadingSelector } from './redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from './store/store'
-import { getActivitiesSucceeded } from './store/actions'
-import { getActivitiesApiAsync } from './api'
+import { createIsLoadingSelector } from '../redux-taking-thunk'
+import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { getActivitiesSucceeded } from '../store/actions'
+import { getActivitiesApiAsync } from '../api'
 
 export const getActivitiesTakingThunkAction: AppTakingThunkAction = {
   name: 'getActivities',

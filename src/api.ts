@@ -23,11 +23,10 @@ export async function getActivitiesApiAsync() {
   return [true, responseBody]
 }
 
-export const getSingleActivityUrlTemplate = '/api/activities/{id}'
 export async function getSingleActivityApiAsync(id: number) {
-  const url = template.parse(getSingleActivityUrlTemplate).expand({ id })
   let responseBody
   try {
+    const url = template.parse('/api/activities/{id}').expand({ id })
     const response = await fetch(url)
     if (!response.ok) {
       return [false]
@@ -68,11 +67,10 @@ export type UpdateActivityResponseBody = {
   updatedActivity?: Activity
 }
 
-export const updateActivityUrlTemplate = '/api/activities/{id}'
 export async function updateActivityApiAsync(id: number, activity: Activity) {
-  const url = template.parse(updateActivityUrlTemplate).expand({ id })
   let responseBody: UpdateActivityResponseBody
   try {
+    const url = template.parse('/api/activities/{id}').expand({ id })
     const init = {
       method: "PUT",
       headers: {
@@ -92,10 +90,9 @@ export async function updateActivityApiAsync(id: number, activity: Activity) {
   return [true, responseBody]
 }
 
-export const deleteActivityUrlTemplate = '/api/activities/{id}'
 export async function deleteActivityApiAsync(id: number) {
-  const url = template.parse(deleteActivityUrlTemplate).expand({ id })
   try {
+    const url = template.parse('/api/activities/{id}').expand({ id })
     const init = {
       method: "DELETE"
     }

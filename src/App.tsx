@@ -1,40 +1,16 @@
-import { BrowserRouter, Switch, Route, Link, Redirect } from 'react-router-dom'
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom'
 import { Home } from './Home'
 import { Activities } from './Activities'
 import { ActivityEditor } from './ActivityEditor'
 import { PageNotFound } from './PageNotFound'
-import { resetServer } from './api'
+import { AppHeader } from './AppHeader'
 import { Notifications } from './Notifications'
 
 function App() {
   return (
-    <div style={{ margin: 16 }}>
-      <BrowserRouter>
-        <div>
-          <Link to='/home'>Home</Link>
-          {' '}
-          <Link to='/activities' >Activities</Link>
-          {process.env.REACT_APP_MSW_MOCK
-            ? (
-              <div>
-                MSW mock, can only query, and cannot create or save<br />
-                use with server for all operations
-              </div>
-            )
-            : (
-              <div>
-                use with server, can perform all operations<br />
-                <button
-                  onClick={() => {
-                    resetServer()
-                  }}
-                >
-                  reset server
-                </button>
-              </div>
-            )
-          }
-        </div>
+    <BrowserRouter>
+      <div style={{ margin: 16 }}>
+        <AppHeader />
         <Switch>
           <Redirect exact from='/' to='/activities' />
           <Route exact path={'/home'} component={Home} />
@@ -58,8 +34,8 @@ function App() {
           <Route component={PageNotFound} />
         </Switch>
         <Notifications />
-      </BrowserRouter>
-    </div>
+      </div>
+    </BrowserRouter >
   );
 }
 

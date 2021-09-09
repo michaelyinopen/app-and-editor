@@ -1,27 +1,67 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom'
-import { deleteActivityTakingThunkAction } from './deleteActivityTakingThunkAction';
 import {
+  deleteActivityTakingThunkAction,
+  createActivityIsDeletingSelector,
+} from './takingThunkActions/deleteActivityTakingThunkAction';
+import {
+  getActivitiesTakingThunkAction,
   activitiesIsLoadingSelector,
-  getActivitiesTakingThunkAction
-} from './getActivitiesTakingThunkAction';
+} from './takingThunkActions/getActivitiesTakingThunkAction';
 import { useAppDispatch, useAppSelector } from "./store";
+import { addNotification } from './store/actions';
+
+const ActivityHeader = ({ id }) => {
+  const activity = useAppSelector(state => state.activities.entities[id])
+  const dispatch = useAppDispatch()
+  const isDeleting = useAppSelector(createActivityIsDeletingSelector(id))
+  if (!activity) {
+    return null
+  }
+  return (
+    <>
+      {activity.name}{' '}
+      <Link to={`/activities/${id}`}>View</Link>{' '}
+      <Link to={`/activities/${id}/edit`}>Edit</Link>{' '}
+      <button
+        onClick={() => {
+          dispatch(deleteActivityTakingThunkAction(id))
+            .then(result => {
+              if (result === true) {
+                //todo notify
+              }
+              if (result === false) {
+                //todo notify
+              }
+            })
+            .catch(() => {
+              //todo notify
+            })
+        }}
+      >
+        Delete
+      </button>
+      {isDeleting && <span> Deleting...</span>}
+    </ >
+  )
+}
 
 export const Activities = () => {
-  const activities = useAppSelector(state => state.activities.entities)
+  const activityIds = useAppSelector(state => state.activities.ids)
   const dispatch = useAppDispatch()
 
   const loadActivitiesCallback = useRef(() => {
     dispatch(getActivitiesTakingThunkAction)
       .then(result => {
         if (result === false) {
-          alert('get jobSets failed')
+          dispatch(addNotification('Get Activities Failed'))
         }
       })
       .catch(() => {
-        alert('get jobSets failed catch')
+        dispatch(addNotification('Get Activities Failed'))
       })
   }).current
+
   useEffect(() => {
     loadActivitiesCallback()
   }, [loadActivitiesCallback])
@@ -37,30 +77,9 @@ export const Activities = () => {
       </div>
       <div><Link to={`/activities/new`}>New</Link></div>
       <ol>
-        {Object.values(activities).map(a => (
-          <li key={a!.id}>
-            {a!.name}{' '}
-            <Link to={`/activities/${a!.id}`}>View</Link>{' '}
-            <Link to={`/activities/${a!.id}/edit`}>Edit</Link>{' '}
-            <button
-              onClick={() => {
-                dispatch(deleteActivityTakingThunkAction(a!.id))
-                  .then(result => {
-                    if (result === true) {
-                      //todo notify
-                    }
-                    if (result === false) {
-                      //todo notify
-                    }
-                  })
-                  .catch(() => {
-                    //todo notify
-                  })
-              }}
-            >
-              Delete
-            </button>
-            {/*deleting*/}
+        {activityIds.map(id => (
+          <li key={id}>
+            <ActivityHeader id={id} />
           </li>
         ))}
       </ol>
