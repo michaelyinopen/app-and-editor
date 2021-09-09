@@ -1,7 +1,6 @@
 import { createIsLoadingSelector } from '../redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { AppDispatch, AppTakingThunkAction, fetchedActivity } from '../store'
 import { getSingleActivityApiAsync } from '../api'
-import { getSingleActivitySucceeded } from '../store/actions'
 
 export const getActivityTakingThunkAction = (id: number): AppTakingThunkAction => ({
   name: `getActivity/${id}`,
@@ -9,7 +8,7 @@ export const getActivityTakingThunkAction = (id: number): AppTakingThunkAction =
   thunk: function* (dispatch: AppDispatch) {
     const getActivityResult: any = yield getSingleActivityApiAsync(id)
     if (getActivityResult[0] === true) {
-      dispatch(getSingleActivitySucceeded(getActivityResult[1]))
+      dispatch(fetchedActivity(getActivityResult[1]))
       return true
     } else {
       return false

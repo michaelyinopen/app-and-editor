@@ -3,12 +3,12 @@ import {
   EntityState
 } from '@reduxjs/toolkit'
 import {
-  deleteActivitySucceeded,
+  deletedActivity,
   getActivitiesSucceeded,
-  getSingleActivitySucceeded,
+  fetchedActivity,
 } from './actions'
 
-type ActivitiesState = EntityState<{
+export type ActivitiesState = EntityState<{
   id: number,
   name: string,
   versionToken: string,
@@ -25,9 +25,7 @@ const activitiesInitialState: ActivitiesState = {
 
 export const activitiesReducer = createReducer(activitiesInitialState, (builder) => {
   builder
-    .addCase(getActivitiesSucceeded, (state, action) => {
-      const { payload: { activityHeaders } } = action
-
+    .addCase(getActivitiesSucceeded, (state, { payload: { activityHeaders } }) => {
       const toRemoveIds = state.ids.filter(sId => !activityHeaders.some(ah => ah.id === sId))
       const hasRemoved = toRemoveIds.length > 0
       for (const removeId of toRemoveIds) {
@@ -56,14 +54,11 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
         }
       }
 
-      state.ids = hasCreated
+      state.ids = hasCreated || hasRemoved
         ? activityHeaders.map(eh => eh.id)
-        : hasRemoved
-          ? state.ids.filter((id) => id in state.entities)
-          : state.ids
+        : state.ids
     })
-    .addCase(getSingleActivitySucceeded, (state, action) => {
-      const { payload: activity } = action
+    .addCase(fetchedActivity, (state, { payload: activity }) => {
       const index = state.ids.findIndex(sId => sId === activity.id)
       if (index === -1) {
         state.ids.push(activity.id)
@@ -88,7 +83,7 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
         state.entities[activity.id]!.hasDetail = true
       }
     })
-    .addCase(deleteActivitySucceeded, (state, action) => {
+    .addCase(deletedActivity, (state, action) => {
       const { payload: id } = action
       const index = state.ids.findIndex(sId => sId === id)
       if (index !== -1) {

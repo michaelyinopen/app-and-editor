@@ -1,5 +1,8 @@
-import { useAppDispatch, useAppSelector } from "./store"
-import { clearNotifications } from "./store/actions"
+import {
+  useAppDispatch,
+  useAppSelector,
+  clearNotifications,
+} from "./store"
 import styles from './Notifications.module.css';
 
 export const Notifications = () => {

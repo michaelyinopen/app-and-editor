@@ -1,7 +1,6 @@
 import { createIsLoadingSelector } from '../redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { AppDispatch, AppTakingThunkAction, fetchedActivity } from '../store'
 import { updateActivityApiAsync, UpdateActivityResponseBody } from '../api'
-import { getSingleActivitySucceeded } from '../store/actions'
 import { Activity } from '../types'
 
 export type UpdateActivityTakingThunkActionResult = 'version condition failed' | 'not found' | 'failed' | 'success'
@@ -14,12 +13,12 @@ export const updateActivityTakingThunkAction = (id: number, activity: Activity):
     if (updateActivityResult[0] === true) {
       const updateActivityResponseBody: UpdateActivityResponseBody = updateActivityResult[1]
       if (updateActivityResponseBody.status === 'version condition failed') {
-        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.activity!))
+        dispatch(fetchedActivity(updateActivityResponseBody.activity!))
         return 'version condition failed'
       } else if (updateActivityResponseBody.status === 'not found') {
         return 'not found'
       } else {
-        dispatch(getSingleActivitySucceeded(updateActivityResponseBody.updatedActivity!))
+        dispatch(fetchedActivity(updateActivityResponseBody.updatedActivity!))
         return 'success'
       }
     } else {

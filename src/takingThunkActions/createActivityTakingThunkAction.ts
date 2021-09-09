@@ -1,7 +1,6 @@
 import { createIsLoadingSelector } from '../redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { AppDispatch, AppTakingThunkAction, fetchedActivity } from '../store'
 import { createActivityApiAsync } from '../api'
-import { getSingleActivitySucceeded } from '../store/actions'
 import { Activity } from '../types'
 
 export type ActivityCreation = {
@@ -18,7 +17,7 @@ export const createActivityTakingThunkAction = (activity: ActivityCreation, crea
     const createActivityResult: any = yield createActivityApiAsync(activity)
     if (createActivityResult[0] === true) {
       const createActivityResponseBody: Activity = createActivityResult[1]
-      dispatch(getSingleActivitySucceeded(createActivityResponseBody))
+      dispatch(fetchedActivity(createActivityResponseBody))
       return [true, createActivityResponseBody]
     } else {
       return [false, undefined]

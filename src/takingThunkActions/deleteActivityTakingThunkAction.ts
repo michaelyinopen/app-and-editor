@@ -1,7 +1,6 @@
 import { createIsLoadingSelector } from '../redux-taking-thunk'
-import type { AppDispatch, AppTakingThunkAction } from '../store/store'
+import { AppDispatch, AppTakingThunkAction, deletedActivity } from '../store'
 import { deleteActivityApiAsync } from '../api'
-import { deleteActivitySucceeded } from '../store/actions'
 
 export const deleteActivityTakingThunkAction = (id: number): AppTakingThunkAction => ({
   name: `deleteActivity/${id}`,
@@ -9,7 +8,7 @@ export const deleteActivityTakingThunkAction = (id: number): AppTakingThunkActio
   thunk: function* (dispatch: AppDispatch) {
     const deleteActivityResult: boolean = yield deleteActivityApiAsync(id)
     if (deleteActivityResult === true) {
-      dispatch(deleteActivitySucceeded(id))
+      dispatch(deletedActivity(id))
       return true
     } else {
       return false

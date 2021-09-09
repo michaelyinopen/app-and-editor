@@ -8,8 +8,11 @@ import {
   getActivitiesTakingThunkAction,
   activitiesIsLoadingSelector,
 } from './takingThunkActions/getActivitiesTakingThunkAction';
-import { useAppDispatch, useAppSelector } from "./store";
-import { addNotification } from './store/actions';
+import {
+  useAppDispatch,
+  useAppSelector,
+  addNotification,
+} from "./store";
 
 const ActivityHeader = ({ id }) => {
   const activity = useAppSelector(state => state.activities.entities[id])

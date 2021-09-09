@@ -6,7 +6,11 @@ import {
 } from "react"
 import { nanoid } from 'nanoid'
 import { Link, useHistory, Prompt } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from "../store"
+import {
+  useAppDispatch,
+  useAppSelector,
+  addNotification
+} from "../store"
 import {
   ActivityFromStore,
   failedToLoadActivity,
@@ -41,7 +45,6 @@ import {
   createActivityTakingThunkAction,
   createCreateActivityIsLoadingSelector
 } from '../takingThunkActions/createActivityTakingThunkAction'
-import { addNotification } from "../store/actions"
 
 type ActivityEditorProps = {
   id: number | undefined

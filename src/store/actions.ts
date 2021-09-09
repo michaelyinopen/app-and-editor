@@ -10,10 +10,9 @@ export const getActivitiesSucceeded = createAction(
   })
 )
 
-export const getSingleActivitySucceeded = createAction<Activity>('getSingleActivitySucceeded')
-// todo create another action for version condition failed, and updated
+export const fetchedActivity = createAction<Activity>('fetchedActivity')
 
-export const deleteActivitySucceeded = createAction<number>('deleteActivitySucceeded')
+export const deletedActivity = createAction<number>('deletedActivity')
 
 // notifications
 export const addNotification = createAction<string>('addNotification')
