@@ -53,31 +53,3 @@ This project's implementation is also "last save wins", but the experience is im
 ### Example: merge changes with conflict resolution(apply/unapply + manual edit)
 
 ### Example: discard local changes
-
-### Version Token
-Token for a specific version. If data is saved, version token changes, therefore can detect change by comparing the version tokens.
-
-### Field Change
-
-### Operation
-Field change (might be merged, e.g.typing)
-
-### Step
-
-### Conflict
-
-//////////////////////////////////
-
-
-### Special Steps
-insert
-delete
-re-order
-
-### Step
-
-### Merge steps
-reorder might merge multiple operations
-
-### Operational Transformation
-before and after states -> operations

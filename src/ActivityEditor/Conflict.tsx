@@ -29,9 +29,9 @@ export const Conflict = ({
   const undone = stepIndex > currentStepIndex
   const hasLaterChangesOnSamePath = steps
     .slice(stepIndex + 1, currentStepIndex + 1)
-    .flatMap(s => s.operations
+    .flatMap(s => s.fieldChanges
       .concat(s.conflicts?.map(c => c.fieldChange) ?? [])
-      .concat(s.reverseCurrentOperations ?? [])
+      .concat(s.reverseCurrentFieldChanges ?? [])
     )
     .some(op => op.path === conflict.fieldChange.path)
   const disabled = undone || hasLaterChangesOnSamePath

@@ -68,7 +68,7 @@ const activityEditorInitialState: ActivityEditorState = {
     where: '',
     howMuch: undefined,
   },
-  steps: [{ name: 'initial', operations: [] }],
+  steps: [{ name: 'initial', fieldChanges: [] }],
   currentStepIndex: 0,
 }
 
