@@ -27,4 +27,4 @@ export const updateActivityTakingThunkAction = (id: number, activity: Activity):
   }
 })
 
-export const createUpdateActivityIsLoadingSelector = (id: number) => createIsLoadingSelector(`updateActivity/${id}`)
+export const createUpdateActivityIsLoadingSelector = (id) => createIsLoadingSelector(`updateActivity/${id}`)

@@ -9,8 +9,7 @@ import {
   useActivityEditorSelector
 } from "./store/store"
 
-
-export const ActivityEditorForm = ({ disabled }) => {
+export const ActivityEditorForm = () => {
   const editorDispatch = useActivityEditorDispatch()
   const name = useActivityEditorSelector(s => s.formData.name)
   const who = useActivityEditorSelector(s => s.formData.who)
@@ -18,8 +17,11 @@ export const ActivityEditorForm = ({ disabled }) => {
   const howMuch = useActivityEditorSelector(s => s.formData.howMuch)
 
   const hasDetail = useActivityEditorSelector(es => es.hasDetail)
-  const id = useActivityEditorSelector(es => es.id)
-  const isNew = id === undefined
+  const isNew = useActivityEditorSelector(es => es.id === undefined)
+  const isEdit = useActivityEditorSelector(es => es.isEdit)
+  const initialized = useActivityEditorSelector(es => es.initialized)
+
+  const disabled = !isNew && (!isEdit || !initialized)
   return (
     <form onSubmit={() => { }} >
       <fieldset disabled={disabled} >
@@ -49,11 +51,6 @@ export const ActivityEditorForm = ({ disabled }) => {
           </>
         }
       </fieldset>
-      {/* 
-      <fieldset {...(disabled ? { disabled: true } : {})}>
-        <input type="Submit">Save</input>
-      </fieldset>
-      */}
     </form>
   )
 }

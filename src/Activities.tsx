@@ -31,14 +31,14 @@ const ActivityHeader = ({ id }) => {
           dispatch(deleteActivityTakingThunkAction(id))
             .then(result => {
               if (result === true) {
-                //todo notify
+                dispatch(addNotification(`Deleted Activity #${id}`))
               }
               if (result === false) {
-                //todo notify
+                dispatch(addNotification(`Failed to deleted Activity #${id}`))
               }
             })
             .catch(() => {
-              //todo notify
+              dispatch(addNotification(`Failed to deleted Activity #${id}`))
             })
         }}
       >
