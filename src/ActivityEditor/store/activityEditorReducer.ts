@@ -28,7 +28,7 @@ import {
   CalculateRefreshedStep,
   redoStep,
   Step,
-  SwitchToDiscardLocalChange,
+  SwitchToDiscardLocalChanges,
   SwitchToMerge,
   undoStep
 } from './editHistory'
@@ -243,7 +243,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       }
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].mergeBehaviour = 'discard local changes'
-      state.formData = SwitchToDiscardLocalChange(state.steps[stepIndex], state.formData)
+      state.formData = SwitchToDiscardLocalChanges(state.steps[stepIndex], state.formData)
       for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
         step.saveStatus = undefined
       }
@@ -257,7 +257,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       }
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = true
-      state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
+      state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex], state.formData)
       for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
         step.saveStatus = undefined
       }
@@ -271,7 +271,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       }
       state.steps.splice(state.currentStepIndex + 1)
       state.steps[stepIndex].conflicts![conflictIndex].applied = false
-      state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex].fieldChange, state.formData)
+      state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex], state.formData)
       for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
         step.saveStatus = undefined
       }

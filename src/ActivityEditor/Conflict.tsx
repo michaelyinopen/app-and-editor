@@ -30,10 +30,11 @@ export const Conflict = ({
   const hasLaterChangesOnSamePath = steps
     .slice(stepIndex + 1, currentStepIndex + 1)
     .flatMap(s => s.fieldChanges
-      .concat(s.conflicts?.map(c => c.fieldChange) ?? [])
+      .concat(s.conflicts?.flatMap(c => c.fieldChanges) ?? [])
       .concat(s.reverseCurrentFieldChanges ?? [])
     )
-    .some(op => op.path === conflict.fieldChange.path)
+    .some(op => conflict.fieldChanges.some(c => c.path === op.path))
+  //todo some other matching mechanism
   const disabled = undone || hasLaterChangesOnSamePath
   return (
     <div>

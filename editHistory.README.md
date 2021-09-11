@@ -19,7 +19,6 @@ todo: remove
 
 //////////////////////////////////
 
-
 ## Special Steps
 insert
 delete
@@ -32,3 +31,44 @@ reorder might merge multiple operations
 
 ## Operational Transformation
 before and after states -> operations
+
+
+All Actions that chould change formData will create have editHistory middleware calculate step, except actions that could change the steps list, those are handles by ways other than middleware
+
+//////////////////////
+getFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[]
+mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[]
+calculateStepName(fieldChanges: FieldChange[]): string
+
+// middleware after each action that changes formData
+calculateSteps(
+  previousStep: Step,
+  previousFormData: FormData = defaultFormData,
+  currentFormData: FormData)
+  : Step[]
+
+// Manipulate formData
+undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined
+
+undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData
+
+redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined
+
+redoStep(step: Step, previousFormData: FormData): FormData
+
+SwitchToMerge(step: Step, currentFormData: FormData): FormData
+
+SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData
+
+applyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData
+
+unApplyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData
+
+// refresh
+ActivityToFormData(activity: ActivityWithDetailFromStore)
+
+CalculateRefreshedStep(
+  previousVersionFormData: FormData,
+  currentFormData: FormData,
+  storeActivity: ActivityWithDetailFromStore
+): Step | undefined

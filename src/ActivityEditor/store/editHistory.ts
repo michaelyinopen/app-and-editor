@@ -14,10 +14,9 @@ export type FieldChange = {
   newValue: any,
 }
 
-// todo conflict is more lika a step(has name and can have multiple field changes)
 export type Conflict = {
   name: string,
-  fieldChange: FieldChange,
+  fieldChanges: FieldChange[],
   applied: boolean,
 }
 
@@ -135,7 +134,7 @@ export function calculateSteps(
   }
 }
 
-//#region formData maipulation
+//#region formData manipulation
 function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
   return produce(formData, (draft) => {
     if (fieldChange.path === '/name') {
@@ -151,37 +150,6 @@ function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
       draft.howMuch = fieldChange.previousValue
     }
   })
-}
-
-export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
-  let formData = previousFormData
-  const allFieldChanges = step.mergeBehaviour === 'merge'
-    ? step.fieldChanges
-      .concat(
-        step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
-      )
-    : step.mergeBehaviour === 'discard local changes'
-      ? step.fieldChanges
-        .concat(
-          step.conflicts?.map(c => c.fieldChange) ?? []
-        )
-        .concat(
-          step.reverseCurrentFieldChanges ?? []
-        )
-      : step.fieldChanges
-  for (const fieldChange of allFieldChanges) {
-    if (isDraft(formData)) {
-      const undoResult = undoFieldChange(fieldChange, formData)
-      formData = typeof undoResult === 'undefined'
-        ? formData
-        : undoResult
-    } else {
-      formData = produce(formData, (draft) => {
-        return undoFieldChange(fieldChange, draft)
-      })
-    }
-  }
-  return formData
 }
 
 function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
@@ -201,42 +169,9 @@ function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
   })
 }
 
-export function redoStep(step: Step, previousFormData: FormData): FormData {
-  let formData = previousFormData
-  const allFieldChanges = step.mergeBehaviour === 'merge'
-    ? step.fieldChanges
-      .concat(
-        step.conflicts?.filter(c => c.applied).map(c => c.fieldChange) ?? []
-      )
-    : step.mergeBehaviour === 'discard local changes'
-      ? step.fieldChanges
-        .concat(
-          step.conflicts?.map(c => c.fieldChange) ?? []
-        )
-        .concat(
-          step.reverseCurrentFieldChanges ?? []
-        )
-      : step.fieldChanges
-  for (const fieldChange of allFieldChanges) {
-    if (isDraft(formData)) {
-      const redoResult = redoFieldChange(fieldChange, formData)
-      formData = typeof redoResult === 'undefined'
-        ? formData
-        : redoResult
-    } else {
-      formData = produce(formData, (draft) => {
-        return redoFieldChange(fieldChange, draft)
-      })
-    }
-  }
-  return formData
-}
-
-export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
-  let formData = currentFormData
-  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
-    .concat(step.reverseCurrentFieldChanges ?? [])
-  for (const fieldChange of allFieldChanges) {
+function undoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
+  let formData = sourceFormData
+  for (const fieldChange of fieldChanges) {
     if (isDraft(formData)) {
       const undoResult = undoFieldChange(fieldChange, formData)
       formData = typeof undoResult === 'undefined'
@@ -251,11 +186,9 @@ export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
   return formData
 }
 
-export function SwitchToDiscardLocalChange(step: Step, currentFormData: FormData): FormData {
-  let formData = currentFormData
-  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).map(c => c.fieldChange) ?? [])
-    .concat(step.reverseCurrentFieldChanges ?? [])
-  for (const fieldChange of allFieldChanges) {
+function redoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
+  let formData = sourceFormData
+  for (const fieldChange of fieldChanges) {
     if (isDraft(formData)) {
       const redoResult = redoFieldChange(fieldChange, formData)
       formData = typeof redoResult === 'undefined'
@@ -270,36 +203,60 @@ export function SwitchToDiscardLocalChange(step: Step, currentFormData: FormData
   return formData
 }
 
-export function applyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData {
-  let formData = currentFormData
-  const fieldChange = conflict
-  if (isDraft(formData)) {
-    const redoResult = redoFieldChange(fieldChange, formData)
-    formData = typeof redoResult === 'undefined'
-      ? formData
-      : redoResult
-  } else {
-    formData = produce(formData, (draft) => {
-      return redoFieldChange(fieldChange, draft)
-    })
-  }
-  return formData
+export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
+  const allFieldChanges = step.mergeBehaviour === 'merge'
+    ? step.fieldChanges
+      .concat(
+        step.conflicts?.filter(c => c.applied).flatMap(c => c.fieldChanges) ?? []
+      )
+    : step.mergeBehaviour === 'discard local changes'
+      ? step.fieldChanges
+        .concat(
+          step.conflicts?.flatMap(c => c.fieldChanges) ?? []
+        )
+        .concat(
+          step.reverseCurrentFieldChanges ?? []
+        )
+      : step.fieldChanges
+  return undoFieldChanges(allFieldChanges, previousFormData)
 }
 
-export function unApplyConflictToFromData(conflict: FieldChange, currentFormData: FormData): FormData {
-  let formData = currentFormData
-  const fieldChange = conflict
-  if (isDraft(formData)) {
-    const undoResult = undoFieldChange(fieldChange, formData)
-    formData = typeof undoResult === 'undefined'
-      ? formData
-      : undoResult
-  } else {
-    formData = produce(formData, (draft) => {
-      return undoFieldChange(fieldChange, draft)
-    })
-  }
-  return formData
+export function redoStep(step: Step, previousFormData: FormData): FormData {
+  const allFieldChanges = step.mergeBehaviour === 'merge'
+    ? step.fieldChanges
+      .concat(
+        step.conflicts?.filter(c => c.applied).flatMap(c => c.fieldChanges) ?? []
+      )
+    : step.mergeBehaviour === 'discard local changes'
+      ? step.fieldChanges
+        .concat(
+          step.conflicts?.flatMap(c => c.fieldChanges) ?? []
+        )
+        .concat(
+          step.reverseCurrentFieldChanges ?? []
+        )
+      : step.fieldChanges
+  return redoFieldChanges(allFieldChanges, previousFormData)
+}
+
+export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
+  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
+    .concat(step.reverseCurrentFieldChanges ?? [])
+  return undoFieldChanges(allFieldChanges, currentFormData)
+}
+
+export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
+  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
+    .concat(step.reverseCurrentFieldChanges ?? [])
+  return redoFieldChanges(allFieldChanges, currentFormData)
+}
+
+export function applyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+  return redoFieldChanges(conflict.fieldChanges, currentFormData)
+}
+
+export function unApplyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+  return undoFieldChanges(conflict.fieldChanges, currentFormData)
 }
 //#endregion formData maipulation
 
@@ -351,7 +308,7 @@ export function CalculateRefreshedStep(
     mergeBehaviour: 'merge',
     conflicts: conflictFieldChanges.map(c => ({
       name: calculateStepName([c]),
-      fieldChange: c,
+      fieldChanges: [c],
       applied: true
     })),
     reverseCurrentFieldChanges: reverseCurrentFieldChanges,
