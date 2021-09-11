@@ -26,7 +26,7 @@ export type Step = {
   versionToken?: string,
   mergeBehaviour?: 'merge' | 'discard local changes',
   conflicts?: Conflict[],
-  reverseCurrentFieldChanges?: FieldChange[],
+  reverseLocalFieldChanges?: FieldChange[],
   saveStatus?: 'saving' | 'saved',
 }
 
@@ -85,8 +85,7 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChange.path === '/howMuch') {
     return 'Edit how much'
   }
-  // should not reach here
-  return ''
+  throw new Error('Cannot determine step name')
 }
 
 export function calculateSteps(
@@ -215,7 +214,7 @@ export function undoStep(step: Step, previousFormData: FormData | Draft<FormData
           step.conflicts?.flatMap(c => c.fieldChanges) ?? []
         )
         .concat(
-          step.reverseCurrentFieldChanges ?? []
+          step.reverseLocalFieldChanges ?? []
         )
       : step.fieldChanges
   return undoFieldChanges(allFieldChanges, previousFormData)
@@ -233,7 +232,7 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
           step.conflicts?.flatMap(c => c.fieldChanges) ?? []
         )
         .concat(
-          step.reverseCurrentFieldChanges ?? []
+          step.reverseLocalFieldChanges ?? []
         )
       : step.fieldChanges
   return redoFieldChanges(allFieldChanges, previousFormData)
@@ -241,13 +240,13 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
 
 export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
   const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseCurrentFieldChanges ?? [])
+    .concat(step.reverseLocalFieldChanges ?? [])
   return undoFieldChanges(allFieldChanges, currentFormData)
 }
 
 export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
   const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseCurrentFieldChanges ?? [])
+    .concat(step.reverseLocalFieldChanges ?? [])
   return redoFieldChanges(allFieldChanges, currentFormData)
 }
 
@@ -282,7 +281,7 @@ export function CalculateRefreshedStep(
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: FieldChange[] = []
-  const reverseCurrentFieldChanges: FieldChange[] = []
+  const reverseLocalFieldChanges: FieldChange[] = []
 
   for (const change of storeVsCurrent) {
     if (!currentVsPreviousVersion.find(c => c.path === change.path)) {
@@ -295,7 +294,7 @@ export function CalculateRefreshedStep(
     }
     else {
       // only current changed
-      reverseCurrentFieldChanges.push(change)
+      reverseLocalFieldChanges.push(change)
     }
   }
   if (nonConflictFieldChanges.length === 0 && conflictFieldChanges.length === 0) {
@@ -311,6 +310,6 @@ export function CalculateRefreshedStep(
       fieldChanges: [c],
       applied: true
     })),
-    reverseCurrentFieldChanges: reverseCurrentFieldChanges,
+    reverseLocalFieldChanges,
   }
 }

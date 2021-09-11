@@ -31,7 +31,7 @@ export const Conflict = ({
     .slice(stepIndex + 1, currentStepIndex + 1)
     .flatMap(s => s.fieldChanges
       .concat(s.conflicts?.flatMap(c => c.fieldChanges) ?? [])
-      .concat(s.reverseCurrentFieldChanges ?? [])
+      .concat(s.reverseLocalFieldChanges ?? [])
     )
     .some(op => conflict.fieldChanges.some(c => c.path === op.path))
   //todo some other matching mechanism
