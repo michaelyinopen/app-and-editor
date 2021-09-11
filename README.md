@@ -37,7 +37,7 @@ Detect changes using `versionToken`, that updates everytime the data is saved.
 Merge changes, manully resolve conflicts, and save again.
 
 ### Comparison: block saving
-Block saving if data was updated by someone else would lose all local changes.
+Block saving if data was updated by someone else, would lose all local changes.
 
 ### Comparison: naive last save wins
 If any save just overrides other user's changes, user might miss important changes.

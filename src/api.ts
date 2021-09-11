@@ -16,8 +16,7 @@ export async function getActivitiesApiAsync() {
     }
     responseBody = await response.json()
   }
-  catch (e) {
-    alert(e)
+  catch {
     return [false]
   }
   return [true, responseBody]
@@ -33,7 +32,7 @@ export async function getSingleActivityApiAsync(id: number) {
     }
     responseBody = await response.json()
   }
-  catch (e) {
+  catch {
     return [false]
   }
   return [true, responseBody]
@@ -55,7 +54,7 @@ export async function createActivityApiAsync(activity: Partial<Activity>) {
     }
     responseBody = await response.json()
   }
-  catch (e) {
+  catch {
     return [false]
   }
   return [true, responseBody]
@@ -84,7 +83,7 @@ export async function updateActivityApiAsync(id: number, activity: Activity) {
     }
     responseBody = await response.json()
   }
-  catch (e) {
+  catch {
     return [false]
   }
   return [true, responseBody]
@@ -101,7 +100,7 @@ export async function deleteActivityApiAsync(id: number) {
       return false
     }
   }
-  catch (e) {
+  catch {
     return false
   }
   return true
