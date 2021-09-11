@@ -271,7 +271,8 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
 export function CalculateRefreshedStep(
   previousVersionFormData: FormData,
   currentFormData: FormData,
-  storeActivity: ActivityWithDetailFromStore
+  storeActivity: ActivityWithDetailFromStore,
+  discardLocalChanges: boolean
 ): Step | undefined {
   const storeFormData = ActivityToFormData(storeActivity)
 
@@ -304,7 +305,7 @@ export function CalculateRefreshedStep(
     name: 'Refreshed',
     fieldChanges: nonConflictFieldChanges,
     versionToken: storeActivity.versionToken,
-    mergeBehaviour: 'merge',
+    mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
     conflicts: conflictFieldChanges.map(c => ({
       name: calculateStepName([c]),
       fieldChanges: [c],

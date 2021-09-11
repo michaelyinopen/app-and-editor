@@ -128,10 +128,12 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           || !activity.hasDetail) {
           return
         }
+        const discardLocalChanges = !state.isEdit
         const refreshedStep = CalculateRefreshedStep(
           state.versions[state.versions.length - 1].formData,
           state.formData,
-          activity
+          activity,
+          discardLocalChanges
         )
         if (refreshedStep) {
           state.formData = redoStep(refreshedStep, state.formData)
