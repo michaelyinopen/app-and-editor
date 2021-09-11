@@ -21,21 +21,21 @@ If step has `VersionToken`, the step is a "Refreshed" step. `mergeBehaviour` can
 
 When `mergeBehaviour` is `merge`, `fieldChanges` and `conflicts` both represents server-side changes merged to the current form data. `fieldChanges` contains fields that are changed only in the server.`conflicts` contains fields that are changed in the server and locally.
 
-When `mergeBehaviour` is `discard local changes`, all `conflicts` are applied and `reverseCurrentFieldChanges` are also applied. The result formData will be the server-side's formData.
+When `mergeBehaviour` is `discard local changes`, all `conflicts` are applied and `reverseLocalFieldChanges` are also applied. The result formData will be the server-side's formData.
 
 `saveStatus` shows that the formData at that step is saved by the user, and that step will not merge with later changes. `saveStatus` is not reliable, and is intended only for giving the user a hint.
 
 ## Conflict
-A conflict contsins a name, similar to step name. It contains one or more field changes. When the `mergeBehaviour` is `merge`, the user can choose to apply or unapply the conflict with a checkbox. Apply a conflict means take server's version of the data.
+A conflict contsins a name, similar to step name. It contains one or more field changes. When the `mergeBehaviour` is `merge`, the user can choose to apply or unapply the conflict with a checkbox. Apply a conflict means take server's version of the data, unapply means take the local version.
 
 When the field(or related fields) are edited after the "Refreshed" step, the option to apply or unapply a conflict will be disabled.
 
+//////////////////////////////
 ## Special Steps
 insert
 delete
 re-order
 
-## Step
 
 ## Operational Transformation
 before and after states -> operations

@@ -21,13 +21,13 @@ The situation of concern is a form that displays information, while allowing use
 Features beyond inputting data:
 
 - load data\
-  the form loads data from a server
+  the form loads data from a server.
 - read-only mode\
-  the user might want to view only
+  the user might want to view only.
 - edit history\
   allow the users to undo or redo. (Does not save versions on the server)
 - multiple users editing at the same time\
-  when the user saves, detect if the data was changed by other users and have means to resolve
+  when the user saves, detect if the data was changed by other users and have means to resolve conflicts.
 
 Note: does not include real-time auto-saving or real-time collaboration.
 
@@ -53,3 +53,11 @@ This project's implementation is also "last save wins", but the experience is im
 ### Example: merge changes with conflict resolution(apply/unapply + manual edit)
 
 ### Example: discard local changes
+
+## Specialized form solution
+I did no attempt to make a generic form solution.
+
+E.g. hard-code the path of each field is much easier than calculating the paths from an unknown JSON object.
+
+// todo lifecycle flow of refreshed
+// todo lifecycle flow of create
