@@ -9,7 +9,7 @@ import { Notifications } from './Notifications'
 function App() {
   return (
     <BrowserRouter>
-      <div style={{ margin: 16 }}>
+      <div style={{ margin: 16, marginBottom: 50 }}>
         <AppHeader />
         <Switch>
           <Redirect exact from='/' to='/activities' />

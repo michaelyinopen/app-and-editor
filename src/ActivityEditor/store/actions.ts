@@ -54,8 +54,8 @@ export const addRide = createAction(
     }
   })
 )
-export const updateRideDescription = createAction(
-  'updateRideDescription',
+export const setRideDescription = createAction(
+  'setRideDescription',
   (id: string, value: string) => ({
     payload: {
       id,
@@ -64,8 +64,8 @@ export const updateRideDescription = createAction(
   })
 )
 // export const moveRide = createAction<undefined | number>('setHowMuch') //todo
-export const deleteRide = createAction(
-  'deleteRide',
+export const removeRide = createAction(
+  'removeRide',
   (id: string) => ({
     payload: {
       id

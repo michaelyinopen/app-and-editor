@@ -3,19 +3,21 @@ import { createStore, applyMiddleware } from 'redux'
 import {
   Provider,
   createDispatchHook,
-  createSelectorHook
+  createSelectorHook,
+  TypedUseSelectorHook
 } from 'react-redux'
 import { activityEditorReducer } from './activityEditorReducer'
 import { editHistoryMiddleware } from './editHistoryMiddleware'
 
 const activityEditorContext = React.createContext<any>(null)
 
+export type ActivityEditorState = ReturnType<typeof activityEditorStore.getState>
+
 export const useActivityEditorDispatch = createDispatchHook(activityEditorContext)
-export const useActivityEditorSelector = createSelectorHook(activityEditorContext)
+export const useActivityEditorSelector: TypedUseSelectorHook<ActivityEditorState>
+  = createSelectorHook(activityEditorContext)
 
 const activityEditorStore = createStore(activityEditorReducer, applyMiddleware(editHistoryMiddleware))
-
-export type ActivityEditorState = ReturnType<typeof activityEditorStore.getState>
 
 export function ActivityEditorProvider({ children }) {
   return (

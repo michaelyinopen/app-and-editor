@@ -27,6 +27,7 @@ export const Conflict = ({
   const steps: StepType[] = useActivityEditorSelector(es => es.steps)
 
   const undone = stepIndex > currentStepIndex
+  // memo step? // lodash with weak map, closure capture conflict, useRef
   const hasLaterChangesOnSamePath = steps
     .slice(stepIndex + 1, currentStepIndex + 1)
     .flatMap(s => s.fieldChanges

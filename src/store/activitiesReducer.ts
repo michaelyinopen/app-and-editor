@@ -75,13 +75,11 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
           person: activity.person,
           place: activity.place,
           cost: activity.cost,
-          rides: {
-            ...activity.rides.map(r => ({
-              id: r.id,
-              description: r.description,
-              sequence: r.sequence
-            }))
-          },
+          rides: activity.rides.map(r => ({
+            id: r.id,
+            description: r.description,
+            sequence: r.sequence
+          })),
           hasDetail: true,
         }
         state.entities[activity.id] = newEntity
@@ -93,13 +91,11 @@ export const activitiesReducer = createReducer(activitiesInitialState, (builder)
         state.entities[activity.id]!.person = activity.person
         state.entities[activity.id]!.place = activity.place
         state.entities[activity.id]!.cost = activity.cost
-        state.entities[activity.id]!.rides = {
-          ...activity.rides.map(r => ({
-            id: r.id,
-            description: r.description,
-            sequence: r.sequence
-          }))
-        }
+        state.entities[activity.id]!.rides = activity.rides.map(r => ({
+          id: r.id,
+          description: r.description,
+          sequence: r.sequence
+        }))
         state.entities[activity.id]!.hasDetail = true
       }
     })

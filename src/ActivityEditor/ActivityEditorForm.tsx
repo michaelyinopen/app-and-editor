@@ -1,3 +1,4 @@
+import { RideSection } from "./RideSection"
 import {
   setHowMuch,
   setName,
@@ -47,7 +48,7 @@ export const ActivityEditorForm = () => {
                 editorDispatch(setHowMuch(finalValue))
               }}
             />
-            <br />
+            <RideSection />
           </>
         }
       </fieldset>

@@ -21,6 +21,9 @@ import {
   unApplyConflict,
   savingStep,
   savedStep,
+  addRide,
+  setRideDescription,
+  removeRide,
 } from './actions'
 import {
   unApplyConflictToFromData,
@@ -179,6 +182,28 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(setHowMuch, (state, { payload }) => {
       state.formData.howMuch = payload
+    })
+    .addCase(addRide, (state, { payload: { id } }) => {
+      // always the last sequence
+      const sequence = Object.values(state.formData.rides).length + 1
+      state.formData.rides[id] = {
+        id,
+        description: '',
+        sequence
+      }
+    })
+    .addCase(setRideDescription, (state, { payload: { id, value } }) => {
+      state.formData.rides[id].description = value
+    })
+    .addCase(removeRide, (state, { payload: { id } }) => {
+      const removedSequence = state.formData.rides[id].sequence
+      delete state.formData.rides[id]
+      // shift sequences of other rides
+      for (const ride of Object.values(state.formData.rides)) {
+        if (ride.sequence > removedSequence) {
+          ride.sequence = ride.sequence - 1
+        }
+      }
     })
     .addCase(replaceLastStep, (state, { payload }) => {
       state.steps.splice(state.currentStepIndex)

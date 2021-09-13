@@ -157,7 +157,8 @@ const Save = () => {
             name: formData.name,
             person: formData.who,
             place: formData.where,
-            cost: formData.howMuch,
+            cost: formData.howMuch!,
+            rides: Object.values(formData.rides),
             versionToken,
           }
           editorDispatch(savingStep(currentStepIndex, true))
@@ -225,7 +226,8 @@ const Create = () => {
             name: formData.name,
             person: formData.who,
             place: formData.where,
-            cost: formData.howMuch,
+            cost: formData.howMuch!,
+            rides: Object.values(formData.rides),
           }
           editorDispatch(savingStep(currentStepIndex, true))
           dispatch(createActivityTakingThunkAction(activity, creationToken))

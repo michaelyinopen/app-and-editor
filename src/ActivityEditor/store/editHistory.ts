@@ -45,6 +45,10 @@ const defaultFormData = {
   rides: {},
 }
 
+function numberOfSlashes(value: string): number {
+  return [...value].filter(c => c === '/').length
+}
+
 function getFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
   if (previousFormData === currentFormData) {
     return []
@@ -62,11 +66,53 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
   if (previousFormData.howMuch !== currentFormData.howMuch) {
     fieldChanges.push({ path: '/howMuch', previousValue: previousFormData.howMuch, newValue: currentFormData.howMuch })
   }
+
+  function getRidesFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
+    const rideFieldChanges: FieldChange[] = []
+    const previousRideKeys = Object.keys(previousFormData.rides)
+    const currentRideKeys = Object.keys(currentFormData.rides)
+
+    const createdRideKeys = currentRideKeys.filter(ck => !previousRideKeys.includes(ck))
+    for (const createdRideKey of createdRideKeys) {
+      rideFieldChanges.push({
+        path: `/rides/${createdRideKey}`,
+        previousValue: undefined,
+        newValue: currentFormData.rides[createdRideKey]
+      })
+    }
+
+    const removedRideKeys = previousRideKeys.filter(pk => !currentRideKeys.includes(pk))
+    for (const removedRideKey of removedRideKeys) {
+      rideFieldChanges.push({
+        path: `/rides/${removedRideKey}`,
+        previousValue: previousFormData.rides[removedRideKey],
+        newValue: undefined
+      })
+    }
+
+    const commonRideKeys = currentRideKeys.filter(ck => previousRideKeys.includes(ck))
+    for (const commonRideKey of commonRideKeys) {
+      const previousRide = previousFormData.rides[commonRideKey]
+      const currentRide = currentFormData.rides[commonRideKey]
+      if (previousRide.description !== currentRide.description) {
+        rideFieldChanges.push({
+          path: `/rides/${commonRideKey}/description`,
+          previousValue: previousRide.description,
+          newValue: currentRide.description
+        })
+      }
+      // do not care about sequence for now
+    }
+    return rideFieldChanges
+  }
+  fieldChanges.push(...getRidesFieldChanges(previousFormData, currentFormData))
+
   return fieldChanges
 }
 
 function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
   // assumes single field change step
+  // add/delete rides cannot use reference equal of values
   return (a.path === b.path)
     ? a.previousValue === b.newValue
       ? [] // merged resulting in no-op
@@ -81,18 +127,29 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChanges.length > 1) {
     return 'Multiple edits'
   }
-  const fieldChange = fieldChanges[0] // assumes one step only has one field change
-  if (fieldChange.path === '/name') {
+  const { path, previousValue, newValue } = fieldChanges[0] // assumes one step only has one field change
+  if (path === '/name') {
     return 'Edit name'
   }
-  if (fieldChange.path === '/who') {
+  if (path === '/who') {
     return 'Edit who'
   }
-  if (fieldChange.path === '/where') {
+  if (path === '/where') {
     return 'Edit where'
   }
-  if (fieldChange.path === '/howMuch') {
+  if (path === '/howMuch') {
     return 'Edit how much'
+  }
+  if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
+    if (previousValue === undefined && newValue !== undefined) {
+      return 'Add ride'
+    }
+    if (previousValue !== undefined && newValue === undefined) {
+      return 'Remove ride'
+    }
+  }
+  if (path.startsWith('/rides/') && path.endsWith('description')) {
+    return 'Edit ride description'
   }
   throw new Error('Cannot determine step name')
 }
@@ -144,35 +201,64 @@ export function calculateSteps(
 
 //#region formData manipulation
 function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
+  const { path, previousValue } = fieldChange
   return produce(formData, (draft) => {
-    if (fieldChange.path === '/name') {
-      draft.name = fieldChange.previousValue
+    if (path === '/name') {
+      draft.name = previousValue
     }
-    else if (fieldChange.path === '/who') {
-      draft.who = fieldChange.previousValue
+    else if (path === '/who') {
+      draft.who = previousValue
     }
-    else if (fieldChange.path === '/where') {
-      draft.where = fieldChange.previousValue
+    else if (path === '/where') {
+      draft.where = previousValue
     }
-    else if (fieldChange.path === '/howMuch') {
-      draft.howMuch = fieldChange.previousValue
+    else if (path === '/howMuch') {
+      draft.howMuch = previousValue
+    }
+    else if (path === '/howMuch') {
+      draft.howMuch = previousValue
+    }
+    else if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
+      const rideId = path.substring('/rides/'.length)
+      if (previousValue === undefined) {
+        delete draft.rides[rideId]
+      } else {
+        draft.rides[rideId] = previousValue
+      }
+    }
+    else if (path.startsWith('/rides/') && path.endsWith('description')) {
+      const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
+      draft.rides[rideId].description = previousValue
     }
   })
 }
 
 function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
+  const { path, newValue } = fieldChange
   return produce(formData, (draft) => {
-    if (fieldChange.path === '/name') {
-      draft.name = fieldChange.newValue
+    if (path === '/name') {
+      draft.name = newValue
     }
-    else if (fieldChange.path === '/who') {
-      draft.who = fieldChange.newValue
+    else if (path === '/who') {
+      draft.who = newValue
     }
-    else if (fieldChange.path === '/where') {
-      draft.where = fieldChange.newValue
+    else if (path === '/where') {
+      draft.where = newValue
     }
-    else if (fieldChange.path === '/howMuch') {
-      draft.howMuch = fieldChange.newValue
+    else if (path === '/howMuch') {
+      draft.howMuch = newValue
+    }
+    else if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
+      const rideId = path.substring('/rides/'.length)
+      if (newValue === undefined) {
+        delete draft.rides[rideId]
+      } else {
+        draft.rides[rideId] = newValue
+      }
+    }
+    else if (path.startsWith('/rides/') && path.endsWith('description')) {
+      const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
+      draft.rides[rideId].description = newValue
     }
   })
 }
