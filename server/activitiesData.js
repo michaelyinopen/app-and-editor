@@ -7,6 +7,18 @@ const initialActivity = {
     person: 'some person',
     place: 'some place',
     cost: 99,
+    rides: [
+      {
+        id: '5e3960cc-50d4-428b-ab82-bcae8d698d40',
+        description: 'red car',
+        sequence: 1
+      },
+      {
+        id: '79d89f69-f953-4228-b68b-9dfff4ef2d93',
+        description: 'ferry',
+        sequence: 1
+      },
+    ],
     versionToken: '1',
   },
   2: {
@@ -15,6 +27,7 @@ const initialActivity = {
     person: 'snail',
     place: 'leaf',
     cost: 8,
+    rides: [],
     versionToken: '1',
   },
   3: {
@@ -23,6 +36,7 @@ const initialActivity = {
     person: 'resolver',
     place: 'happy',
     cost: 3838,
+    rides: [],
     versionToken: '1',
   },
   4: {
@@ -31,6 +45,7 @@ const initialActivity = {
     person: 'chance',
     place: 'casino',
     cost: Math.floor(activityFourUpdateMarker / 3) + 1,
+    rides: [],
     versionToken: (Math.floor(activityFourUpdateMarker / 3) + 1).toString(),
   }
 }

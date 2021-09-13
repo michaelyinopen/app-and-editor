@@ -38,6 +38,13 @@ type FormDataState = {
   who: string,
   where: string,
   howMuch?: number,
+  rides: {
+    [id: string]: {
+      id: string,
+      description: string,
+      sequence: number
+    }
+  },
 }
 
 type ActivityEditorState = {
@@ -67,6 +74,7 @@ const activityEditorInitialState: ActivityEditorState = {
     who: '',
     where: '',
     howMuch: undefined,
+    rides: {},
   },
   steps: [{ name: 'initial', fieldChanges: [] }],
   currentStepIndex: 0,
@@ -103,6 +111,9 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         state.formData.howMuch = activity && activity.hasDetail
           ? activity.cost
           : activityEditorInitialState.formData.howMuch
+        state.formData.rides = activity && activity.hasDetail
+          ? Object.fromEntries(activity.rides.map(r => [r.id, r]))
+          : activityEditorInitialState.formData.rides
 
         if (loaded) {
           // if loaded, it is garunteed that (activity && activity.hasDetail) === true
@@ -116,6 +127,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
                 who: activityWithDetail.person,
                 where: activityWithDetail.place,
                 howMuch: activityWithDetail.cost,
+                rides: Object.fromEntries(activityWithDetail.rides.map(r => [r.id, r]))
               }
             }
           ]
@@ -151,6 +163,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
             who: activity.person,
             where: activity.place,
             howMuch: activity.cost,
+            rides: Object.fromEntries(activity.rides.map(r => [r.id, r]))
           }
         })
       }

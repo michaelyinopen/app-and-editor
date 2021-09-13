@@ -6,6 +6,13 @@ export type FormData = {
   who: string,
   where: string,
   howMuch?: number,
+  rides: {
+    [id: string]: {
+      id: string,
+      description: string,
+      sequence: number
+    }
+  }
 }
 
 export type FieldChange = {
@@ -35,6 +42,7 @@ const defaultFormData = {
   who: '',
   where: '',
   howMuch: undefined,
+  rides: {},
 }
 
 function getFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
@@ -58,6 +66,7 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
 }
 
 function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
+  // assumes single field change step
   return (a.path === b.path)
     ? a.previousValue === b.newValue
       ? [] // merged resulting in no-op
@@ -265,6 +274,7 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
     who: activity.person,
     where: activity.place,
     howMuch: activity.cost,
+    rides: Object.fromEntries(activity.rides.map(r => [r.id, r]))
   }
 }
 
