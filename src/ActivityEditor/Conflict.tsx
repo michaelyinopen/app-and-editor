@@ -1,6 +1,10 @@
+import { useMemo } from 'react'
+import memoize from 'lodash/memoize'
 import {
   Step as StepType,
-  Conflict as ConflictType
+  Conflict as ConflictType,
+  Step,
+  conflictHasRelatedChanges
 } from './store/editHistory'
 import {
   useActivityEditorDispatch,
@@ -27,16 +31,32 @@ export const Conflict = ({
   const steps: StepType[] = useActivityEditorSelector(es => es.steps)
 
   const undone = stepIndex > currentStepIndex
-  // memo step? // lodash with weak map, closure capture conflict, useRef
-  const hasLaterChangesOnSamePath = steps
-    .slice(stepIndex + 1, currentStepIndex + 1)
-    .flatMap(s => s.fieldChanges
-      .concat(s.conflicts?.flatMap(c => c.fieldChanges) ?? [])
-      .concat(s.reverseLocalFieldChanges ?? [])
-    )
-    .some(op => conflict.fieldChanges.some(c => c.path === op.path))
-  //todo some other matching mechanism
-  const disabled = undone || hasLaterChangesOnSamePath
+
+  const hasRelatedChangesWithStepMemoize = useMemo(
+    () => {
+      const hasRelatedChangesWithStep = (step: Step) => {
+        return conflictHasRelatedChanges(conflict, step)
+      }
+      const memoized = memoize(hasRelatedChangesWithStep)
+      memoized.cache = new WeakMap()
+      return memoized
+    },
+    [conflict]
+  )
+
+  const hasRelatedChanges = useMemo(
+    () => {
+      for (const step of steps.slice(stepIndex + 1, currentStepIndex + 1)) {
+        const stepResult = hasRelatedChangesWithStepMemoize(step)
+        if (stepResult) {
+          return true
+        }
+      }
+      return false
+    },
+    [hasRelatedChangesWithStepMemoize, steps, stepIndex, currentStepIndex]
+  )
+  const disabled = undone || hasRelatedChanges
   return (
     <div>
       <input

@@ -30,7 +30,7 @@ const Ride = ({ id }) => {
   const editorDispatch = useActivityEditorDispatch()
   const ride = useActivityEditorSelector(es => es.formData.rides[id])
   return (
-    <div>
+    <div style={{ borderBottomStyle: 'dashed' }}>
       <label htmlFor={`ride-description-${id}`}>description:</label>
       <br />
       <input

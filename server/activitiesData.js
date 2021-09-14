@@ -16,7 +16,7 @@ const initialActivity = {
       {
         id: '79d89f69-f953-4228-b68b-9dfff4ef2d93',
         description: 'ferry',
-        sequence: 1
+        sequence: 2
       },
     ],
     versionToken: '1',

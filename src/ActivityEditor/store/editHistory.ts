@@ -120,6 +120,59 @@ function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
     : [a, b] // not merged
 }
 
+// isItem means non-property change, means create or delete
+function getRideId(path: string): { rideId: string | undefined, isItem: boolean } {
+  if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
+    const rideId = path.substring('/rides/'.length)
+    return {
+      rideId,
+      isItem: true
+    }
+  }
+  else if (path.startsWith('/rides/') && path.endsWith('description')) {
+    const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
+    return {
+      rideId,
+      isItem: false
+    }
+  }
+  return {
+    rideId: undefined,
+    isItem: false
+  }
+}
+
+function hasRelatedChanges(
+  aChanges: FieldChange[],
+  bChanges: FieldChange[]
+): boolean {
+  for (const aChange of aChanges) {
+    let { rideId: aRideId, isItem: isAItem } = getRideId(aChange.path)
+
+    for (const bChange of bChanges) {
+      if (aChange.path === bChange.path) {
+        return true
+      }
+      if (aRideId) {
+        let { rideId: bRideId, isItem: isBItem } = getRideId(bChange.path)
+        if (aRideId === bRideId && (isAItem || isBItem)) {
+          // same ride and one change is item change(create or delete)
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
+export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
+  const stepFieldChanges = step.fieldChanges
+    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
+    .concat(step.reverseLocalFieldChanges ?? [])
+
+  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
+}
+
 function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChanges.length === 0) {
     return '';
@@ -381,11 +434,11 @@ export function CalculateRefreshedStep(
   const reverseLocalFieldChanges: FieldChange[] = []
 
   for (const change of storeVsCurrent) {
-    if (!currentVsPreviousVersion.find(c => c.path === change.path)) {
+    if (!hasRelatedChanges([change], currentVsPreviousVersion)) {
       // store activity changed and there are no current edits
       nonConflictFieldChanges.push(change)
     }
-    else if (storeVsPreviousVersion.find(c => c.path === change.path)) {
+    else if (hasRelatedChanges([change], storeVsPreviousVersion)) {
       // store activity and current both changed
       conflictFieldChanges.push(change)
     }
