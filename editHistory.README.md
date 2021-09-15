@@ -31,6 +31,12 @@ A conflict contsins a name, similar to step name. It contains one or more field 
 When the field(or related fields) are edited after the "Refreshed" step, the option to apply or unapply a conflict will be disabled.
 
 //////////////////////////////
+## Grouped
+Field changes that count as the same step, only have sequence
+
+## Related Change
+conflict will be disabled when there is a related change
+
 ## Special Steps
 insert
 delete

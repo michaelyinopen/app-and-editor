@@ -214,7 +214,7 @@ export function calculateSteps(
   : Step[] {
   const fieldChanges = getFieldChanges(previousFormData, currentFormData)
   if (fieldChanges.length === 0) {
-    return previousStep ? [previousStep] : []
+    return [previousStep]
   }
   if (previousStep.fieldChanges.length !== 1
     || fieldChanges.length !== 1
@@ -225,7 +225,7 @@ export function calculateSteps(
       name,
       fieldChanges: fieldChanges
     }
-    return previousStep ? [previousStep, newStep] : [newStep]
+    return [previousStep, newStep]
   }
   const mergedFieldChanges = mergeFieldChanges(
     previousStep.fieldChanges[0],
@@ -242,7 +242,7 @@ export function calculateSteps(
     }
     return [mergedStep]
   }
-  else {// mergedFieldChanges.length === 2
+  else {// mergedFieldChanges.length === 2 //todo: multiple filed change step?
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
