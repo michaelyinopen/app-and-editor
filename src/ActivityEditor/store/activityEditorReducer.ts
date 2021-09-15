@@ -42,10 +42,12 @@ type FormDataState = {
   where: string,
   howMuch?: number,
   rides: {
-    [id: string]: {
-      id: string,
-      description: string,
-      sequence: number
+    ids: string[],
+    entities: {
+      [id: string]: {
+        id: string,
+        description: string
+      }
     }
   },
 }
@@ -77,7 +79,10 @@ const activityEditorInitialState: ActivityEditorState = {
     who: '',
     where: '',
     howMuch: undefined,
-    rides: {},
+    rides: {
+      ids: [],
+      entities: {}
+    },
   },
   steps: [{ name: 'initial', fieldChanges: [] }],
   currentStepIndex: 0,
@@ -115,7 +120,19 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           ? activity.cost
           : activityEditorInitialState.formData.howMuch
         state.formData.rides = activity && activity.hasDetail
-          ? Object.fromEntries(activity.rides.map(r => [r.id, r]))
+          ? {
+            ids: [...activity.rides]
+              .sort((a, b) => a.sequence - b.sequence)
+              .map(r => r.id),
+            entities:
+              Object.fromEntries(activity.rides.map(r => [
+                r.id,
+                {
+                  id: r.id,
+                  description: r.description
+                }
+              ]))
+          }
           : activityEditorInitialState.formData.rides
 
         if (loaded) {
@@ -130,7 +147,19 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
                 who: activityWithDetail.person,
                 where: activityWithDetail.place,
                 howMuch: activityWithDetail.cost,
-                rides: Object.fromEntries(activityWithDetail.rides.map(r => [r.id, r]))
+                rides: {
+                  ids: [...activityWithDetail.rides]
+                    .sort((a, b) => a.sequence - b.sequence)
+                    .map(r => r.id),
+                  entities:
+                    Object.fromEntries(activityWithDetail.rides.map(r => [
+                      r.id,
+                      {
+                        id: r.id,
+                        description: r.description
+                      }
+                    ]))
+                }
               }
             }
           ]
@@ -166,7 +195,19 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
             who: activity.person,
             where: activity.place,
             howMuch: activity.cost,
-            rides: Object.fromEntries(activity.rides.map(r => [r.id, r]))
+            rides: {
+              ids: [...activity.rides]
+                .sort((a, b) => a.sequence - b.sequence)
+                .map(r => r.id),
+              entities:
+                Object.fromEntries(activity.rides.map(r => [
+                  r.id,
+                  {
+                    id: r.id,
+                    description: r.description
+                  }
+                ]))
+            }
           }
         })
       }
@@ -185,25 +226,21 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(addRide, (state, { payload: { id } }) => {
       // always the last sequence
-      const sequence = Object.values(state.formData.rides).length + 1
-      state.formData.rides[id] = {
+      state.formData.rides.ids.push(id)
+      state.formData.rides.entities[id] = {
         id,
-        description: '',
-        sequence
+        description: ''
       }
     })
     .addCase(setRideDescription, (state, { payload: { id, value } }) => {
       state.formData.rides[id].description = value
     })
     .addCase(removeRide, (state, { payload: { id } }) => {
-      const removedSequence = state.formData.rides[id].sequence
-      delete state.formData.rides[id]
-      // shift sequences of other rides
-      for (const ride of Object.values(state.formData.rides)) {
-        if (ride.sequence > removedSequence) {
-          ride.sequence = ride.sequence - 1
-        }
+      const index = state.formData.rides.ids.findIndex(rId => rId === id)
+      if (index !== -1) {
+        state.formData.rides.ids.splice(index, 1)
       }
+      delete state.formData.rides[id]
     })
     .addCase(replaceLastStep, (state, { payload }) => {
       state.steps.splice(state.currentStepIndex)

@@ -7,10 +7,12 @@ export type FormData = {
   where: string,
   howMuch?: number,
   rides: {
-    [id: string]: {
-      id: string,
-      description: string,
-      sequence: number
+    ids: string[],
+    entities: {
+      [id: string]: {
+        id: string,
+        description: string
+      }
     }
   }
 }
@@ -42,7 +44,10 @@ const defaultFormData = {
   who: '',
   where: '',
   howMuch: undefined,
-  rides: {},
+  rides: {
+    ids: [],
+    entities: {}
+  },
 }
 
 function numberOfSlashes(value: string): number {
@@ -407,13 +412,25 @@ export function unApplyConflictToFromData(conflict: Conflict, currentFormData: F
 }
 //#endregion formData maipulation
 
-export function ActivityToFormData(activity: ActivityWithDetailFromStore) {
+export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
   return {
     name: activity.name,
     who: activity.person,
     where: activity.place,
     howMuch: activity.cost,
-    rides: Object.fromEntries(activity.rides.map(r => [r.id, r]))
+    rides: {
+      ids: [...activity.rides]
+        .sort((a, b) => a.sequence - b.sequence)
+        .map(r => r.id),
+      entities:
+        Object.fromEntries(activity.rides.map(r => [
+          r.id,
+          {
+            id: r.id,
+            description: r.description
+          }
+        ]))
+    }
   }
 }
 

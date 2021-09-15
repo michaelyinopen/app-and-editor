@@ -28,7 +28,7 @@ const RemoveRide = ({ id }) => {
 
 const Ride = ({ id }) => {
   const editorDispatch = useActivityEditorDispatch()
-  const ride = useActivityEditorSelector(es => es.formData.rides[id])
+  const ride = useActivityEditorSelector(es => es.formData.rides.entities[id])
   return (
     <div style={{ borderBottomStyle: 'dashed' }}>
       <label htmlFor={`ride-description-${id}`}>description:</label>
@@ -46,11 +46,7 @@ const Ride = ({ id }) => {
 }
 
 export const RideSection = memo(() => {
-  //todo reselect
-  const rides = useActivityEditorSelector(es => es.formData.rides)
-  const rideIds = Object.values(rides)
-    .sort((a, b) => a.sequence - b.sequence)
-    .map(r => r.id)
+  const rideIds = useActivityEditorSelector(es => es.formData.rides.ids)
   return (
     <div>
       <h3>Rides</h3>

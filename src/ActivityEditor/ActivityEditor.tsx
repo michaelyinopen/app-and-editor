@@ -158,7 +158,11 @@ const Save = () => {
             person: formData.who,
             place: formData.where,
             cost: formData.howMuch!,
-            rides: Object.values(formData.rides),
+            rides: formData.rides.ids.map((rid, index) => ({
+              id: rid,
+              description: formData.rides.entities[rid].description,
+              sequence: index + 1
+            })),
             versionToken,
           }
           editorDispatch(savingStep(currentStepIndex, true))
@@ -227,7 +231,11 @@ const Create = () => {
             person: formData.who,
             place: formData.where,
             cost: formData.howMuch!,
-            rides: Object.values(formData.rides),
+            rides: formData.rides.ids.map((rid, index) => ({
+              id: rid,
+              description: formData.rides.entities[rid].description,
+              sequence: index + 1
+            })),
           }
           editorDispatch(savingStep(currentStepIndex, true))
           dispatch(createActivityTakingThunkAction(activity, creationToken))
