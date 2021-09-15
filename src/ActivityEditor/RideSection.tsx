@@ -36,7 +36,7 @@ const Ride = ({ id }) => {
       <input
         type="text"
         id={`ride-description-${id}`}
-        value={ride.description}
+        value={ride?.description}
         onChange={e => { editorDispatch(setRideDescription(id, e.target.value ?? '')) }}
       />
       <br />

@@ -74,34 +74,34 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
 
   function getRidesFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
     const rideFieldChanges: FieldChange[] = []
-    const previousRideKeys = Object.keys(previousFormData.rides)
-    const currentRideKeys = Object.keys(currentFormData.rides)
+    const previousRideIds = previousFormData.rides.ids
+    const currentRideIds = currentFormData.rides.ids
 
-    const createdRideKeys = currentRideKeys.filter(ck => !previousRideKeys.includes(ck))
-    for (const createdRideKey of createdRideKeys) {
+    const createdRideIds = currentRideIds.filter(ck => !previousRideIds.includes(ck))
+    for (const createdRideId of createdRideIds) {
       rideFieldChanges.push({
-        path: `/rides/${createdRideKey}`,
+        path: `/rides/entities/${createdRideId}`,
         previousValue: undefined,
-        newValue: currentFormData.rides[createdRideKey]
+        newValue: currentFormData.rides.entities[createdRideId]
       })
     }
 
-    const removedRideKeys = previousRideKeys.filter(pk => !currentRideKeys.includes(pk))
-    for (const removedRideKey of removedRideKeys) {
+    const removedRideIds = previousRideIds.filter(pk => !currentRideIds.includes(pk))
+    for (const removedRideId of removedRideIds) {
       rideFieldChanges.push({
-        path: `/rides/${removedRideKey}`,
-        previousValue: previousFormData.rides[removedRideKey],
+        path: `/rides/entities/${removedRideId}`,
+        previousValue: previousFormData.rides.entities[removedRideId],
         newValue: undefined
       })
     }
 
-    const commonRideKeys = currentRideKeys.filter(ck => previousRideKeys.includes(ck))
-    for (const commonRideKey of commonRideKeys) {
-      const previousRide = previousFormData.rides[commonRideKey]
-      const currentRide = currentFormData.rides[commonRideKey]
+    const commonRideIds = currentRideIds.filter(ck => previousRideIds.includes(ck))
+    for (const commonRideId of commonRideIds) {
+      const previousRide = previousFormData.rides.entities[commonRideId]
+      const currentRide = currentFormData.rides.entities[commonRideId]
       if (previousRide.description !== currentRide.description) {
         rideFieldChanges.push({
-          path: `/rides/${commonRideKey}/description`,
+          path: `/rides/entities/${commonRideId}/description`,
           previousValue: previousRide.description,
           newValue: currentRide.description
         })
@@ -127,15 +127,15 @@ function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
 
 // isItem means non-property change, means create or delete
 function getRideId(path: string): { rideId: string | undefined, isItem: boolean } {
-  if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
-    const rideId = path.substring('/rides/'.length)
+  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+    const rideId = path.substring('/rides/entities/'.length)
     return {
       rideId,
       isItem: true
     }
   }
-  else if (path.startsWith('/rides/') && path.endsWith('description')) {
-    const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
+  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
     return {
       rideId,
       isItem: false
@@ -198,7 +198,7 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (path === '/howMuch') {
     return 'Edit how much'
   }
-  if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
+  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
     if (previousValue === undefined && newValue !== undefined) {
       return 'Add ride'
     }
@@ -206,7 +206,7 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
       return 'Remove ride'
     }
   }
-  if (path.startsWith('/rides/') && path.endsWith('description')) {
+  if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
     return 'Edit ride description'
   }
   throw new Error('Cannot determine step name')
@@ -276,17 +276,17 @@ function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
     else if (path === '/howMuch') {
       draft.howMuch = previousValue
     }
-    else if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
-      const rideId = path.substring('/rides/'.length)
+    else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+      const rideId = path.substring('/rides/entities/'.length)
       if (previousValue === undefined) {
-        delete draft.rides[rideId]
+        delete draft.rides.entities[rideId]
       } else {
-        draft.rides[rideId] = previousValue
+        draft.rides.entities[rideId] = previousValue
       }
     }
-    else if (path.startsWith('/rides/') && path.endsWith('description')) {
-      const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
-      draft.rides[rideId].description = previousValue
+    else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+      const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
+      draft.rides.entities[rideId].description = previousValue
     }
   })
 }
@@ -306,17 +306,17 @@ function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
     else if (path === '/howMuch') {
       draft.howMuch = newValue
     }
-    else if (path.startsWith('/rides/') && numberOfSlashes(path) === 2) {
-      const rideId = path.substring('/rides/'.length)
+    else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+      const rideId = path.substring('/rides/entities/'.length)
       if (newValue === undefined) {
-        delete draft.rides[rideId]
+        delete draft.rides.entities[rideId]
       } else {
-        draft.rides[rideId] = newValue
+        draft.rides.entities[rideId] = newValue
       }
     }
-    else if (path.startsWith('/rides/') && path.endsWith('description')) {
-      const rideId = path.substring('/rides/'.length, path.length - 'description'.length - 1)
-      draft.rides[rideId].description = newValue
+    else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+      const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
+      draft.rides.entities[rideId].description = newValue
     }
   })
 }

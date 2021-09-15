@@ -233,14 +233,14 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       }
     })
     .addCase(setRideDescription, (state, { payload: { id, value } }) => {
-      state.formData.rides[id].description = value
+      state.formData.rides.entities[id].description = value
     })
     .addCase(removeRide, (state, { payload: { id } }) => {
       const index = state.formData.rides.ids.findIndex(rId => rId === id)
       if (index !== -1) {
         state.formData.rides.ids.splice(index, 1)
       }
-      delete state.formData.rides[id]
+      delete state.formData.rides.entities[id]
     })
     .addCase(replaceLastStep, (state, { payload }) => {
       state.steps.splice(state.currentStepIndex)
