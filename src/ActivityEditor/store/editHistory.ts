@@ -23,6 +23,8 @@ export type FieldChange = {
   newValue: any,
 }
 
+export type GroupedFieldChanges = FieldChange[]
+
 export type Conflict = {
   name: string,
   fieldChanges: FieldChange[],
@@ -54,11 +56,22 @@ function numberOfSlashes(value: string): number {
   return [...value].filter(c => c === '/').length
 }
 
-function getFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function getFieldChanges(previousFormData: FormData, currentFormData: FormData): Array<FieldChange | GroupedFieldChanges> {
   if (previousFormData === currentFormData) {
     return []
   }
-  const fieldChanges: FieldChange[] = []
+  const fieldChanges: Array<FieldChange | GroupedFieldChanges> = []
   if (previousFormData.name !== currentFormData.name) {
     fieldChanges.push({ path: '/name', previousValue: previousFormData.name, newValue: currentFormData.name })
   }
@@ -72,42 +85,85 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
     fieldChanges.push({ path: '/howMuch', previousValue: previousFormData.howMuch, newValue: currentFormData.howMuch })
   }
 
-  function getRidesFieldChanges(previousFormData: FormData, currentFormData: FormData): FieldChange[] {
-    const rideFieldChanges: FieldChange[] = []
+  function getRidesFieldChanges(previousFormData: FormData, currentFormData: FormData): Array<FieldChange | GroupedFieldChanges> {
     const previousRideIds = previousFormData.rides.ids
     const currentRideIds = currentFormData.rides.ids
 
-    const createdRideIds = currentRideIds.filter(ck => !previousRideIds.includes(ck))
-    for (const createdRideId of createdRideIds) {
-      rideFieldChanges.push({
-        path: `/rides/entities/${createdRideId}`,
-        previousValue: undefined,
-        newValue: currentFormData.rides.entities[createdRideId]
-      })
-    }
+    let rideFieldChanges: Array<FieldChange | GroupedFieldChanges> = []
+    let calculationRideIds: string[] = previousRideIds;
 
-    const removedRideIds = previousRideIds.filter(pk => !currentRideIds.includes(pk))
-    for (const removedRideId of removedRideIds) {
-      rideFieldChanges.push({
-        path: `/rides/entities/${removedRideId}`,
-        previousValue: previousFormData.rides.entities[removedRideId],
-        newValue: undefined
-      })
-    }
+    (function removeRideFieldChanges() {
+      const removedRideIds = previousRideIds.filter(pRId => !currentRideIds.includes(pRId))
+      for (const removedRideId of removedRideIds) {
+        const newCalculationRideIds = calculationRideIds.filter(rId => rId !== removedRideId)
+        const idFieldChange = {
+          path: '/rides/ids',
+          previousValue: calculationRideIds,
+          newValue: newCalculationRideIds
+        }
+        const entityFieldChange = {
+          path: `/rides/entities/${removedRideId}`,
+          previousValue: previousFormData.rides.entities[removedRideId],
+          newValue: undefined
+        }
 
-    const commonRideIds = currentRideIds.filter(ck => previousRideIds.includes(ck))
-    for (const commonRideId of commonRideIds) {
-      const previousRide = previousFormData.rides.entities[commonRideId]
-      const currentRide = currentFormData.rides.entities[commonRideId]
-      if (previousRide.description !== currentRide.description) {
+        calculationRideIds = newCalculationRideIds
+        rideFieldChanges.push([idFieldChange, entityFieldChange])
+      }
+    })();
+
+    (function moveRideFieldChanges() {
+      // rides that are not added or deleted
+      const correspondingCurrentRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
+      if (!arraysEqual(calculationRideIds, correspondingCurrentRideIds)) {
         rideFieldChanges.push({
-          path: `/rides/entities/${commonRideId}/description`,
-          previousValue: previousRide.description,
-          newValue: currentRide.description
+          path: '/rides/ids',
+          previousValue: calculationRideIds,
+          newValue: correspondingCurrentRideIds
         })
       }
-      // do not care about sequence for now
-    }
+    })();
+
+    (function updateRidePropertiesFieldChanges() {
+      const commonRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
+      for (const commonRideId of commonRideIds) {
+        const previousRide = previousFormData.rides.entities[commonRideId]
+        const currentRide = currentFormData.rides.entities[commonRideId]
+        if (previousRide.description !== currentRide.description) {
+          rideFieldChanges.push({
+            path: `/rides/entities/${commonRideId}/description`,
+            previousValue: previousRide.description,
+            newValue: currentRide.description
+          })
+        }
+      }
+    })();
+
+    (function addRidePropertiesFieldChanges() {
+      const addedRideIds = currentRideIds.filter(cRId => !previousRideIds.includes(cRId))
+      for (const addedRideId of addedRideIds) {
+        const addedIndex = currentRideIds.indexOf(addedRideId)
+        const newCalculationRideIds = [
+          ...calculationRideIds.slice(0, addedIndex),
+          addedRideId,
+          ...calculationRideIds.slice(addedIndex)
+        ]
+        const idFieldChange = {
+          path: '/rides/ids',
+          previousValue: calculationRideIds,
+          newValue: newCalculationRideIds
+        }
+        const entityFieldChange = {
+          path: `/rides/entities/${addedRideId}`,
+          previousValue: undefined,
+          newValue: currentFormData.rides.entities[addedRideId]
+        }
+
+        calculationRideIds = newCalculationRideIds
+        rideFieldChanges.push([idFieldChange, entityFieldChange])
+      }
+    })();
+
     return rideFieldChanges
   }
   fieldChanges.push(...getRidesFieldChanges(previousFormData, currentFormData))
@@ -116,8 +172,6 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
 }
 
 function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
-  // assumes single field change step
-  // add/delete rides cannot use reference equal of values
   return (a.path === b.path)
     ? a.previousValue === b.newValue
       ? [] // merged resulting in no-op
@@ -145,37 +199,6 @@ function getRideId(path: string): { rideId: string | undefined, isItem: boolean 
     rideId: undefined,
     isItem: false
   }
-}
-
-function hasRelatedChanges(
-  aChanges: FieldChange[],
-  bChanges: FieldChange[]
-): boolean {
-  for (const aChange of aChanges) {
-    let { rideId: aRideId, isItem: isAItem } = getRideId(aChange.path)
-
-    for (const bChange of bChanges) {
-      if (aChange.path === bChange.path) {
-        return true
-      }
-      if (aRideId) {
-        let { rideId: bRideId, isItem: isBItem } = getRideId(bChange.path)
-        if (aRideId === bRideId && (isAItem || isBItem)) {
-          // same ride and one change is item change(create or delete)
-          return true
-        }
-      }
-    }
-  }
-  return false
-}
-
-export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
-  const stepFieldChanges = step.fieldChanges
-    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseLocalFieldChanges ?? [])
-
-  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
 }
 
 function calculateStepName(fieldChanges: FieldChange[]): string {
@@ -411,6 +434,28 @@ export function unApplyConflictToFromData(conflict: Conflict, currentFormData: F
   return undoFieldChanges(conflict.fieldChanges, currentFormData)
 }
 //#endregion formData maipulation
+function hasRelatedChanges(
+  aChanges: FieldChange[],
+  bChanges: FieldChange[]
+): boolean {
+  for (const aChange of aChanges) {
+    let { rideId: aRideId, isItem: isAItem } = getRideId(aChange.path)
+
+    for (const bChange of bChanges) {
+      if (aChange.path === bChange.path) {
+        return true
+      }
+      if (aRideId) {
+        let { rideId: bRideId, isItem: isBItem } = getRideId(bChange.path)
+        if (aRideId === bRideId && (isAItem || isBItem)) {
+          // same ride and one change is item change(create or delete)
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
 
 export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
   return {
@@ -479,4 +524,12 @@ export function CalculateRefreshedStep(
     })),
     reverseLocalFieldChanges,
   }
+}
+
+export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
+  const stepFieldChanges = step.fieldChanges
+    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
+    .concat(step.reverseLocalFieldChanges ?? [])
+
+  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
 }
