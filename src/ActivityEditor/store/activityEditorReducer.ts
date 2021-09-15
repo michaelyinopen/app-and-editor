@@ -232,6 +232,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         description: ''
       }
     })
+    // todo moveRide
     .addCase(setRideDescription, (state, { payload: { id, value } }) => {
       state.formData.rides.entities[id].description = value
     })

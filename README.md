@@ -61,3 +61,10 @@ E.g. hard-code the path of each field is much easier than calculating the paths 
 
 // todo lifecycle flow of refreshed
 // todo lifecycle flow of create
+
+// todo types of changes:
+- property field change
+- add to collection
+- collection item property change
+- collection items sequence change
+- remove from collection

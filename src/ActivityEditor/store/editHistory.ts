@@ -225,7 +225,7 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChanges.length > 1) {
     return 'Multiple edits'
   }
-  
+
   const { path } = fieldChanges[0]
   if (path === '/name') {
     return 'Edit name'
@@ -253,7 +253,7 @@ export function calculateSteps(
   previousFormData: FormData = defaultFormData,
   currentFormData: FormData)
   : Step[] {
-  const fieldChanges = getFieldChanges(previousFormData, currentFormData)
+  const fieldChanges = getFieldChanges(previousFormData, currentFormData).flat()
   if (fieldChanges.length === 0) {
     return [previousStep]
   }
@@ -283,7 +283,7 @@ export function calculateSteps(
     }
     return [mergedStep]
   }
-  else {// mergedFieldChanges.length === 2 //todo: multiple filed change step?
+  else {// fieldChanges did not merge
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
@@ -295,6 +295,7 @@ export function calculateSteps(
 
 //#region formData manipulation
 function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
+  // todo sequence undoFieldChange
   const { path, previousValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -328,6 +329,7 @@ function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
 }
 
 function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
+  // todo sequence redoFieldChange
   const { path, newValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -358,6 +360,7 @@ function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
 }
 
 function undoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
+  // todo sequence undoFieldChanges
   let formData = sourceFormData
   for (const fieldChange of fieldChanges) {
     if (isDraft(formData)) {
@@ -375,6 +378,7 @@ function undoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData 
 }
 
 function redoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
+  // todo sequence redoFieldChanges
   let formData = sourceFormData
   for (const fieldChange of fieldChanges) {
     if (isDraft(formData)) {
@@ -392,6 +396,7 @@ function redoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData 
 }
 
 export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
+  // todo sequence undoStep
   const allFieldChanges = step.mergeBehaviour === 'merge'
     ? step.fieldChanges
       .concat(
@@ -410,6 +415,7 @@ export function undoStep(step: Step, previousFormData: FormData | Draft<FormData
 }
 
 export function redoStep(step: Step, previousFormData: FormData): FormData {
+  // todo sequence redoStep
   const allFieldChanges = step.mergeBehaviour === 'merge'
     ? step.fieldChanges
       .concat(
@@ -428,22 +434,26 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
 }
 
 export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
+  // todo sequence SwitchToMerge
   const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
     .concat(step.reverseLocalFieldChanges ?? [])
   return undoFieldChanges(allFieldChanges, currentFormData)
 }
 
 export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
+  // todo sequence SwitchToDiscardLocalChanges
   const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
     .concat(step.reverseLocalFieldChanges ?? [])
   return redoFieldChanges(allFieldChanges, currentFormData)
 }
 
 export function applyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+  // todo sequence applyConflictToFromData
   return redoFieldChanges(conflict.fieldChanges, currentFormData)
 }
 
 export function unApplyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+  // todo sequence unApplyConflictToFromData
   return undoFieldChanges(conflict.fieldChanges, currentFormData)
 }
 //#endregion formData maipulation
@@ -451,6 +461,7 @@ function hasRelatedChanges(
   aChanges: FieldChange[],
   bChanges: FieldChange[]
 ): boolean {
+  // todo sequence *hasRelatedChanges*
   for (const aChange of aChanges) {
     let { rideId: aRideId, isItem: isAItem } = getRideId(aChange.path)
 
@@ -505,21 +516,21 @@ export function CalculateRefreshedStep(
   const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
 
   const nonConflictFieldChanges: FieldChange[] = []
-  const conflictFieldChanges: FieldChange[] = []
+  const conflictFieldChanges: (FieldChange | GroupedFieldChanges)[] = []
   const reverseLocalFieldChanges: FieldChange[] = []
 
   for (const change of storeVsCurrent) {
-    if (!hasRelatedChanges([change], currentVsPreviousVersion)) {
+    if (!hasRelatedChanges([change].flat(), currentVsPreviousVersion.flat())) {
       // store activity changed and there are no current edits
-      nonConflictFieldChanges.push(change)
+      nonConflictFieldChanges.push(...[change].flat())
     }
-    else if (hasRelatedChanges([change], storeVsPreviousVersion)) {
+    else if (hasRelatedChanges([change].flat(), storeVsPreviousVersion.flat())) {
       // store activity and current both changed
       conflictFieldChanges.push(change)
     }
     else {
       // only current changed
-      reverseLocalFieldChanges.push(change)
+      reverseLocalFieldChanges.push(...[change].flat())
     }
   }
   if (nonConflictFieldChanges.length === 0 && conflictFieldChanges.length === 0) {
@@ -531,8 +542,8 @@ export function CalculateRefreshedStep(
     versionToken: storeActivity.versionToken,
     mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
     conflicts: conflictFieldChanges.map(c => ({
-      name: calculateStepName([c]),
-      fieldChanges: [c],
+      name: calculateStepName([c].flat()),
+      fieldChanges: [c].flat(),
       applied: true
     })),
     reverseLocalFieldChanges,

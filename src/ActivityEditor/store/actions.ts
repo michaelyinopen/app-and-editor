@@ -63,7 +63,7 @@ export const setRideDescription = createAction(
     }
   })
 )
-// export const moveRide = createAction<undefined | number>('setHowMuch') //todo
+// export const moveRide = createAction<undefined | number>('moveRide') //todo
 export const removeRide = createAction(
   'removeRide',
   (id: string) => ({
