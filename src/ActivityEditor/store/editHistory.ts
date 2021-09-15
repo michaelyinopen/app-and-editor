@@ -174,6 +174,7 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
 function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
   return (a.path === b.path)
     ? a.previousValue === b.newValue
+      || (Array.isArray(a) && Array.isArray(b) && arraysEqual(a, b))
       ? [] // merged resulting in no-op
       : [{ path: a.path, previousValue: a.previousValue, newValue: b.newValue }] // merged
     : [a, b] // not merged
@@ -205,10 +206,27 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChanges.length === 0) {
     return '';
   }
+
+  if (fieldChanges.length === 2 && fieldChanges.some(c => c.path === '/rides/ids')) {
+    const entityChange = fieldChanges.find(c =>
+      c.path.startsWith('/rides/entities/') && numberOfSlashes(c.path) === 3)!
+    if (entityChange
+      && entityChange.previousValue === undefined
+      && entityChange.newValue !== undefined) {
+      return 'Add ride'
+    }
+    if (entityChange
+      && entityChange.previousValue !== undefined
+      && entityChange.newValue === undefined) {
+      return 'Remove ride'
+    }
+  }
+
   if (fieldChanges.length > 1) {
     return 'Multiple edits'
   }
-  const { path, previousValue, newValue } = fieldChanges[0] // assumes one step only has one field change
+  
+  const { path } = fieldChanges[0]
   if (path === '/name') {
     return 'Edit name'
   }
@@ -221,13 +239,8 @@ function calculateStepName(fieldChanges: FieldChange[]): string {
   if (path === '/howMuch') {
     return 'Edit how much'
   }
-  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
-    if (previousValue === undefined && newValue !== undefined) {
-      return 'Add ride'
-    }
-    if (previousValue !== undefined && newValue === undefined) {
-      return 'Remove ride'
-    }
+  if (path === '/rides/ids') {
+    return 'Move rides'
   }
   if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
     return 'Edit ride description'
