@@ -9,12 +9,12 @@ const initialActivity = {
     cost: 99,
     rides: [
       {
-        id: '5e3960cc-50d4-428b-ab82-bcae8d698d40',
+        id: 'GFqbzNATDKY8pKRAZV3ko',
         description: 'red car',
         sequence: 1
       },
       {
-        id: '79d89f69-f953-4228-b68b-9dfff4ef2d93',
+        id: 'zUxqlLLtWWjOdvHfAa1Vx',
         description: 'ferry',
         sequence: 2
       },

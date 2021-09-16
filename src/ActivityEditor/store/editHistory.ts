@@ -457,28 +457,20 @@ export function unApplyConflictToFromData(conflict: Conflict, currentFormData: F
   return undoFieldChanges(conflict.fieldChanges, currentFormData)
 }
 //#endregion formData maipulation
+
 function hasRelatedChanges(
   aChanges: FieldChange[],
   bChanges: FieldChange[]
 ): boolean {
-  // todo sequence *hasRelatedChanges*
-  for (const aChange of aChanges) {
-    let { rideId: aRideId, isItem: isAItem } = getRideId(aChange.path)
+  return aChanges.some(ac => bChanges.some(bc => bc.path === ac.path))
+}
 
-    for (const bChange of bChanges) {
-      if (aChange.path === bChange.path) {
-        return true
-      }
-      if (aRideId) {
-        let { rideId: bRideId, isItem: isBItem } = getRideId(bChange.path)
-        if (aRideId === bRideId && (isAItem || isBItem)) {
-          // same ride and one change is item change(create or delete)
-          return true
-        }
-      }
-    }
-  }
-  return false
+export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
+  const stepFieldChanges = step.fieldChanges
+    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
+    .concat(step.reverseLocalFieldChanges ?? [])
+
+  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
 }
 
 export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
@@ -503,6 +495,13 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormD
   }
 }
 
+function hasConflictedChanges(
+  change: FieldChange | GroupedFieldChanges,
+  otherChanges: (FieldChange | GroupedFieldChanges)[]
+): boolean {
+  //todo
+}
+
 export function CalculateRefreshedStep(
   previousVersionFormData: FormData,
   currentFormData: FormData,
@@ -520,11 +519,11 @@ export function CalculateRefreshedStep(
   const reverseLocalFieldChanges: FieldChange[] = []
 
   for (const change of storeVsCurrent) {
-    if (!hasRelatedChanges([change].flat(), currentVsPreviousVersion.flat())) {
+    if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
       // store activity changed and there are no current edits
       nonConflictFieldChanges.push(...[change].flat())
     }
-    else if (hasRelatedChanges([change].flat(), storeVsPreviousVersion.flat())) {
+    else if (hasConflictedChanges(change, storeVsPreviousVersion)) {
       // store activity and current both changed
       conflictFieldChanges.push(change)
     }
@@ -548,12 +547,4 @@ export function CalculateRefreshedStep(
     })),
     reverseLocalFieldChanges,
   }
-}
-
-export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
-  const stepFieldChanges = step.fieldChanges
-    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseLocalFieldChanges ?? [])
-
-  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
 }
