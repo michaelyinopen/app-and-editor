@@ -505,26 +505,26 @@ function hasConflictedChanges(
 export function CalculateRefreshedStep(
   previousVersionFormData: FormData,
   currentFormData: FormData,
-  storeActivity: ActivityWithDetailFromStore,
+  remoteActivity: ActivityWithDetailFromStore,
   discardLocalChanges: boolean
 ): Step | undefined {
-  const storeFormData = ActivityToFormData(storeActivity)
+  const remoteFormData = ActivityToFormData(remoteActivity)
 
-  const storeVsCurrent = getFieldChanges(currentFormData, storeFormData)
+  const remoteVsCurrent = getFieldChanges(currentFormData, remoteFormData)
   const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
-  const storeVsPreviousVersion = getFieldChanges(previousVersionFormData, storeFormData)
+  const remoteVsPreviousVersion = getFieldChanges(previousVersionFormData, remoteFormData)
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: (FieldChange | GroupedFieldChanges)[] = []
   const reverseLocalFieldChanges: FieldChange[] = []
 
-  for (const change of storeVsCurrent) {
+  for (const change of remoteVsCurrent) {
     if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
-      // store activity changed and there are no current edits
+      // remote activity changed and there are no current edits
       nonConflictFieldChanges.push(...[change].flat())
     }
-    else if (hasConflictedChanges(change, storeVsPreviousVersion)) {
-      // store activity and current both changed
+    else if (hasConflictedChanges(change, remoteVsPreviousVersion)) {
+      // remote activity and current both changed
       conflictFieldChanges.push(change)
     }
     else {
@@ -538,7 +538,7 @@ export function CalculateRefreshedStep(
   return {
     name: 'Refreshed',
     fieldChanges: nonConflictFieldChanges,
-    versionToken: storeActivity.versionToken,
+    versionToken: remoteActivity.versionToken,
     mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
     conflicts: conflictFieldChanges.map(c => ({
       name: calculateStepName([c].flat()),
