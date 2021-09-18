@@ -499,36 +499,40 @@ function hasConflictedChanges(
   change: FieldChange | GroupedFieldChanges,
   otherChanges: (FieldChange | GroupedFieldChanges)[]
 ): boolean {
-  //todo
+  if (!Array.isArray(change)) {
+    return otherChanges.flat().some(c => c.path === change.path)
+  } else {
+
+  }
 }
 
 export function CalculateRefreshedStep(
   previousVersionFormData: FormData,
-  currentFormData: FormData,
+  localFormData: FormData,
   remoteActivity: ActivityWithDetailFromStore,
   discardLocalChanges: boolean
 ): Step | undefined {
   const remoteFormData = ActivityToFormData(remoteActivity)
 
-  const remoteVsCurrent = getFieldChanges(currentFormData, remoteFormData)
-  const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, currentFormData)
+  const remoteVsLocal = getFieldChanges(localFormData, remoteFormData)
+  const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, localFormData)
   const remoteVsPreviousVersion = getFieldChanges(previousVersionFormData, remoteFormData)
 
   const nonConflictFieldChanges: FieldChange[] = []
   const conflictFieldChanges: (FieldChange | GroupedFieldChanges)[] = []
   const reverseLocalFieldChanges: FieldChange[] = []
 
-  for (const change of remoteVsCurrent) {
+  for (const change of remoteVsLocal) {
     if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
-      // remote activity changed and there are no current edits
+      // remote activity changed and there are no local edits
       nonConflictFieldChanges.push(...[change].flat())
     }
     else if (hasConflictedChanges(change, remoteVsPreviousVersion)) {
-      // remote activity and current both changed
+      // remote activity and local both changed
       conflictFieldChanges.push(change)
     }
     else {
-      // only current changed
+      // only local changed
       reverseLocalFieldChanges.push(...[change].flat())
     }
   }
