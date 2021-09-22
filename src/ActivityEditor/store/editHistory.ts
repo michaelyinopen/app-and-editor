@@ -28,7 +28,8 @@ export type GroupedFieldChanges = FieldChange[]
 export type Operation = {
   type: 'edit' | 'merge' | 'conflict' | 'reverse local',
   fieldChanges: FieldChange[],
-  conflictApplied?: boolean, // need this to preserve the selection when toggling 'merge' and 'discard local changes'
+  conflictName?: string,
+  conflictApplied?: boolean, // need this to preserve the selection when toggling 'merge' and 'discard local changes',
   applied: boolean,
 }
 
@@ -585,30 +586,170 @@ function getRideId(path: string): string | undefined {
   return undefined
 }
 
-function hasConflictedChanges(
+function isRemovedRide(change: FieldChange | GroupedFieldChanges): [true, string] | [false] {
+  if (Array.isArray(change)) {
+    const removalIdsFieldChange = change.find(c =>
+      c.path === '/rides/ids'
+      && c.previousValue.length > c.newValue.length)
+    if (removalIdsFieldChange) {
+      const removedId = removalIdsFieldChange.previousValue
+        .find((id: string) => !removalIdsFieldChange.newValue.includes(id))
+      return [true, removedId]
+    }
+  }
+  return [false]
+}
+
+function isMovedRides(change: FieldChange | GroupedFieldChanges): boolean {
+  return !Array.isArray(change) && change.path === '/rides/ids'
+}
+
+function isAddedRide(change: FieldChange | GroupedFieldChanges): [true, string] | [false] {
+  if (Array.isArray(change)) {
+    const additionIdsFieldChange = change.find(c =>
+      c.path === '/rides/ids'
+      && c.previousValue.length < c.newValue.length)
+    if (additionIdsFieldChange) {
+      const addedId = additionIdsFieldChange.newValue
+        .find((id: string) => !additionIdsFieldChange.previousValue.includes(id))
+      return [true, addedId]
+    }
+  }
+  return [false]
+}
+
+function isEditRideFor(rideId: string, change: FieldChange | GroupedFieldChanges): boolean {
+  return !Array.isArray(change)
+    && change.path.startsWith(`/rides/entities/${rideId}`)
+    && numberOfSlashes(change.path) > 3
+}
+
+function isRemovedRideFor(rideId: string, change: FieldChange | GroupedFieldChanges): boolean {
+  return Array.isArray(change)
+    && change.some(c =>
+      c.path === '/rides/ids'
+      && c.previousValue.length > c.newValue.length
+      && !c.newValue.includes(rideId)
+      && c.previousValue.includes(rideId)
+    )
+}
+
+function isAddedRideFor(rideId: string, change: FieldChange | GroupedFieldChanges): boolean {
+  return Array.isArray(change)
+    && change.some(c =>
+      c.path === '/rides/ids'
+      && c.previousValue.length < c.newValue.length
+      && !c.previousValue.includes(rideId)
+      && c.newValue.includes(rideId)
+    )
+}
+
+function CalculateOperationFromRefreshedFieldChange(
   change: FieldChange | GroupedFieldChanges,
-  otherChanges: (FieldChange | GroupedFieldChanges)[]
-): boolean {
-  if (!Array.isArray(change)) {
-    if (change.path === '/rides/ids') {
-      return otherChanges.some(oc => !Array.isArray(oc) && oc.path === '/rides/ids')
+  currentVsPreviousVersion: (FieldChange | GroupedFieldChanges)[],
+  remoteVsPreviousVersion: (FieldChange | GroupedFieldChanges)[]
+): Operation {
+  const isRemoveRideResult = isRemovedRide(change)
+  if (isRemoveRideResult[0]) {
+    const removedRideId = isRemoveRideResult[1]
+    if (currentVsPreviousVersion.some(cs => isEditRideFor(removedRideId, cs))) {
+      return {
+        type: 'conflict' as const,
+        fieldChanges: [change].flat(),
+        conflictName: 'Remove ride',
+        conflictApplied: true,
+        applied: true
+      }
+    } else if (remoteVsPreviousVersion.some(cs => isRemovedRideFor(removedRideId, cs))) {
+      return {
+        type: 'merge' as const,
+        fieldChanges: [change].flat(),
+        applied: true
+      }
+    } else {
+      return {
+        type: 'reverse local' as const,
+        fieldChanges: [change].flat(),
+        applied: false
+      }
     }
-    return otherChanges.flat().some(c => c.path === change.path)
-  } else if (change.length === 2 && change.some(c => c.path === '/rides/ids')) {
-    const entityChange = change.find(c =>
-      c.path.startsWith('/rides/entities/') && numberOfSlashes(c.path) === 3)!
-    if (entityChange
-      && entityChange.previousValue !== undefined
-      && entityChange.newValue === undefined) {
-      // remove ride
-      return otherChanges.flat().some(oc => oc.path === '/rides/ids')
-        || 
+  }
+  if (isMovedRides(change)) {
+    if (remoteVsPreviousVersion.some(cs => isMovedRides(cs))
+      && currentVsPreviousVersion.some(cs => isMovedRides(cs))) {
+      return {
+        type: 'conflict' as const,
+        fieldChanges: [change].flat(),
+        conflictName: 'Move rides',
+        conflictApplied: true,
+        applied: true
+      }
+    } else if (remoteVsPreviousVersion.some(cs => isMovedRides(cs))) {
+      return {
+        type: 'merge' as const,
+        fieldChanges: [change].flat(),
+        applied: true
+      }
+    } else {
+      return {
+        type: 'reverse local' as const,
+        fieldChanges: [change].flat(),
+        applied: false
+      }
     }
-    if (entityChange
-      && entityChange.previousValue === undefined
-      && entityChange.newValue !== undefined) {
-      // add ride
-      return 'Add ride'
+  }
+  const isAddedRideResult = isAddedRide(change)
+  if (isAddedRideResult[0]) {
+    const addedRideId = isAddedRideResult[1]
+    if (remoteVsPreviousVersion.some(cs => isEditRideFor(addedRideId, cs))) {
+      return {
+        type: 'conflict' as const,
+        fieldChanges: [change].flat(),
+        conflictName: 'Reverse delete ride',
+        conflictApplied: true,
+        applied: true
+      }
+    } else if (remoteVsPreviousVersion.some(cs => isAddedRideFor(addedRideId, cs))) {
+      return {
+        type: 'merge' as const,
+        fieldChanges: [change].flat(),
+        applied: true
+      }
+    } else {
+      return {
+        type: 'reverse local' as const,
+        fieldChanges: [change].flat(),
+        applied: false
+      }
+    }
+  }
+
+  // changes not related to rideIds
+  const fieldChange = change as FieldChange
+  if (!currentVsPreviousVersion.flat().some(c => c.path === fieldChange.path)) {
+    // remote activity changed and there are no local edits
+    return {
+      type: 'merge' as const,
+      fieldChanges: [fieldChange],
+      applied: true
+    }
+  }
+  else if (remoteVsPreviousVersion.flat().some(c => c.path === fieldChange.path)) {
+    // remote activity and local both changed
+    return {
+      type: 'conflict' as const,
+      fieldChanges: [fieldChange],
+      conflictName: calculateStepName([fieldChange]),
+      conflictApplied: true,
+      applied: true
+    }
+  }
+  else {
+    // only local changed
+    return {
+      type: 'reverse local' as const,
+      fieldChanges: [fieldChange],
+      applied: false
     }
   }
 }
@@ -658,7 +799,14 @@ export function CalculateRefreshedStep(
     }
     else {
       // involves ride/ids
-      if (Array.isArray(change)) {
+      if (!Array.isArray(change)) {
+        // move
+
+      }
+      else if (change.some(c => c.path === '/rides/ids' && c.previousValue.length > c.newValue.length)) {
+
+      }
+      else if (change.some(c => c.path === '/rides/ids' && c.previousValue.length < c.newValue.length)) {
 
       }
       else {
