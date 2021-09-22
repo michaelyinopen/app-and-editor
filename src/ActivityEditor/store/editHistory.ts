@@ -1,4 +1,4 @@
-import { produce, isDraft, Draft } from "immer"
+import { produce, Draft } from "immer"
 import { ActivityWithDetailFromStore } from "./actions"
 
 export type FormData = {
@@ -35,9 +35,6 @@ export type Operation = {
 
 export type Step = {
   name: string,
-  // fieldChanges: FieldChange[],
-  // conflicts?: Conflict[],
-  // reverseLocalFieldChanges?: FieldChange[],
   operations: Operation[],
   versionToken?: string,
   mergeBehaviour?: 'merge' | 'discard local changes',
@@ -552,6 +549,7 @@ export function conflictHasRelatedChanges(operation: Operation, step: Step): boo
   )
 }
 
+//#region Refreshed Step
 export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
   return {
     name: activity.name,
@@ -572,18 +570,6 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormD
         ]))
     }
   }
-}
-
-function getRideId(path: string): string | undefined {
-  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
-    const rideId = path.substring('/rides/entities/'.length)
-    return rideId
-  }
-  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
-    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
-    return rideId
-  }
-  return undefined
 }
 
 function isRemovedRide(change: FieldChange | GroupedFieldChanges): [true, string] | [false] {
@@ -769,102 +755,15 @@ export function CalculateRefreshedStep(
   const operations: Operation[] = []
 
   for (const change of remoteVsLocal) {
-    // extract calculateOperation(currentVsPreviousVersion, remoteVsPreviousVersion, change):Operation
-    if (!Array.isArray(change) && change.path !== '/rides/ids') {
-      if (!currentVsPreviousVersion.flat().some(c => c.path === change.path)) {
-        // remote activity changed and there are no local edits
-        operations.push({
-          type: 'merge' as const,
-          fieldChanges: [change],
-          applied: true
-        })
-      }
-      else if (remoteVsPreviousVersion.flat().some(c => c.path === change.path)) {
-        // remote activity and local both changed
-        operations.push({
-          type: 'conflict' as const,
-          fieldChanges: [change],
-          conflictApplied: true,
-          applied: true
-        })
-      }
-      else {
-        // only local changed
-        operations.push({
-          type: 'reverse local' as const,
-          fieldChanges: [change],
-          applied: false
-        })
-      }
-    }
-    else {
-      // involves ride/ids
-      if (!Array.isArray(change)) {
-        // move
-
-      }
-      else if (change.some(c => c.path === '/rides/ids' && c.previousValue.length > c.newValue.length)) {
-
-      }
-      else if (change.some(c => c.path === '/rides/ids' && c.previousValue.length < c.newValue.length)) {
-
-      }
-      else {
-        //change.path === '/rides/ids'
-        if (!currentVsPreviousVersion.some(c => !Array.isArray(c) && c.path === '/rides/ids')) {
-          operations.push({
-            type: 'merge' as const,
-            fieldChanges: [change],
-            applied: true
-          })
-        }
-        else if (remoteVsPreviousVersion.some(c => !Array.isArray(c) && c.path === '/rides/ids')) {
-          operations.push({
-            type: 'conflict' as const,
-            fieldChanges: [change],
-            conflictApplied: true,
-            applied: true
-          })
-        }
-        else {
-          operations.push({
-            type: 'reverse local' as const,
-            fieldChanges: [change],
-            applied: false
-          })
-        }
-      }
-      ///////
-      if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
-        // remote activity changed and there are no local edits
-        operations.push({
-          type: 'merge' as const,
-          fieldChanges: [change].flat(),
-          applied: true
-        })
-      }
-      else if (hasConflictedChanges(change, remoteVsPreviousVersion)) {
-        // remote activity and local both changed
-        operations.push({
-          type: 'conflict' as const,
-          fieldChanges: [change].flat(),
-          conflictApplied: true,
-          applied: true
-        })
-      }
-      else {
-        // only local changed
-        operations.push({
-          type: 'reverse local' as const,
-          fieldChanges: [change].flat(),
-          applied: false
-        })
-      }
-    }
+    const operation = CalculateOperationFromRefreshedFieldChange(
+      change,
+      currentVsPreviousVersion,
+      remoteVsPreviousVersion)
+    operations.push(operation)
   }
 
   // remove this?
-  if (!operations.some(op => op.type === 'merge' || op.type === 'conflict')) {
+  if (operations.length === 0) {
     return undefined
   }
   return {
@@ -874,3 +773,4 @@ export function CalculateRefreshedStep(
     mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
   }
 }
+//#endregion Refreshed Step
