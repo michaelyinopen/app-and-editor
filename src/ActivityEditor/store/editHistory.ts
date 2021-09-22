@@ -25,19 +25,21 @@ export type FieldChange = {
 
 export type GroupedFieldChanges = FieldChange[]
 
-export type Conflict = {
-  name: string,
+export type Operation = {
+  type: 'edit' | 'merge' | 'conflict' | 'reverse local',
   fieldChanges: FieldChange[],
+  conflictApplied?: boolean, // need this to preserve the selection when toggling 'merge' and 'discard local changes'
   applied: boolean,
 }
 
 export type Step = {
   name: string,
-  fieldChanges: FieldChange[],
+  // fieldChanges: FieldChange[],
+  // conflicts?: Conflict[],
+  // reverseLocalFieldChanges?: FieldChange[],
+  operations: Operation[],
   versionToken?: string,
   mergeBehaviour?: 'merge' | 'discard local changes',
-  conflicts?: Conflict[],
-  reverseLocalFieldChanges?: FieldChange[],
   saveStatus?: 'saving' | 'saved',
 }
 
@@ -106,14 +108,13 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
           previousValue: previousFormData.rides.entities[removedRideId],
           newValue: undefined
         }
-
         calculationRideIds = newCalculationRideIds
         rideFieldChanges.push([idFieldChange, entityFieldChange])
       }
     })();
 
     (function moveRideFieldChanges() {
-      // rides that are not added or deleted
+      // rides that are not added or removed
       const correspondingCurrentRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
       if (!arraysEqual(calculationRideIds, correspondingCurrentRideIds)) {
         rideFieldChanges.push({
@@ -158,7 +159,6 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
           previousValue: undefined,
           newValue: currentFormData.rides.entities[addedRideId]
         }
-
         calculationRideIds = newCalculationRideIds
         rideFieldChanges.push([idFieldChange, entityFieldChange])
       }
@@ -166,40 +166,18 @@ function getFieldChanges(previousFormData: FormData, currentFormData: FormData):
 
     return rideFieldChanges
   }
-  fieldChanges.push(...getRidesFieldChanges(previousFormData, currentFormData))
 
+  fieldChanges.push(...getRidesFieldChanges(previousFormData, currentFormData))
   return fieldChanges
 }
 
-function mergeFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
+function combineFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
   return (a.path === b.path)
     ? a.previousValue === b.newValue
       || (Array.isArray(a) && Array.isArray(b) && arraysEqual(a, b))
-      ? [] // merged resulting in no-op
+      ? [] // combined resulting in no-op
       : [{ path: a.path, previousValue: a.previousValue, newValue: b.newValue }] // merged
-    : [a, b] // not merged
-}
-
-// isItem means non-property change, means create or delete
-function getRideId(path: string): { rideId: string | undefined, isItem: boolean } {
-  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
-    const rideId = path.substring('/rides/entities/'.length)
-    return {
-      rideId,
-      isItem: true
-    }
-  }
-  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
-    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
-    return {
-      rideId,
-      isItem: false
-    }
-  }
-  return {
-    rideId: undefined,
-    isItem: false
-  }
+    : [a, b] // not combined
 }
 
 function calculateStepName(fieldChanges: FieldChange[]): string {
@@ -257,45 +235,70 @@ export function calculateSteps(
   if (fieldChanges.length === 0) {
     return [previousStep]
   }
-  if (previousStep.fieldChanges.length !== 1
-    || fieldChanges.length !== 1
+  if (fieldChanges.length !== 1
     || previousStep.versionToken
-    || previousStep.saveStatus) {
+    || previousStep.saveStatus
+    || previousStep.operations.length !== 1
+    || previousStep.operations[0].fieldChanges.length !== 1
+  ) {
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
-      fieldChanges: fieldChanges
+      operations: [{
+        type: 'edit' as const,
+        fieldChanges,
+        applied: true
+      }]
     }
     return [previousStep, newStep]
   }
-  const mergedFieldChanges = mergeFieldChanges(
-    previousStep.fieldChanges[0],
+  const combinedFieldChanges = combineFieldChanges(
+    previousStep.operations[0].fieldChanges[0],
     fieldChanges[0]
   )
-  if (mergedFieldChanges.length === 0) {
+  if (combinedFieldChanges.length === 0) {
+    // no-op
     return []
   }
-  else if (mergedFieldChanges.length === 1) {
-    const name = calculateStepName(mergedFieldChanges)
+  else if (combinedFieldChanges.length === 1) {
+    // combined
+    const name = calculateStepName(combinedFieldChanges)
     const mergedStep = {
       name,
-      fieldChanges: mergedFieldChanges
+      operations: [{
+        type: 'edit' as const,
+        fieldChanges: combinedFieldChanges,
+        applied: true
+      }]
     }
     return [mergedStep]
   }
-  else {// fieldChanges did not merge
+  else {
+    // did not combine
     const name = calculateStepName(fieldChanges)
     const newStep = {
       name,
-      fieldChanges: fieldChanges
+      operations: [{
+        type: 'edit' as const,
+        fieldChanges,
+        applied: true
+      }]
     }
     return [previousStep, newStep]
   }
 }
 
 //#region formData manipulation
-function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
-  // todo sequence undoFieldChange
+export type Adjust = {
+  '/rides/ids'?: {
+    type: 'remove' | 'add',
+    id: string,
+    index?: number,
+  }[]
+}
+
+function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>, adjust: Adjust): FormData | undefined {
+  // todo sequence undoFieldChange, handle offset
   const { path, previousValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -325,11 +328,29 @@ function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
       const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
       draft.rides.entities[rideId].description = previousValue
     }
+    else if (path === '/rides/ids') {
+      let rideIds: string[] = [...previousValue]
+      for (const rideIdAdjust of (adjust['/rides/ids'] ?? [])) {
+        if (rideIdAdjust.type === 'remove') {
+          // unapplied an remove
+          rideIds = rideIds.filter(rId => rId !== rideIdAdjust.id)
+        } else if (rideIdAdjust.type === 'add') {
+          // unapplied a add
+          rideIds = [
+            ...rideIds.slice(0, rideIdAdjust.index),
+            rideIdAdjust.id,
+            ...rideIds.slice(rideIdAdjust.index)
+          ]
+        }
+      }
+      draft.rides.ids = rideIds
+    }
   })
 }
 
-function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): FormData | undefined {
-  // todo sequence redoFieldChange
+// if everything is applied, offset will be empty
+function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>, adjust: Adjust): FormData | undefined {
+  // todo sequence redoFieldChange, handle offset
   const { path, newValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -356,87 +377,145 @@ function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>): F
       const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
       draft.rides.entities[rideId].description = newValue
     }
+    else if (path === '/rides/ids') {
+      let rideIds: string[] = [...newValue]
+      for (const rideIdAdjust of (adjust['/rides/ids'] ?? [])) {
+        if (rideIdAdjust.type === 'add') {
+          // unapplied a remove
+          rideIds = [
+            ...rideIds.slice(0, rideIdAdjust.index),
+            rideIdAdjust.id,
+            ...rideIds.slice(rideIdAdjust.index)
+          ]
+        } else if (rideIdAdjust.type === 'remove') {
+          // unapplied an add
+          rideIds = rideIds.filter(rId => rId !== rideIdAdjust.id)
+        }
+      }
+      draft.rides.ids = rideIds
+    }
   })
 }
 
-function undoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
-  // todo sequence undoFieldChanges
-  let formData = sourceFormData
-  for (const fieldChange of fieldChanges) {
-    if (isDraft(formData)) {
-      const undoResult = undoFieldChange(fieldChange, formData)
-      formData = typeof undoResult === 'undefined'
-        ? formData
-        : undoResult
+function calculateUndoAdjust(unappliedFieldChange: FieldChange, adjust: Adjust): Adjust {
+  const { path } = unappliedFieldChange
+  if (path !== '/rides/ids') {
+    return adjust
+  }
+  const rideIdAdjusts = adjust['/rides/ids'] ?? []
+  const previousValue: string[] = unappliedFieldChange.previousValue
+  const newValue: string[] = unappliedFieldChange.newValue
+  if (previousValue.length > newValue.length) {
+    // unapplied a remove
+    const removedId = [...previousValue].reverse().find(pRid => !newValue.includes(pRid))!
+    return {
+      ...adjust,
+      '/rides/ids': [
+        ...rideIdAdjusts,
+        {
+          type: 'remove',
+          id: removedId,
+        }
+      ]
+    }
+  } else if (previousValue.length < newValue.length) {
+    // unapplied an add
+    let addedIndex = (newValue.length - 1) - [...newValue].reverse().findIndex(nRid => !previousValue.includes(nRid))!
+    return {
+      ...adjust,
+      '/rides/ids': [
+        ...rideIdAdjusts,
+        {
+          type: 'add',
+          id: newValue[addedIndex],
+          index: addedIndex
+        }
+      ]
+    }
+  }
+  return adjust
+}
+
+function calculateRedoAdjust(unappliedFieldChange: FieldChange, adjust: Adjust): Adjust {
+  const { path } = unappliedFieldChange
+  if (path !== '/rides/ids') {
+    return adjust
+  }
+  const rideIdAdjusts = adjust['/rides/ids'] ?? []
+  const previousValue: string[] = unappliedFieldChange.previousValue
+  const newValue: string[] = unappliedFieldChange.newValue
+  if (previousValue.length > newValue.length) {
+    // unapplied a remove
+    const removedIndex = previousValue.findIndex(pRid => !newValue.includes(pRid))
+    const accumulatedOffset = rideIdAdjusts.filter(adj => adj.type === 'add').length
+    return {
+      ...adjust,
+      '/rides/ids': [
+        ...rideIdAdjusts,
+        {
+          index: accumulatedOffset + removedIndex,
+          id: previousValue[removedIndex],
+          type: 'add'
+        }
+      ]
+    }
+  } else if (previousValue.length < newValue.length) {
+    // unapplied an add
+    let addedId = newValue.find(pRid => !previousValue.includes(pRid))!
+    return {
+      ...adjust,
+      '/rides/ids': [
+        ...rideIdAdjusts,
+        {
+          type: 'remove',
+          id: addedId,
+        }
+      ]
+    }
+  }
+  return adjust
+}
+
+export function undoStep(step: Step, previousFormData: Draft<FormData>): FormData | undefined {
+  let formData = previousFormData
+  let adjust: Adjust = {}
+
+  const fieldChangeApplied = step.operations
+    .flatMap(op => op.fieldChanges.map(fc => [fc, op.applied] as const))
+    .reverse()
+
+  for (const [fieldChange, applied] of fieldChangeApplied) {
+    if (applied) {
+      const undoResult = undoFieldChange(fieldChange, formData, adjust)
+      formData = undoResult ?? formData
     } else {
-      formData = produce(formData, (draft) => {
-        return undoFieldChange(fieldChange, draft)
-      })
+      adjust = calculateUndoAdjust(fieldChange, adjust)
     }
   }
   return formData
 }
 
-function redoFieldChanges(fieldChanges: FieldChange[], sourceFormData: FormData | Draft<FormData>): FormData {
-  // todo sequence redoFieldChanges
-  let formData = sourceFormData
-  for (const fieldChange of fieldChanges) {
-    if (isDraft(formData)) {
-      const redoResult = redoFieldChange(fieldChange, formData)
-      formData = typeof redoResult === 'undefined'
-        ? formData
-        : redoResult
+export function redoStep(step: Step, previousFormData: Draft<FormData>): FormData | undefined {
+  let formData = previousFormData
+  let adjust: Adjust = {}
+
+  const fieldChangeApplied = step.operations
+    .flatMap(op => op.fieldChanges.map(fc => [fc, op.applied] as const))
+
+  for (const [fieldChange, applied] of fieldChangeApplied) {
+    if (applied) {
+      const redoResult = redoFieldChange(fieldChange, formData, adjust)
+      formData = redoResult ?? formData
     } else {
-      formData = produce(formData, (draft) => {
-        return redoFieldChange(fieldChange, draft)
-      })
+      adjust = calculateRedoAdjust(fieldChange, adjust)
     }
   }
   return formData
-}
-
-export function undoStep(step: Step, previousFormData: FormData | Draft<FormData>): FormData {
-  // todo sequence undoStep
-  const allFieldChanges = step.mergeBehaviour === 'merge'
-    ? step.fieldChanges
-      .concat(
-        step.conflicts?.filter(c => c.applied).flatMap(c => c.fieldChanges) ?? []
-      )
-    : step.mergeBehaviour === 'discard local changes'
-      ? step.fieldChanges
-        .concat(
-          step.conflicts?.flatMap(c => c.fieldChanges) ?? []
-        )
-        .concat(
-          step.reverseLocalFieldChanges ?? []
-        )
-      : step.fieldChanges
-  return undoFieldChanges(allFieldChanges, previousFormData)
-}
-
-export function redoStep(step: Step, previousFormData: FormData): FormData {
-  // todo sequence redoStep
-  const allFieldChanges = step.mergeBehaviour === 'merge'
-    ? step.fieldChanges
-      .concat(
-        step.conflicts?.filter(c => c.applied).flatMap(c => c.fieldChanges) ?? []
-      )
-    : step.mergeBehaviour === 'discard local changes'
-      ? step.fieldChanges
-        .concat(
-          step.conflicts?.flatMap(c => c.fieldChanges) ?? []
-        )
-        .concat(
-          step.reverseLocalFieldChanges ?? []
-        )
-      : step.fieldChanges
-  return redoFieldChanges(allFieldChanges, previousFormData)
 }
 
 export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
   // todo sequence SwitchToMerge
-  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseLocalFieldChanges ?? [])
+  const fieldChangesToRedo = step.operations.filter(op => op.applied).flatMap(op => op.fieldChanges)
   return undoFieldChanges(allFieldChanges, currentFormData)
 }
 
@@ -465,12 +544,11 @@ function hasRelatedChanges(
   return aChanges.some(ac => bChanges.some(bc => bc.path === ac.path))
 }
 
-export function conflictHasRelatedChanges(conflict: Conflict, step: Step): boolean {
-  const stepFieldChanges = step.fieldChanges
-    .concat(step.conflicts?.flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseLocalFieldChanges ?? [])
-
-  return hasRelatedChanges(conflict.fieldChanges, stepFieldChanges)
+export function conflictHasRelatedChanges(operation: Operation, step: Step): boolean {
+  return hasRelatedChanges(
+    operation.fieldChanges,
+    step.operations.flatMap(op => op.fieldChanges)
+  )
 }
 
 export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
@@ -495,14 +573,43 @@ export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormD
   }
 }
 
+function getRideId(path: string): string | undefined {
+  if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+    const rideId = path.substring('/rides/entities/'.length)
+    return rideId
+  }
+  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
+    return rideId
+  }
+  return undefined
+}
+
 function hasConflictedChanges(
   change: FieldChange | GroupedFieldChanges,
   otherChanges: (FieldChange | GroupedFieldChanges)[]
 ): boolean {
   if (!Array.isArray(change)) {
+    if (change.path === '/rides/ids') {
+      return otherChanges.some(oc => !Array.isArray(oc) && oc.path === '/rides/ids')
+    }
     return otherChanges.flat().some(c => c.path === change.path)
-  } else {
-
+  } else if (change.length === 2 && change.some(c => c.path === '/rides/ids')) {
+    const entityChange = change.find(c =>
+      c.path.startsWith('/rides/entities/') && numberOfSlashes(c.path) === 3)!
+    if (entityChange
+      && entityChange.previousValue !== undefined
+      && entityChange.newValue === undefined) {
+      // remove ride
+      return otherChanges.flat().some(oc => oc.path === '/rides/ids')
+        || 
+    }
+    if (entityChange
+      && entityChange.previousValue === undefined
+      && entityChange.newValue !== undefined) {
+      // add ride
+      return 'Add ride'
+    }
   }
 }
 
@@ -518,37 +625,104 @@ export function CalculateRefreshedStep(
   const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, localFormData)
   const remoteVsPreviousVersion = getFieldChanges(previousVersionFormData, remoteFormData)
 
-  const nonConflictFieldChanges: FieldChange[] = []
-  const conflictFieldChanges: (FieldChange | GroupedFieldChanges)[] = []
-  const reverseLocalFieldChanges: FieldChange[] = []
+  const operations: Operation[] = []
 
   for (const change of remoteVsLocal) {
-    if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
-      // remote activity changed and there are no local edits
-      nonConflictFieldChanges.push(...[change].flat())
-    }
-    else if (hasConflictedChanges(change, remoteVsPreviousVersion)) {
-      // remote activity and local both changed
-      conflictFieldChanges.push(change)
+    // extract calculateOperation(currentVsPreviousVersion, remoteVsPreviousVersion, change):Operation
+    if (!Array.isArray(change) && change.path !== '/rides/ids') {
+      if (!currentVsPreviousVersion.flat().some(c => c.path === change.path)) {
+        // remote activity changed and there are no local edits
+        operations.push({
+          type: 'merge' as const,
+          fieldChanges: [change],
+          applied: true
+        })
+      }
+      else if (remoteVsPreviousVersion.flat().some(c => c.path === change.path)) {
+        // remote activity and local both changed
+        operations.push({
+          type: 'conflict' as const,
+          fieldChanges: [change],
+          conflictApplied: true,
+          applied: true
+        })
+      }
+      else {
+        // only local changed
+        operations.push({
+          type: 'reverse local' as const,
+          fieldChanges: [change],
+          applied: false
+        })
+      }
     }
     else {
-      // only local changed
-      reverseLocalFieldChanges.push(...[change].flat())
+      // involves ride/ids
+      if (Array.isArray(change)) {
+
+      }
+      else {
+        //change.path === '/rides/ids'
+        if (!currentVsPreviousVersion.some(c => !Array.isArray(c) && c.path === '/rides/ids')) {
+          operations.push({
+            type: 'merge' as const,
+            fieldChanges: [change],
+            applied: true
+          })
+        }
+        else if (remoteVsPreviousVersion.some(c => !Array.isArray(c) && c.path === '/rides/ids')) {
+          operations.push({
+            type: 'conflict' as const,
+            fieldChanges: [change],
+            conflictApplied: true,
+            applied: true
+          })
+        }
+        else {
+          operations.push({
+            type: 'reverse local' as const,
+            fieldChanges: [change],
+            applied: false
+          })
+        }
+      }
+      ///////
+      if (!hasConflictedChanges(change, currentVsPreviousVersion)) {
+        // remote activity changed and there are no local edits
+        operations.push({
+          type: 'merge' as const,
+          fieldChanges: [change].flat(),
+          applied: true
+        })
+      }
+      else if (hasConflictedChanges(change, remoteVsPreviousVersion)) {
+        // remote activity and local both changed
+        operations.push({
+          type: 'conflict' as const,
+          fieldChanges: [change].flat(),
+          conflictApplied: true,
+          applied: true
+        })
+      }
+      else {
+        // only local changed
+        operations.push({
+          type: 'reverse local' as const,
+          fieldChanges: [change].flat(),
+          applied: false
+        })
+      }
     }
   }
-  if (nonConflictFieldChanges.length === 0 && conflictFieldChanges.length === 0) {
+
+  // remove this?
+  if (!operations.some(op => op.type === 'merge' || op.type === 'conflict')) {
     return undefined
   }
   return {
     name: 'Refreshed',
-    fieldChanges: nonConflictFieldChanges,
+    operations,
     versionToken: remoteActivity.versionToken,
     mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
-    conflicts: conflictFieldChanges.map(c => ({
-      name: calculateStepName([c].flat()),
-      fieldChanges: [c].flat(),
-      applied: true
-    })),
-    reverseLocalFieldChanges,
   }
 }

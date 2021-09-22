@@ -70,7 +70,7 @@ const ExitPrompt = () => {
   const isCurrentStepSaved = useActivityEditorSelector(es => es.steps[es.currentStepIndex].saveStatus === 'saved')
   const condition = isEdit
     && !isCurrentStepSaved
-    && (isNew || !isInitialStep)
+    && (isNew || !isInitialStep) // deep equal with previous version?
   return (
     <Prompt
       when={condition}

@@ -84,7 +84,7 @@ const activityEditorInitialState: ActivityEditorState = {
       entities: {}
     },
   },
-  steps: [{ name: 'initial', fieldChanges: [] }],
+  steps: [{ name: 'initial', operations: [] }],
   currentStepIndex: 0,
 }
 
