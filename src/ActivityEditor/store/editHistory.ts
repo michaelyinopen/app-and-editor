@@ -480,10 +480,15 @@ export function undoStep(step: Step, previousFormData: FormData): FormData {
     .reverse()
 
   for (const [fieldChange, applied] of fieldChangeApplied) {
-    if (applied) {
+    if (fieldChange.path === '/rides/ids') {
       formData = undoFieldChange(fieldChange, formData, adjust)
+      if (!applied) {
+        adjust = calculateUndoAdjust(fieldChange, adjust)
+      }
     } else {
-      adjust = calculateUndoAdjust(fieldChange, adjust)
+      if (applied) {
+        formData = undoFieldChange(fieldChange, formData, adjust)
+      }
     }
   }
   return formData
@@ -497,10 +502,15 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
     .flatMap(op => op.fieldChanges.map(fc => [fc, op.applied] as const))
 
   for (const [fieldChange, applied] of fieldChangeApplied) {
-    if (applied) {
+    if (fieldChange.path === '/rides/ids') {
       formData = redoFieldChange(fieldChange, formData, adjust)
+      if (!applied) {
+        adjust = calculateRedoAdjust(fieldChange, adjust)
+      }
     } else {
-      adjust = calculateRedoAdjust(fieldChange, adjust)
+      if (applied) {
+        formData = redoFieldChange(fieldChange, formData, adjust)
+      }
     }
   }
   return formData
