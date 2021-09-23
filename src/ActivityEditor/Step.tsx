@@ -36,6 +36,10 @@ const VersionedStep = ({
 }: StepProps) => {
   const editorDispatch = useActivityEditorDispatch()
   const currentStepIndex = useActivityEditorSelector(es => es.currentStepIndex)
+  const conflicts = step.mergeBehaviour !== 'merge'
+    ? []
+    : step.operations.filter(op => op.type === 'conflict')
+    
   return (
     <div
       style={{ borderStyle: 'ridge' }}
@@ -73,10 +77,10 @@ const VersionedStep = ({
         />
         <label htmlFor={`step${stepIndex}-merge`}>Merge</label>
       </div>
-      {step.mergeBehaviour === 'merge' && step.conflicts!.length !== 0 && (
+      {conflicts.length !== 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 32 }}>
           <b>Conflicts</b>
-          {step.conflicts!.map((conflict, conflictIndex) => (
+          {conflicts.map((conflict, conflictIndex) => (
             <Conflict
               key={`conflict-${stepIndex}-${conflictIndex}`}
               stepIndex={stepIndex}

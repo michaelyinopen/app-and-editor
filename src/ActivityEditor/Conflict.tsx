@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import memoize from 'lodash/memoize'
 import {
   Step as StepType,
-  Conflict as ConflictType,
+  Operation as OperationType,
   Step,
   conflictHasRelatedChanges
 } from './store/editHistory'
@@ -18,7 +18,7 @@ import {
 type ConfictProps = {
   stepIndex: number,
   conflictIndex: number,
-  conflict: ConflictType,
+  conflict: OperationType,
 }
 
 export const Conflict = ({
@@ -31,7 +31,6 @@ export const Conflict = ({
   const steps: StepType[] = useActivityEditorSelector(es => es.steps)
 
   const undone = stepIndex > currentStepIndex
-
   const hasRelatedChangesWithStepMemoize = useMemo(
     () => {
       const hasRelatedChangesWithStep = (step: Step) => {
@@ -62,7 +61,7 @@ export const Conflict = ({
       <input
         type="checkbox"
         id={`conflict-${stepIndex}-${conflictIndex}`}
-        checked={conflict.applied}
+        checked={conflict.conflictApplied}
         onChange={e => {
           if (e.target.checked) {
             editorDispatch(applyConflict(stepIndex, conflictIndex))
@@ -72,7 +71,7 @@ export const Conflict = ({
         }}
         disabled={disabled}
       />
-      <label htmlFor={`conflict-${stepIndex}-${conflictIndex}`}>{conflict.name}</label>
+      <label htmlFor={`conflict-${stepIndex}-${conflictIndex}`}>{conflict.conflictName}</label>
     </div>
   )
 }

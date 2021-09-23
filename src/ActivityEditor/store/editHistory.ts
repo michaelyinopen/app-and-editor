@@ -511,28 +511,32 @@ export function redoStep(step: Step, previousFormData: Draft<FormData>): FormDat
   return formData
 }
 
-export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
-  // todo sequence SwitchToMerge
-  const fieldChangesToRedo = step.operations.filter(op => op.applied).flatMap(op => op.fieldChanges)
-  return undoFieldChanges(allFieldChanges, currentFormData)
-}
+// export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
+//   // todo sequence SwitchToMerge
+//   // const fieldChangesToRedo = step.operations.filter(op => op.applied).flatMap(op => op.fieldChanges)
+//   // return undoFieldChanges(allFieldChanges, currentFormData)
+//   return currentFormData
+// }
 
-export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
-  // todo sequence SwitchToDiscardLocalChanges
-  const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
-    .concat(step.reverseLocalFieldChanges ?? [])
-  return redoFieldChanges(allFieldChanges, currentFormData)
-}
+// export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
+//   // todo sequence SwitchToDiscardLocalChanges
+//   // const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
+//   //   .concat(step.reverseLocalFieldChanges ?? [])
+//   // return redoFieldChanges(allFieldChanges, currentFormData)
+//   return currentFormData
+// }
 
-export function applyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
-  // todo sequence applyConflictToFromData
-  return redoFieldChanges(conflict.fieldChanges, currentFormData)
-}
+// export function applyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+//   // todo sequence applyConflictToFromData
+//   // return redoFieldChanges(conflict.fieldChanges, currentFormData)
+//   return currentFormData
+// }
 
-export function unApplyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
-  // todo sequence unApplyConflictToFromData
-  return undoFieldChanges(conflict.fieldChanges, currentFormData)
-}
+// export function unApplyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
+//   // todo sequence unApplyConflictToFromData
+//   // return undoFieldChanges(conflict.fieldChanges, currentFormData)
+//   return currentFormData
+// }
 //#endregion formData maipulation
 
 function hasRelatedChanges(
