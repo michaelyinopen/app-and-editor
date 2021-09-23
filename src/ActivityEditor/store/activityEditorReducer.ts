@@ -31,8 +31,6 @@ import {
   Step,
   // unApplyConflictToFromData,
   // applyConflictToFromData,
-  // SwitchToDiscardLocalChanges,
-  // SwitchToMerge,
   undoStep
 } from './editHistory'
 
@@ -180,8 +178,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           discardLocalChanges
         )
         if (refreshedStep) {
-          const redoStepResult = redoStep(refreshedStep, state.formData)
-          state.formData = redoStepResult ?? state.formData
+          state.formData = redoStep(refreshedStep, state.formData)
           state.steps.splice(state.currentStepIndex + 1)
           state.steps.push(refreshedStep)
           state.currentStepIndex = state.steps.length - 1
@@ -251,15 +248,13 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
     })
     .addCase(undo, (state) => {
       if (state.currentStepIndex > 0) {
-        const undoStepResult = undoStep(state.steps[state.currentStepIndex], state.formData)
-        state.formData = undoStepResult ?? state.formData
+        state.formData = undoStep(state.steps[state.currentStepIndex], state.formData)
         state.currentStepIndex = state.currentStepIndex - 1
       }
     })
     .addCase(redo, (state) => {
       if (state.currentStepIndex < state.steps.length - 1) {
-        const redoStepResult = redoStep(state.steps[state.currentStepIndex + 1], state.formData)
-        state.formData = redoStepResult ?? state.formData
+        state.formData = redoStep(state.steps[state.currentStepIndex + 1], state.formData)
         state.currentStepIndex = state.currentStepIndex + 1
       }
     })
@@ -271,16 +266,14 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
             .slice(targetStepIndex + 1, state.currentStepIndex + 1)
             .reverse()
           for (const stepToUndo of stepsToUndo) {
-            const undoStepResult = undoStep(stepToUndo, formData)
-            formData = undoStepResult ?? formData
+            formData = undoStep(stepToUndo, formData)
           }
         }
         else if (targetStepIndex > state.currentStepIndex) {
           const stepsToRedo = state.steps
             .slice(state.currentStepIndex + 1, targetStepIndex + 1)
           for (const stepToRedo of stepsToRedo) {
-            const redoStepResult = redoStep(stepToRedo, formData)
-            formData = redoStepResult ?? formData
+            formData = redoStep(stepToRedo, formData)
           }
         }
         state.formData = formData
@@ -306,57 +299,117 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.steps[stepIndex].saveStatus = 'saved'
     })
     .addCase(setMergeBehaviourMerge, (state, { payload: { stepIndex } }) => {
-      // if (state.currentStepIndex !== stepIndex
-      //   || state.steps[stepIndex].mergeBehaviour === 'merge'
-      // ) {
-      //   return
-      // }
-      // state.steps.splice(state.currentStepIndex + 1)
-      // state.steps[stepIndex].mergeBehaviour = 'merge'
-      // state.formData = SwitchToMerge(state.steps[stepIndex], state.formData)
-      // for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
-      //   step.saveStatus = undefined
-      // }
+      if (state.currentStepIndex !== stepIndex
+        || state.steps[stepIndex].mergeBehaviour === 'merge'
+      ) {
+        return
+      }
+      state.steps.splice(state.currentStepIndex + 1)
+
+      // undo step, then change step to merge, then redo the updated step
+      const step = state.steps[stepIndex]
+
+      let formData = state.formData
+      formData = undoStep(step, formData)
+      step.mergeBehaviour = 'merge'
+      for (const operation of step.operations) {
+        operation.applied =
+          operation.type === 'merge' ? true
+            : operation.type === 'conflict' ? operation.conflictApplied!
+              : operation.type === 'reverse local' ? false
+                : false
+      }
+      formData = redoStep(step, formData)
+      state.formData = formData
+
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
+      }
     })
     .addCase(setMergeBehaviourDiscardLocal, (state, { payload: { stepIndex } }) => {
-      // if (state.currentStepIndex !== stepIndex
-      //   || state.steps[stepIndex].mergeBehaviour === 'discard local changes'
-      // ) {
-      //   return
-      // }
-      // state.steps.splice(state.currentStepIndex + 1)
-      // state.steps[stepIndex].mergeBehaviour = 'discard local changes'
-      // state.formData = SwitchToDiscardLocalChanges(state.steps[stepIndex], state.formData)
-      // for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
-      //   step.saveStatus = undefined
-      // }
+      if (state.currentStepIndex !== stepIndex
+        || state.steps[stepIndex].mergeBehaviour === 'discard local changes'
+      ) {
+        return
+      }
+      state.steps.splice(state.currentStepIndex + 1)
+
+      // undo step, then change step to merge, then redo the updated step
+      const step = state.steps[stepIndex]
+
+      let formData = state.formData
+      formData = undoStep(step, formData)
+      step.mergeBehaviour = 'discard local changes'
+      for (const operation of step.operations) {
+        operation.applied = true
+      }
+      formData = redoStep(step, formData)
+      state.formData = formData
+
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
+      }
     })
     .addCase(applyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
-      // if (
-      //   state.steps[stepIndex].mergeBehaviour !== 'merge'
-      //   || state.steps[stepIndex].conflicts![conflictIndex].applied
-      // ) {
-      //   return
-      // }
-      // state.steps.splice(state.currentStepIndex + 1)
-      // state.steps[stepIndex].conflicts![conflictIndex].applied = true
-      // state.formData = applyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex], state.formData)
-      // for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
-      //   step.saveStatus = undefined
-      // }
+      if (state.steps[stepIndex].mergeBehaviour !== 'merge') {
+        return
+      }
+      // undo all subsequent steps and the refreshed step
+      // then update step's conflict's conflictApplied and apply
+      // then redo the refreshed step and subsequent steps
+      const step = state.steps[stepIndex]
+      const conflictToApply = step.operations.filter(op => op.type === 'conflict')[conflictIndex]
+
+      let formData = state.formData
+      const stepsToUndo = state.steps
+        .slice(stepIndex, state.currentStepIndex + 1)
+        .reverse()
+      for (const stepToUndo of stepsToUndo) {
+        formData = undoStep(stepToUndo, formData)
+      }
+
+      conflictToApply.conflictApplied = true
+      conflictToApply.applied = true
+
+      const stepsToRedo = stepsToUndo.reverse()
+      for (const stepToRedo of stepsToRedo) {
+        formData = redoStep(stepToRedo, formData)
+      }
+      state.formData = formData
+
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
+      }
     })
     .addCase(unApplyConflict, (state, { payload: { stepIndex, conflictIndex } }) => {
-      // if (
-      //   state.steps[stepIndex].mergeBehaviour !== 'merge'
-      //   || !state.steps[stepIndex].conflicts![conflictIndex].applied
-      // ) {
-      //   return
-      // }
-      // state.steps.splice(state.currentStepIndex + 1)
-      // state.steps[stepIndex].conflicts![conflictIndex].applied = false
-      // state.formData = unApplyConflictToFromData(state.steps[stepIndex].conflicts![conflictIndex], state.formData)
-      // for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
-      //   step.saveStatus = undefined
-      // }
+      if (state.steps[stepIndex].mergeBehaviour !== 'merge') {
+        return
+      }
+      // undo all subsequent steps and the refreshed step
+      // then update step's conflict's conflictApplied and apply
+      // then redo the refreshed step and subsequent steps
+      const step = state.steps[stepIndex]
+      const conflictToApply = step.operations.filter(op => op.type === 'conflict')[conflictIndex]
+
+      let formData = state.formData
+      const stepsToUndo = state.steps
+        .slice(stepIndex, state.currentStepIndex + 1)
+        .reverse()
+      for (const stepToUndo of stepsToUndo) {
+        formData = undoStep(stepToUndo, formData)
+      }
+
+      conflictToApply.conflictApplied = false
+      conflictToApply.applied = false
+
+      const stepsToRedo = stepsToUndo.reverse()
+      for (const stepToRedo of stepsToRedo) {
+        formData = redoStep(stepToRedo, formData)
+      }
+      state.formData = formData
+
+      for (const step of state.steps.slice(stepIndex).filter(s => s.saveStatus)) {
+        step.saveStatus = undefined
+      }
     })
 })

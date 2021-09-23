@@ -1,4 +1,4 @@
-import { produce, Draft } from "immer"
+import { produce } from "immer"
 import { ActivityWithDetailFromStore } from "./actions"
 
 export type FormData = {
@@ -295,8 +295,7 @@ export type Adjust = {
   }[]
 }
 
-function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>, adjust: Adjust): FormData | undefined {
-  // todo sequence undoFieldChange, handle offset
+function undoFieldChange(fieldChange: FieldChange, formData: FormData, adjust: Adjust): FormData {
   const { path, previousValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -346,9 +345,7 @@ function undoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>, ad
   })
 }
 
-// if everything is applied, offset will be empty
-function redoFieldChange(fieldChange: FieldChange, formData: Draft<FormData>, adjust: Adjust): FormData | undefined {
-  // todo sequence redoFieldChange, handle offset
+function redoFieldChange(fieldChange: FieldChange, formData: FormData, adjust: Adjust): FormData {
   const { path, newValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -474,7 +471,7 @@ function calculateRedoAdjust(unappliedFieldChange: FieldChange, adjust: Adjust):
   return adjust
 }
 
-export function undoStep(step: Step, previousFormData: Draft<FormData>): FormData | undefined {
+export function undoStep(step: Step, previousFormData: FormData): FormData {
   let formData = previousFormData
   let adjust: Adjust = {}
 
@@ -484,8 +481,7 @@ export function undoStep(step: Step, previousFormData: Draft<FormData>): FormDat
 
   for (const [fieldChange, applied] of fieldChangeApplied) {
     if (applied) {
-      const undoResult = undoFieldChange(fieldChange, formData, adjust)
-      formData = undoResult ?? formData
+      formData = undoFieldChange(fieldChange, formData, adjust)
     } else {
       adjust = calculateUndoAdjust(fieldChange, adjust)
     }
@@ -493,7 +489,7 @@ export function undoStep(step: Step, previousFormData: Draft<FormData>): FormDat
   return formData
 }
 
-export function redoStep(step: Step, previousFormData: Draft<FormData>): FormData | undefined {
+export function redoStep(step: Step, previousFormData: FormData): FormData {
   let formData = previousFormData
   let adjust: Adjust = {}
 
@@ -502,41 +498,13 @@ export function redoStep(step: Step, previousFormData: Draft<FormData>): FormDat
 
   for (const [fieldChange, applied] of fieldChangeApplied) {
     if (applied) {
-      const redoResult = redoFieldChange(fieldChange, formData, adjust)
-      formData = redoResult ?? formData
+      formData = redoFieldChange(fieldChange, formData, adjust)
     } else {
       adjust = calculateRedoAdjust(fieldChange, adjust)
     }
   }
   return formData
 }
-
-// export function SwitchToMerge(step: Step, currentFormData: FormData): FormData {
-//   // todo sequence SwitchToMerge
-//   // const fieldChangesToRedo = step.operations.filter(op => op.applied).flatMap(op => op.fieldChanges)
-//   // return undoFieldChanges(allFieldChanges, currentFormData)
-//   return currentFormData
-// }
-
-// export function SwitchToDiscardLocalChanges(step: Step, currentFormData: FormData): FormData {
-//   // todo sequence SwitchToDiscardLocalChanges
-//   // const allFieldChanges = (step.conflicts?.filter(c => !c.applied).flatMap(c => c.fieldChanges) ?? [])
-//   //   .concat(step.reverseLocalFieldChanges ?? [])
-//   // return redoFieldChanges(allFieldChanges, currentFormData)
-//   return currentFormData
-// }
-
-// export function applyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
-//   // todo sequence applyConflictToFromData
-//   // return redoFieldChanges(conflict.fieldChanges, currentFormData)
-//   return currentFormData
-// }
-
-// export function unApplyConflictToFromData(conflict: Conflict, currentFormData: FormData): FormData {
-//   // todo sequence unApplyConflictToFromData
-//   // return undoFieldChanges(conflict.fieldChanges, currentFormData)
-//   return currentFormData
-// }
 //#endregion formData maipulation
 
 function hasRelatedChanges(

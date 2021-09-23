@@ -24,7 +24,7 @@ export const ActivityEditorForm = () => {
 
   const disabled = !isNew && (!isEdit || !initialized)
   return (
-    <form onSubmit={() => { }} >
+    <form style={{ minWidth: 250 }} >
       <fieldset disabled={disabled} >
         <label htmlFor="name">name:</label><br />
         <input type="text" id="name" value={name} onChange={e => { editorDispatch(setName(e.target.value ?? '')) }} /><br />

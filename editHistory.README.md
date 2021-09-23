@@ -61,6 +61,9 @@ before and after states -> operations
 All Actions that chould change formData will create have editHistory middleware calculate step, except actions that could change the steps list, those are handles by ways other than middleware
 
 
+Must use draft update pattern for formData manipulation
+need to use produce fro every field change, because there can be replacement of an object property (collection add) and the new part is not drafted
+
 ///////////
 ## Edit patterns
 ### Edit field
