@@ -7,7 +7,7 @@ import {
   TypedUseSelectorHook
 } from 'react-redux'
 import { activityEditorReducer } from './activityEditorReducer'
-import { editHistoryMiddleware } from './editHistoryMiddleware'
+import { editHistoryMiddleware } from './editHistory'
 
 const activityEditorContext = React.createContext<any>(null)
 

@@ -26,12 +26,10 @@ import {
   removeRide,
 } from './actions'
 import {
-  CalculateRefreshedStep,
+  calculateRefreshedStep,
+  undoStep,
   redoStep,
   Step,
-  // unApplyConflictToFromData,
-  // applyConflictToFromData,
-  undoStep
 } from './editHistory'
 
 type FormDataState = {
@@ -171,7 +169,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           return
         }
         const discardLocalChanges = !state.isEdit
-        const refreshedStep = CalculateRefreshedStep(
+        const refreshedStep = calculateRefreshedStep(
           state.versions[state.versions.length - 1].formData,
           state.formData,
           activity,
