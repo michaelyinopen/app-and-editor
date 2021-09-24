@@ -41,7 +41,7 @@ function combineFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
     ? a.previousValue === b.newValue
       || (Array.isArray(a) && Array.isArray(b) && arraysEqual(a, b))
       ? [] // combined resulting in no-op
-      : [{ path: a.path, previousValue: a.previousValue, newValue: b.newValue }] // merged
+      : [{ ...a, previousValue: a.previousValue, newValue: b.newValue }] // merged
     : [a, b] // not combined
 }
 

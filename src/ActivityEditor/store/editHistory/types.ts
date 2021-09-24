@@ -14,11 +14,19 @@ export type FormData = {
   }
 }
 
+
 export type FieldChange = {
   path: string,
-  previousValue: any,
-  newValue: any,
+  previousValue?: any,
+  newValue?: any,
+  collectionChange?: CollectionChange
 }
+
+export type CollectionChange = CollectionRemoveChange | CollectionMoveChange | CollectionAddChange
+
+export type CollectionAddChange = { type: 'add', id: string, index: number, }
+export type CollectionMoveChange = { type: 'move' }
+export type CollectionRemoveChange = { type: 'remove', id: string, index: number, }
 
 export type GroupedFieldChanges = FieldChange[]
 

@@ -5,6 +5,8 @@ import {
   GroupedFieldChanges,
   Operation,
   Step,
+  CollectionRemoveChange,
+  CollectionAddChange,
 } from './types'
 import {
   calculateStepName,
@@ -38,10 +40,9 @@ function isRemovedRide(change: FieldChange | GroupedFieldChanges): [true, string
   if (Array.isArray(change)) {
     const removalIdsFieldChange = change.find(c =>
       c.path === '/rides/ids'
-      && c.previousValue.length > c.newValue.length)
+      && c.collectionChange?.type === 'remove')
     if (removalIdsFieldChange) {
-      const removedId = removalIdsFieldChange.previousValue
-        .find((id: string) => !removalIdsFieldChange.newValue.includes(id))
+      const removedId = (removalIdsFieldChange.collectionChange as CollectionRemoveChange).id
       return [true, removedId]
     }
   }
@@ -56,10 +57,9 @@ function isAddedRide(change: FieldChange | GroupedFieldChanges): [true, string] 
   if (Array.isArray(change)) {
     const additionIdsFieldChange = change.find(c =>
       c.path === '/rides/ids'
-      && c.previousValue.length < c.newValue.length)
+      && c.collectionChange?.type === 'add')
     if (additionIdsFieldChange) {
-      const addedId = additionIdsFieldChange.newValue
-        .find((id: string) => !additionIdsFieldChange.previousValue.includes(id))
+      const addedId = (additionIdsFieldChange.collectionChange as CollectionAddChange).id
       return [true, addedId]
     }
   }
@@ -76,9 +76,8 @@ function isRemovedRideFor(rideId: string, change: FieldChange | GroupedFieldChan
   return Array.isArray(change)
     && change.some(c =>
       c.path === '/rides/ids'
-      && c.previousValue.length > c.newValue.length
-      && !c.newValue.includes(rideId)
-      && c.previousValue.includes(rideId)
+      && c.collectionChange?.type === 'remove'
+      && c.collectionChange.id === rideId
     )
 }
 
@@ -86,9 +85,8 @@ function isAddedRideFor(rideId: string, change: FieldChange | GroupedFieldChange
   return Array.isArray(change)
     && change.some(c =>
       c.path === '/rides/ids'
-      && c.previousValue.length < c.newValue.length
-      && !c.previousValue.includes(rideId)
-      && c.newValue.includes(rideId)
+      && c.collectionChange?.type === 'add'
+      && c.collectionChange.id === rideId
     )
 }
 

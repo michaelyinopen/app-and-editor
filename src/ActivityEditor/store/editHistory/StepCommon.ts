@@ -47,11 +47,18 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
     (function removeRideFieldChanges() {
       const removedRideIds = previousRideIds.filter(pRId => !currentRideIds.includes(pRId))
       for (const removedRideId of removedRideIds) {
-        const newCalculationRideIds = calculationRideIds.filter(rId => rId !== removedRideId)
+        const removedIndex = currentRideIds.indexOf(removedRideId)
+        const newCalculationRideIds = [
+          ...calculationRideIds.slice(0, removedIndex),
+          ...calculationRideIds.slice(removedIndex + 1)
+        ]
         const idFieldChange = {
           path: '/rides/ids',
-          previousValue: calculationRideIds,
-          newValue: newCalculationRideIds
+          collectionChange: {
+            type: 'remove' as const,
+            id: removedRideId,
+            index: removedIndex
+          }
         }
         const entityFieldChange = {
           path: `/rides/entities/${removedRideId}`,
@@ -70,7 +77,8 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
         rideFieldChanges.push({
           path: '/rides/ids',
           previousValue: calculationRideIds,
-          newValue: correspondingCurrentRideIds
+          newValue: correspondingCurrentRideIds,
+          collectionChange: { type: 'move' as const }
         })
       }
     })();
@@ -101,8 +109,11 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
         ]
         const idFieldChange = {
           path: '/rides/ids',
-          previousValue: calculationRideIds,
-          newValue: newCalculationRideIds
+          collectionChange: {
+            type: 'remove' as const,
+            id: addedRideId,
+            index: addedIndex
+          }
         }
         const entityFieldChange = {
           path: `/rides/entities/${addedRideId}`,
@@ -127,16 +138,11 @@ export function calculateStepName(fieldChanges: FieldChange[]): string {
   }
 
   if (fieldChanges.length === 2 && fieldChanges.some(c => c.path === '/rides/ids')) {
-    const entityChange = fieldChanges.find(c =>
-      c.path.startsWith('/rides/entities/') && numberOfSlashes(c.path) === 3)!
-    if (entityChange
-      && entityChange.previousValue === undefined
-      && entityChange.newValue !== undefined) {
+    const idsChange = fieldChanges.find(c => c.path === '/rides/ids')!
+    if (idsChange?.collectionChange?.type === 'add') {
       return 'Add ride'
     }
-    if (entityChange
-      && entityChange.previousValue !== undefined
-      && entityChange.newValue === undefined) {
+    if (idsChange?.collectionChange?.type === 'remove') {
       return 'Remove ride'
     }
   }
