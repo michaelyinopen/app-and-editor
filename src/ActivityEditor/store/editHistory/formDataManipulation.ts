@@ -125,7 +125,7 @@ function redoRideIdFieldChanges(
           rideIds = [
             ...rideIds.slice(0, addedRideIdIndex),
             collectionChange.id,
-            ...rideIds.slice(addedRideIdIndex + 1),
+            ...rideIds.slice(addedRideIdIndex),
           ]
         }
       } else {
@@ -304,7 +304,7 @@ function undoRideIdFieldChanges(
       rideIds = [
         ...rideIds.slice(0, index),
         id,
-        ...rideIds.slice(index + 1),
+        ...rideIds.slice(index),
       ]
     }
     return {
