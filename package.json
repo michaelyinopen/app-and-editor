@@ -26,7 +26,8 @@
     "start": "cross-env REACT_APP_MSW_MOCK=true react-scripts start",
     "start-web": "react-scripts start",
     "start-server": "cd server && node index.js",
-    "eslint": "eslint --ext ts,tsx,js,jsx src"
+    "eslint": "eslint --ext ts,tsx,js,jsx src",
+    "test": "react-scripts test --watchAll=false"
   },
   "eslintConfig": {
     "extends": [

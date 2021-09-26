@@ -67,6 +67,28 @@ need to use produce fro every field change, because there can be replacement of 
 ///////////
 ## Edit patterns
 ### Edit field
+App store state
+API types
+- setActivityFromAppStore(not loaded)
+- setActivityFromAppStore (loaded) (hasDetail)
+  - formData
+  - initialized
+  - versions
+- edit
+  - formData update
+  - step
+    - combine field changes
+    - undo
+    - redo
+- refreshed setActivityFromAppStore (initialized)
+  - merge/ reverse local
+  - related to conflict
+- save
+
+- refreshed data
+  - refreshed step(different local/remote changes)
+
+
 
 ### Edit remove item from collection
 

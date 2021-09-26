@@ -47,7 +47,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
     (function removeRideFieldChanges() {
       const removedRideIds = previousRideIds.filter(pRId => !currentRideIds.includes(pRId))
       for (const removedRideId of removedRideIds) {
-        const removedIndex = currentRideIds.indexOf(removedRideId)
+        const removedIndex = calculationRideIds.indexOf(removedRideId)
         const newCalculationRideIds = [
           ...calculationRideIds.slice(0, removedIndex),
           ...calculationRideIds.slice(removedIndex + 1)

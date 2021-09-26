@@ -55,7 +55,7 @@ function redoRideIdFieldChanges(
   }
   const appliedMoveFieldChangeIndex = rideIdFieldChangeApplies
     .findIndex(ca => ca.fieldChange.collectionChange?.type === 'move' && ca.applied)
-  if (appliedMoveFieldChangeIndex) {
+  if (appliedMoveFieldChangeIndex !== -1) {
     let rideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue;
 
     (function redoAdd() {
@@ -226,7 +226,7 @@ function undoRideIdFieldChanges(
   }
   const appliedMoveFieldChangeIndex = rideIdFieldChangeApplies
     .findIndex(ca => ca.fieldChange.collectionChange?.type === 'move' && ca.applied)
-  if (appliedMoveFieldChangeIndex) {
+  if (appliedMoveFieldChangeIndex !== -1) {
     let rideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue;
 
     (function undoRemove() {
