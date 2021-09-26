@@ -12,6 +12,7 @@ import {
   setMergeBehaviourDiscardLocal,
   applyConflict,
   unApplyConflict,
+  addRide,
   removeRide,
 } from "../actions";
 import { activityEditorReducer } from "../activityEditorReducer";
@@ -1127,6 +1128,483 @@ describe('Edit Name', () => {
   })
 })
 
+describe('Add Ride', () => {
+  const createLoadedAppStore = () => {
+    const activityEditorStore = createStore(
+      activityEditorReducer,
+      applyMiddleware(editHistoryMiddleware)
+    )
+    activityEditorStore.dispatch(setActivityEditorId(1))
+    activityEditorStore.dispatch(setActivityEditorIsEdit(true))
+    activityEditorStore.dispatch(loadedActivity())
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "1",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+    return activityEditorStore
+  }
+  test('Add', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    const addedRideAction = addRide()
+    const addedRideId = addedRideAction.payload.id
+    activityEditorStore.dispatch(addedRideAction)
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+          [addedRideId]: {
+            id: addedRideId,
+            description: ""
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Add ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: addedRideId,
+                  index: 2
+                }
+              },
+              {
+                path: `/rides/entities/${addedRideId}`,
+                previousValue: undefined,
+                newValue: {
+                  id: addedRideId,
+                  description: ""
+                },
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+    ])
+  })
+  test('Undo Redo Add', () => {
+    const activityEditorStore = createLoadedAppStore()
+    const addedRideAction = addRide()
+    const addedRideId = addedRideAction.payload.id
+    activityEditorStore.dispatch(addedRideAction)
+
+    // act undo
+    activityEditorStore.dispatch(undo())
+
+    // assert undo
+    const undoState = activityEditorStore.getState()
+    expect(undoState.formData).toEqual({
+      name: 'some activity',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          }
+        }
+      },
+    })
+    expect(undoState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Add ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: addedRideId,
+                  index: 2
+                }
+              },
+              {
+                path: `/rides/entities/${addedRideId}`,
+                previousValue: undefined,
+                newValue: {
+                  id: addedRideId,
+                  description: ""
+                },
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+    ])
+    expect(undoState.currentStepIndex).toBe(0)
+
+    // act redo
+    activityEditorStore.dispatch(redo())
+
+    // assert redo
+    const redoState = activityEditorStore.getState()
+    expect(redoState.formData).toEqual({
+      name: 'some activity',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+          [addedRideId]: {
+            id: addedRideId,
+            description: ""
+          },
+        }
+      },
+    })
+    expect(redoState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Add ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: addedRideId,
+                  index: 2
+                }
+              },
+              {
+                path: `/rides/entities/${addedRideId}`,
+                previousValue: undefined,
+                newValue: {
+                  id: addedRideId,
+                  description: ""
+                },
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+    ])
+    expect(redoState.currentStepIndex).toBe(1)
+  })
+  test('Refreshed merge local Add', () => {
+    const activityEditorStore = createLoadedAppStore()
+    const addedRideAction = addRide()
+    const addedRideId = addedRideAction.payload.id
+    activityEditorStore.dispatch(addedRideAction)
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+          [addedRideId]: {
+            id: addedRideId,
+            description: ""
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Add ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: addedRideId,
+                  index: 2
+                }
+              },
+              {
+                path: `/rides/entities/${addedRideId}`,
+                previousValue: undefined,
+                newValue: {
+                  id: addedRideId,
+                  description: ""
+                },
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          },
+          {
+            type: 'reverse local',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'remove',
+                  id: addedRideId,
+                  index: 2
+                }
+              },
+              {
+                path: `/rides/entities/${addedRideId}`,
+                previousValue: {
+                  id: addedRideId,
+                  description: ''
+                },
+                newValue: undefined
+              }
+            ],
+            applied: false
+          },
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(2)
+    expect(actualState.versions.length).toEqual(2)
+  })
+  test('Refreshed remote Add', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "Uho4iijucZABUUpPeg0cU",
+            description: "bus",
+            sequence: 2
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 3
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["GFqbzNATDKY8pKRAZV3ko", 'Uho4iijucZABUUpPeg0cU', "zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          'Uho4iijucZABUUpPeg0cU': {
+            id: 'Uho4iijucZABUUpPeg0cU',
+            description: "bus"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          },
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: 'Uho4iijucZABUUpPeg0cU',
+                  index: 1
+                }
+              },
+              {
+                path: '/rides/entities/Uho4iijucZABUUpPeg0cU',
+                previousValue: undefined,
+                newValue: {
+                  id: 'Uho4iijucZABUUpPeg0cU',
+                  description: 'bus'
+                }
+              }
+            ],
+            applied: true
+          },
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(1)
+    expect(actualState.versions.length).toEqual(2)
+  })
+
+  // todo with move
+})
+
 describe('Remove Ride', () => {
   const createLoadedAppStore = () => {
     const activityEditorStore = createStore(
@@ -1429,4 +1907,198 @@ describe('Remove Ride', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
+  test('Refresh remote remove', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          },
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'remove',
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  index: 0
+                }
+              },
+              {
+                path: '/rides/entities/GFqbzNATDKY8pKRAZV3ko',
+                previousValue: {
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  description: "red car"
+                },
+                newValue: undefined
+              }
+            ],
+            applied: true
+          },
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(1)
+    expect(actualState.versions.length).toEqual(2)
+  })
+  test('Refresh remote and local both remove', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Remove ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'remove',
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  index: 0
+                }
+              },
+              {
+                path: '/rides/entities/GFqbzNATDKY8pKRAZV3ko',
+                previousValue: {
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  description: "red car"
+                },
+                newValue: undefined
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          }
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(2)
+    expect(actualState.versions.length).toEqual(2)
+  })
+
+  // todo with with move
+
+  // todo conflict with update
+
+  // todo Unapply re-apply Conflict
+
+  // todo Conflict has related change
 })
