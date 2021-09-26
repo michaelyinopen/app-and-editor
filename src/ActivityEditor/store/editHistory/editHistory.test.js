@@ -1306,4 +1306,127 @@ describe('Remove Ride', () => {
     })
     expect(actualRedoState.currentStepIndex).toBe(1)
   })
+  test('Refresh merge local remove', () => {
+    const activityEditorStore = createLoadedAppStore()
+    activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Remove ride',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'remove',
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  index: 0
+                }
+              },
+              {
+                path: '/rides/entities/GFqbzNATDKY8pKRAZV3ko',
+                previousValue: {
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  description: "red car"
+                },
+                newValue: undefined
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          },
+          {
+            type: 'reverse local',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'add',
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  index: 0
+                }
+              },
+              {
+                path: '/rides/entities/GFqbzNATDKY8pKRAZV3ko',
+                previousValue: undefined,
+                newValue: {
+                  id: "GFqbzNATDKY8pKRAZV3ko",
+                  description: "red car"
+                }
+              }
+            ],
+            applied: false
+          },
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(2)
+    expect(actualState.versions.length).toEqual(2)
+  })
 })

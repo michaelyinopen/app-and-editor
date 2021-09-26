@@ -110,7 +110,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
         const idFieldChange = {
           path: '/rides/ids',
           collectionChange: {
-            type: 'remove' as const,
+            type: 'add' as const,
             id: addedRideId,
             index: addedIndex
           }

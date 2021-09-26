@@ -4,7 +4,7 @@ import {
   Step,
 } from './types'
 
-//todo add/delete and item update
+//todo important add/delete and item update
 function hasRelatedChanges(
   aChanges: FieldChange[],
   bChanges: FieldChange[]
