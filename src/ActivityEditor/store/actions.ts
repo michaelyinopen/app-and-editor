@@ -63,7 +63,17 @@ export const setRideDescription = createAction(
     }
   })
 )
-// export const moveRide = createAction<undefined | number>('moveRide') //todo
+
+// export const moveRide = createAction(
+//   'moveRide',
+//   (id: string, targetIndex: number) => ({
+//     payload: {
+//       id,
+//       targetIndex,
+//     }
+//   })
+// )
+
 export const removeRide = createAction(
   'removeRide',
   (id: string) => ({
