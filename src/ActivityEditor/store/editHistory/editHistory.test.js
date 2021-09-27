@@ -248,7 +248,7 @@ describe('Edit Name', () => {
       },
     ])
   })
-  test('Undo Redo Edit', () => {
+  test('Undo Redo', () => {
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(setName('some activity edited'))
 
@@ -348,7 +348,7 @@ describe('Edit Name', () => {
     ])
     expect(actualRedoState.currentStepIndex).toBe(1)
   })
-  test('Refreshed local updated', () => {
+  test('Refreshed unchanged, local edit', () => {
     // will not create any new step
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(setName('some activity local edited'))
@@ -424,7 +424,7 @@ describe('Edit Name', () => {
     ])
     expect(actualState.currentStepIndex).toBe(1)
   })
-  test('Refreshed remote updated', () => {
+  test('Refreshed merge remote edit', () => {
     // will create a refreshed step
     const activityEditorStore = createLoadedAppStore()
 
@@ -545,9 +545,9 @@ describe('Edit Name', () => {
       }
     }])
   })
-  test('Merge', () => {
-    // if 'name' was updated locally but not remotely
-    // Merges keep both local and remote changes if there is no conflict
+  test('Refreshed merge local edit', () => {
+    // if 'name' was edited locally but not remotely
+    // Merge will keep both local and remote changes if there is no conflict
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(setName('some activity local edited'))
 
@@ -653,8 +653,8 @@ describe('Edit Name', () => {
     expect(actualState.versions.length).toEqual(2)
   })
   test('Discard local changes', () => {
-    // if 'name' was updated locally but not remotely
-    // Discard local changes will revert 'name' to remote state
+    // if 'name' was edited locally but not remotely
+    // Discard local changes will revert 'name' to its remote state
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(setName('some activity local edited'))
     activityEditorStore.dispatch(setActivityFromAppStore(
@@ -760,7 +760,7 @@ describe('Edit Name', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refreshed remote and local same update', () => {
+  test('Refreshed local and remote same update', () => {
     // will update versions but will not create any new step
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(setName('some activity edited'))
@@ -868,7 +868,7 @@ describe('Edit Name', () => {
     ))
     return activityEditorStore
   }
-  test('Refreshed remote and local different update', () => {
+  test('Refreshed local and remote conflicting edit', () => {
     // will create a refreshed step with conflict
     const activityEditorStore = createAppStoreWithConflict()
 
@@ -1494,7 +1494,7 @@ describe('Add Ride', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refreshed remote Add', () => {
+  test('Refreshed merge remote Add', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
@@ -2360,7 +2360,7 @@ describe('Remove Ride', () => {
     })
     expect(actualRedoState.currentStepIndex).toBe(1)
   })
-  test('Refresh merge local remove', () => {
+  test('Refreshed merge local remove', () => {
     const activityEditorStore = createLoadedAppStore()
     activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
 
@@ -2483,7 +2483,7 @@ describe('Remove Ride', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refresh remote remove', () => {
+  test('Refreshed merge remote remove', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
@@ -2573,7 +2573,7 @@ describe('Remove Ride', () => {
     expect(actualState.currentStepIndex).toBe(1)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refresh local and remote both remove', () => {
+  test('Refreshed local and remote both remove', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
