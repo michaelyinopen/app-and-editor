@@ -15,6 +15,7 @@ import {
   addRide,
   setRideDescription,
   removeRide,
+  moveRide,
 } from "../actions";
 import { activityEditorReducer } from "../activityEditorReducer";
 import { editHistoryMiddleware } from './editStep'
@@ -2802,7 +2803,7 @@ describe('Remove Ride', () => {
     test('Unapply re-apply undo redo', () => {
     })
     test('Conflict has related change', () => {
-      // todo
+      // todo edit ride property or remove
     })
   })
   describe('Refreshed local update remote remove', () => {
@@ -3033,11 +3034,177 @@ describe('Remove Ride', () => {
       })
     })
     test('Conflict has related change', () => {
-      // todo
+      // todo edit ride property or remove
     })
   })
   // todo with with move
 })
 
 describe('Move Rides', () => {
+  const createLoadedAppStore = () => {
+    const activityEditorStore = createStore(
+      activityEditorReducer,
+      applyMiddleware(editHistoryMiddleware)
+    )
+    activityEditorStore.dispatch(setActivityEditorId(1))
+    activityEditorStore.dispatch(setActivityEditorIsEdit(true))
+    activityEditorStore.dispatch(loadedActivity())
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "1",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          },
+          {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train",
+            sequence: 3
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+    return activityEditorStore
+  }
+  test('Move', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Move rides',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'move'
+                },
+                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+    ])
+  })
+  test('Combine Moves', () => {
+    const activityEditorStore = createLoadedAppStore()
+
+    // act
+    activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+    activityEditorStore.dispatch(moveRide('zUxqlLLtWWjOdvHfAa1Vx', 1))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx', 'GFqbzNATDKY8pKRAZV3ko'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Move rides',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'move'
+                },
+                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx', 'GFqbzNATDKY8pKRAZV3ko']
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+    ])
+  })
+  // test('Refreshed merge local remove', () => {
+  // test('Refreshed merge remote remove', () => {
+  // test('Refreshed local and remote both remove', () => {
+  // describe('Refreshed remote and local conflicting move', () => {
+  // describe('Refreshed local move remote remove', () => {
+  // describe('Refreshed local move remote update', () => {
+  // describe('Refreshed local move remote add', () => {
+  // describe('Refreshed remote move local remove', () => {
+  // describe('Refreshed remote move local update', () => {
+  // describe('Refreshed remote move local add', () => {
 })
