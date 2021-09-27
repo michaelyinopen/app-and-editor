@@ -64,15 +64,15 @@ export const setRideDescription = createAction(
   })
 )
 
-// export const moveRide = createAction(
-//   'moveRide',
-//   (id: string, targetIndex: number) => ({
-//     payload: {
-//       id,
-//       targetIndex,
-//     }
-//   })
-// )
+export const moveRide = createAction(
+  'moveRide',
+  (id: string, targetIndex: number) => ({
+    payload: {
+      id,
+      targetIndex,
+    }
+  })
+)
 
 export const removeRide = createAction(
   'removeRide',

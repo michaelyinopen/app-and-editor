@@ -24,6 +24,7 @@ import {
   addRide,
   setRideDescription,
   removeRide,
+  moveRide,
 } from './actions'
 import {
   calculateRefreshedStep,
@@ -228,7 +229,24 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
         description: ''
       }
     })
-    // todo moveRide
+    .addCase(moveRide, (state, { payload: { id, targetIndex } }) => {
+      const originalIndex = state.formData.rides.ids.indexOf(id)
+      if (originalIndex > targetIndex) {
+        state.formData.rides.ids = [
+          ...state.formData.rides.ids.slice(0, targetIndex),
+          id,
+          ...state.formData.rides.ids.slice(targetIndex, originalIndex),
+          ...state.formData.rides.ids.slice(originalIndex + 1)
+        ]
+      } else if (originalIndex < targetIndex) {
+        state.formData.rides.ids = [
+          ...state.formData.rides.ids.slice(0, originalIndex),
+          ...state.formData.rides.ids.slice(originalIndex + 1, targetIndex + 1),
+          id,
+          ...state.formData.rides.ids.slice(targetIndex + 1),
+        ]
+      }
+    })
     .addCase(setRideDescription, (state, { payload: { id, value } }) => {
       state.formData.rides.entities[id].description = value
     })
