@@ -13,14 +13,14 @@ Can undo and redo each field change.
 
 ## Merged Field Change
 //renamed to combine
-If the a field's value changes consecutively, it will count as one field change. It is implemented my merging the new change with the last field change. `mergeFieldChanges`
+If the a field's value changes consecutively, it will count as one field change. It is implemented by combining the new change with the last field change. `mergeFieldChanges`
 
 ## Step
 Related and consecutive field changes will count as one step. One step can have one field change, or multiple field changes. It is implemented my merging the new change with the last step. `calculateSteps`
 
-If step has `VersionToken`, the step is a "Refreshed" step. `mergeBehaviour` can either be `merge` or `discard local changes`.
+If a step has `VersionToken`, the step is a "Refreshed" step. `mergeBehaviour` can either be `merge` or `discard local changes`.
 
-// todo rewtire bacause changed to use operation
+// todo rewrite bacause changed to use operation
 When `mergeBehaviour` is `merge`, `fieldChanges` and `conflicts` both represents server-side changes merged to the current form data. `fieldChanges` contains fields that are changed only in the server.`conflicts` contains fields that are changed in the server and locally.
 
 When `mergeBehaviour` is `discard local changes`, all `conflicts` are applied and `reverseLocalFieldChanges` are also applied. The result formData will be the server-side's formData.
@@ -58,11 +58,11 @@ re-order
 before and after states -> operations
 
 /////////////
-All Actions that chould change formData will create have editHistory middleware calculate step, except actions that could change the steps list, those are handles by ways other than middleware
+All Actions that chould change formData will have editHistory middleware calculate step, except actions that could change the steps list, those are handles by ways other than middleware
 
 
 Must use draft update pattern for formData manipulation
-need to use produce fro every field change, because there can be replacement of an object property (collection add) and the new part is not drafted
+need to use produce for every field change, because there can be replacement of an object property (collection add) and the new part is not drafted
 
 ///////////
 ## Edit patterns

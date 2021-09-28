@@ -1603,8 +1603,6 @@ describe('Add Ride', () => {
     expect(actualState.currentStepIndex).toBe(1)
     expect(actualState.versions.length).toEqual(2)
   })
-
-  // todo with move
 })
 
 describe('Edit Ride Property', () => {
@@ -2802,8 +2800,11 @@ describe('Remove Ride', () => {
     })
     test('Unapply re-apply undo redo', () => {
     })
-    test('Conflict has related change', () => {
-      // todo edit ride property or remove
+    test('Conflict has related change: edit ride property', () => {
+      // todo 
+    })
+    test('Conflict has related change: remove', () => {
+      // todo 
     })
   })
   describe('Refreshed local update remote remove', () => {
@@ -3033,11 +3034,13 @@ describe('Remove Ride', () => {
         }
       })
     })
-    test('Conflict has related change', () => {
-      // todo edit ride property or remove
+    test('Conflict has related change: edit ride property', () => {
+      // todo 
+    })
+    test('Conflict has related change: remove', () => {
+      // todo 
     })
   })
-  // todo with with move
 })
 
 describe('Move Rides', () => {
@@ -3201,10 +3204,28 @@ describe('Move Rides', () => {
   // test('Refreshed merge remote remove', () => {
   // test('Refreshed local and remote both remove', () => {
   // describe('Refreshed remote and local conflicting move', () => {
-  // describe('Refreshed local move remote remove', () => {
+    // Conflict
+    // Unapply re-apply undo redo
+    // Conflict has related change: remove
+    // Conflict has related change: add
+    // Conflict has related change: move
+    // Conflict does not has related change: update
+  // describe('Refreshed local move remote remove', () => {// multiple removes
+    // Refreshed
+    // undo redo
   // describe('Refreshed local move remote update', () => {
-  // describe('Refreshed local move remote add', () => {
-  // describe('Refreshed remote move local remove', () => {
+    // Refreshed
+    // undo redo
+  // describe('Refreshed local move remote add', () => {// multiple removes multiple adds
+    // Refreshed
+    // undo redo
+  // describe('Refreshed remote move local remove', () => {// multiple removes
+    // Refreshed
+    // undo redo
   // describe('Refreshed remote move local update', () => {
-  // describe('Refreshed remote move local add', () => {
+    // Refreshed
+    // undo redo
+  // describe('Refreshed remote move local add', () => {// multiple removes multiple adds
+    // Refreshed
+    // undo redo
 })
