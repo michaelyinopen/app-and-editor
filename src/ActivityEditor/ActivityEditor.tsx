@@ -66,11 +66,15 @@ const WithJobSetEditorProvider: WithActivityEditorProviderType = (Component) => 
 const ExitPrompt = () => {
   const isEdit = useActivityEditorSelector(es => es.isEdit)
   const isNew = useActivityEditorSelector(es => es.id === undefined)
-  const isInitialStep = useActivityEditorSelector(es => es.steps.length === 1)
   const isCurrentStepSaved = useActivityEditorSelector(es => es.steps[es.currentStepIndex].saveStatus === 'saved')
+  const isInitialStep = useActivityEditorSelector(es => es.currentStepIndex === 0)
+  const isCurrentStepDiscardLocalChanges = useActivityEditorSelector(es =>
+    es.steps[es.currentStepIndex].mergeBehaviour === 'discard local changes'
+    && es.steps[es.currentStepIndex].versionToken === es.versions[es.versions.length - 1]?.versionToken)
+  const loadedFromRemote = isInitialStep || isCurrentStepDiscardLocalChanges
   const condition = isEdit
     && !isCurrentStepSaved
-    && (isNew || !isInitialStep) // deep equal with previous version?
+    && (isNew || !loadedFromRemote)
   return (
     <Prompt
       when={condition}

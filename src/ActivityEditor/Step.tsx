@@ -36,10 +36,11 @@ const VersionedStep = ({
 }: StepProps) => {
   const editorDispatch = useActivityEditorDispatch()
   const currentStepIndex = useActivityEditorSelector(es => es.currentStepIndex)
+  const showMergeOptions = step.operations.some(op => op.type === 'reverse local' || op.type === 'conflict')
   const conflicts = step.mergeBehaviour !== 'merge'
     ? []
     : step.operations.filter(op => op.type === 'conflict')
-    
+
   return (
     <div
       style={{ borderStyle: 'ridge' }}
@@ -50,33 +51,35 @@ const VersionedStep = ({
       >
         {step.name}{step.saveStatus === 'saved' ? ' (saved)' : undefined}
       </button>
-      <div>
-        <input
-          type="radio"
-          id={`step${stepIndex}-discard`}
-          checked={step.mergeBehaviour === 'discard local changes'}
-          onChange={e => {
-            if (e.target.checked) {
-              editorDispatch(setMergeBehaviourDiscardLocal(stepIndex))
-            }
-          }}
-          disabled={disabled || stepIndex !== currentStepIndex}
-        />
-        <label htmlFor={`step${stepIndex}-discard`}>Discard local changes</label>
-        <br />
-        <input
-          type="radio"
-          id={`step${stepIndex}-merge`}
-          checked={step.mergeBehaviour === 'merge'}
-          onChange={e => {
-            if (e.target.checked) {
-              editorDispatch(setMergeBehaviourMerge(stepIndex))
-            }
-          }}
-          disabled={disabled || stepIndex !== currentStepIndex}
-        />
-        <label htmlFor={`step${stepIndex}-merge`}>Merge</label>
-      </div>
+      {showMergeOptions && (
+        <div>
+          <input
+            type="radio"
+            id={`step${stepIndex}-discard`}
+            checked={step.mergeBehaviour === 'discard local changes'}
+            onChange={e => {
+              if (e.target.checked) {
+                editorDispatch(setMergeBehaviourDiscardLocal(stepIndex))
+              }
+            }}
+            disabled={disabled || stepIndex !== currentStepIndex}
+          />
+          <label htmlFor={`step${stepIndex}-discard`}>Discard local changes</label>
+          <br />
+          <input
+            type="radio"
+            id={`step${stepIndex}-merge`}
+            checked={step.mergeBehaviour === 'merge'}
+            onChange={e => {
+              if (e.target.checked) {
+                editorDispatch(setMergeBehaviourMerge(stepIndex))
+              }
+            }}
+            disabled={disabled || stepIndex !== currentStepIndex}
+          />
+          <label htmlFor={`step${stepIndex}-merge`}>Merge</label>
+        </div>
+      )}
       {conflicts.length !== 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 32 }}>
           <b>Conflicts</b>

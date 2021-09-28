@@ -203,8 +203,7 @@ function calculateOperationFromRefreshedFieldChange(
 export function calculateRefreshedStep(
   previousVersionFormData: FormData,
   localFormData: FormData,
-  remoteActivity: ActivityWithDetailFromStore,
-  discardLocalChanges: boolean
+  remoteActivity: ActivityWithDetailFromStore
 ): Step | undefined {
   const remoteFormData = ActivityToFormData(remoteActivity)
 
@@ -225,10 +224,13 @@ export function calculateRefreshedStep(
   if (operations.length === 0) {
     return undefined
   }
+  const mergeBehaviour = operations.some(op => op.type === 'reverse local' || op.type === 'conflict')
+    ? 'merge'
+    : 'discard local changes'
   return {
     name: 'Refreshed',
     operations,
     versionToken: remoteActivity.versionToken,
-    mergeBehaviour: discardLocalChanges ? 'discard local changes' : 'merge',
+    mergeBehaviour,
   }
 }

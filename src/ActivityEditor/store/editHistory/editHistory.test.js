@@ -425,7 +425,7 @@ describe('Edit Name', () => {
     ])
     expect(actualState.currentStepIndex).toBe(1)
   })
-  test('Refreshed merge remote edit', () => {
+  test('Refreshed only remote edit', () => {
     // will create a refreshed step
     const activityEditorStore = createLoadedAppStore()
 
@@ -497,7 +497,7 @@ describe('Edit Name', () => {
           }
         ],
         versionToken: '2',
-        mergeBehaviour: 'merge',
+        mergeBehaviour: 'discard local changes',
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
@@ -1494,7 +1494,7 @@ describe('Add Ride', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refreshed merge remote Add', () => {
+  test('Refreshed only remote Add', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
@@ -1596,7 +1596,7 @@ describe('Add Ride', () => {
           },
         ],
         versionToken: '2',
-        mergeBehaviour: 'merge',
+        mergeBehaviour: 'discard local changes',
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
@@ -1982,7 +1982,7 @@ describe('Edit Ride Property', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refreshed merge remote edit', () => {
+  test('Refreshed only remote edit', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
@@ -2040,7 +2040,7 @@ describe('Edit Ride Property', () => {
       {
         name: 'Refreshed',
         versionToken: '2',
-        mergeBehaviour: 'merge',
+        mergeBehaviour: 'discard local changes',
         operations: [
           {
             type: 'merge',
@@ -2481,7 +2481,7 @@ describe('Remove Ride', () => {
     expect(actualState.currentStepIndex).toBe(2)
     expect(actualState.versions.length).toEqual(2)
   })
-  test('Refreshed merge remote remove', () => {
+  test('Refreshed only remote remove', () => {
     const activityEditorStore = createLoadedAppStore()
 
     // act
@@ -2565,7 +2565,7 @@ describe('Remove Ride', () => {
           },
         ],
         versionToken: '2',
-        mergeBehaviour: 'merge',
+        mergeBehaviour: 'discard local changes',
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
@@ -2661,7 +2661,7 @@ describe('Remove Ride', () => {
           }
         ],
         versionToken: '2',
-        mergeBehaviour: 'merge',
+        mergeBehaviour: 'discard local changes',
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
@@ -3517,37 +3517,37 @@ describe('Move Rides', () => {
     ])
   })
   // test('Refreshed merge local remove', () => {
-  // test('Refreshed merge remote remove', () => {
+  // test('Refreshed only remote remove', () => {
   // test('Refreshed local and remote both remove', () => {
   // describe('Refreshed remote and local conflicting move', () => {
-  // Conflict
-  // Unapply re-apply undo redo
-  // Conflict has related change: remove
-  // Conflict has related change: add
-  // Conflict has related change: move
-  // Conflict does not has related change: update
+  //   Conflict
+  //   Unapply re-apply undo redo
+  //   Conflict has related change: remove
+  //   Conflict has related change: add
+  //   Conflict has related change: move
+  //   Conflict does not has related change: update
   // describe('Refreshed local move remote remove', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed local move remote update', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed local move remote add', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed remote move local remove', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed remote move local update', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed remote move local add', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed multiple removes and multiple adds', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
   // describe('Refreshed move, multiple removes and multiple adds', () => {
-  // Refreshed
-  // undo redo
+  //   Refreshed
+  //   undo redo
 })
