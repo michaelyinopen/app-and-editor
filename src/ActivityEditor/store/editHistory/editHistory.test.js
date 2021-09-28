@@ -1081,12 +1081,11 @@ describe('Edit Name', () => {
     expect(actualReapplyState.versions.length).toEqual(2)
   })
   test('Conflict has related change', () => {
-    // will create a refreshed step with conflict
     const activityEditorStore = createAppStoreWithConflict()
     const conflictStepIndex = 2
     const conflictIndex = 0
 
-    // act edit
+    // edit
     activityEditorStore.dispatch(setName('some activity after'))
     const stateAfterEdit = activityEditorStore.getState()
     const conflictOperation = stateAfterEdit.steps[conflictStepIndex].operations
@@ -1107,7 +1106,7 @@ describe('Edit Name', () => {
     // assert edit
     expect(hasRelatedChanges).toBe(true)
 
-    // act undo edit
+    // undo edit
     activityEditorStore.dispatch(undo())
     const stateAfterUndo = activityEditorStore.getState()
     const conflictOperationAfterUndo = stateAfterUndo.steps[conflictStepIndex].operations
@@ -2799,12 +2798,262 @@ describe('Remove Ride', () => {
       expect(actualState.versions.length).toEqual(2)
     })
     test('Unapply re-apply undo redo', () => {
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red VAN",
+              sequence: 1
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 2
+            }
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+
+      // unapply
+      activityEditorStore.dispatch(unApplyConflict(2, 0))
+      const unapplyState = activityEditorStore.getState()
+      expect(unapplyState.formData.rides).toEqual({
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // undo unapply
+      activityEditorStore.dispatch(undo())
+      const undoUnapplyState = activityEditorStore.getState()
+      expect(undoUnapplyState.formData.rides).toEqual({
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // redo unapply
+      activityEditorStore.dispatch(redo())
+      const redoUnapplyState = activityEditorStore.getState()
+      expect(redoUnapplyState.formData.rides).toEqual({
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // reapply
+      activityEditorStore.dispatch(applyConflict(2, 0))
+      const reapplyState = activityEditorStore.getState()
+      expect(reapplyState.formData.rides).toEqual({
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red VAN"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // undo reapply
+      activityEditorStore.dispatch(undo())
+      const undoReapplyState = activityEditorStore.getState()
+      expect(undoReapplyState.formData.rides).toEqual({
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // redo reapply
+      activityEditorStore.dispatch(redo())
+      const redoReapplyState = activityEditorStore.getState()
+      expect(redoReapplyState.formData.rides).toEqual({
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red VAN"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
     })
     test('Conflict has related change: edit ride property', () => {
-      // todo 
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red VAN",
+              sequence: 1
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 2
+            }
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+
+      // edit
+      activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'red TRUCK'))
+      const stateAfterEdit = activityEditorStore.getState()
+      const conflictOperation = stateAfterEdit.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChanges = (() => {
+        for (const step of stateAfterEdit.steps.slice(
+          conflictStepIndex + 1,
+          stateAfterEdit.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperation, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert edit
+      expect(hasRelatedChanges).toBe(true)
+
+      // undo edit
+      activityEditorStore.dispatch(undo())
+      const stateAfterUndoEdit = activityEditorStore.getState()
+      const conflictOperationAfterUndoEdit = stateAfterUndoEdit.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesAfterUndoEdit = (() => {
+        for (const step of stateAfterUndoEdit.steps.slice(
+          conflictStepIndex + 1,
+          stateAfterUndoEdit.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationAfterUndoEdit, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert undo edit
+      expect(hasRelatedChangesAfterUndoEdit).toBe(false)
     })
     test('Conflict has related change: remove', () => {
-      // todo 
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red VAN",
+              sequence: 1
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 2
+            }
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+
+      // remove
+      activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+      const stateRemove = activityEditorStore.getState()
+      const conflictOperationRemove = stateRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesRemove = (() => {
+        for (const step of stateRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert remove
+      expect(hasRelatedChangesRemove).toBe(true)
+
+      // undo remove
+      activityEditorStore.dispatch(undo())
+      const stateUndoRemove = activityEditorStore.getState()
+      const conflictOperationUndoRemove = stateUndoRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoEdit = (() => {
+        for (const step of stateUndoRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert undo remove
+      expect(hasRelatedChangesUndoEdit).toBe(false)
     })
   })
   describe('Refreshed local update remote remove', () => {
@@ -3038,7 +3287,74 @@ describe('Remove Ride', () => {
       // todo 
     })
     test('Conflict has related change: remove', () => {
-      // todo 
+      const activityEditorStore = createLoadedAppStore()
+
+      // act
+      activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'big red car'))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 1
+            }
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      activityEditorStore.dispatch(unApplyConflict(conflictStepIndex, conflictIndex))
+
+      // remove
+      activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+      const stateRemove = activityEditorStore.getState()
+      const conflictOperationRemove = stateRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesRemove = (() => {
+        for (const step of stateRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert remove
+      expect(hasRelatedChangesRemove).toBe(true)
+
+      // undo remove
+      activityEditorStore.dispatch(undo())
+      const stateUndoRemove = activityEditorStore.getState()
+      const conflictOperationUndoRemove = stateUndoRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoEdit = (() => {
+        for (const step of stateUndoRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+
+      // assert undo remove
+      expect(hasRelatedChangesUndoEdit).toBe(false)
     })
   })
 })
@@ -3204,28 +3520,34 @@ describe('Move Rides', () => {
   // test('Refreshed merge remote remove', () => {
   // test('Refreshed local and remote both remove', () => {
   // describe('Refreshed remote and local conflicting move', () => {
-    // Conflict
-    // Unapply re-apply undo redo
-    // Conflict has related change: remove
-    // Conflict has related change: add
-    // Conflict has related change: move
-    // Conflict does not has related change: update
-  // describe('Refreshed local move remote remove', () => {// multiple removes
-    // Refreshed
-    // undo redo
+  // Conflict
+  // Unapply re-apply undo redo
+  // Conflict has related change: remove
+  // Conflict has related change: add
+  // Conflict has related change: move
+  // Conflict does not has related change: update
+  // describe('Refreshed local move remote remove', () => {
+  // Refreshed
+  // undo redo
   // describe('Refreshed local move remote update', () => {
-    // Refreshed
-    // undo redo
-  // describe('Refreshed local move remote add', () => {// multiple removes multiple adds
-    // Refreshed
-    // undo redo
-  // describe('Refreshed remote move local remove', () => {// multiple removes
-    // Refreshed
-    // undo redo
+  // Refreshed
+  // undo redo
+  // describe('Refreshed local move remote add', () => {
+  // Refreshed
+  // undo redo
+  // describe('Refreshed remote move local remove', () => {
+  // Refreshed
+  // undo redo
   // describe('Refreshed remote move local update', () => {
-    // Refreshed
-    // undo redo
-  // describe('Refreshed remote move local add', () => {// multiple removes multiple adds
-    // Refreshed
-    // undo redo
+  // Refreshed
+  // undo redo
+  // describe('Refreshed remote move local add', () => {
+  // Refreshed
+  // undo redo
+  // describe('Refreshed multiple removes and multiple adds', () => {
+  // Refreshed
+  // undo redo
+  // describe('Refreshed move, multiple removes and multiple adds', () => {
+  // Refreshed
+  // undo redo
 })
