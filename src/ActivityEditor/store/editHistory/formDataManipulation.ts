@@ -246,6 +246,25 @@ function undoRideIdFieldChanges(
       }
     })();
 
+    (function reverseUnappliedRemove() {
+      let removeRideIdOffset = 0
+      const removedFieldChanges = rideIdFieldChangeApplies
+        .filter(c => c.fieldChange.collectionChange?.type === 'remove')
+        .reverse()
+      for (const { fieldChange, applied } of removedFieldChanges) {
+        const collectionChange = fieldChange.collectionChange as CollectionRemoveChange
+        if (!applied) {
+          const removedRideIdIndex = collectionChange.index + removeRideIdOffset
+          rideIds = [
+            ...rideIds.slice(0, removedRideIdIndex),
+            collectionChange.id,
+            ...rideIds.slice(removedRideIdIndex + 1),
+          ]
+          removeRideIdOffset = removeRideIdOffset + 1
+        }
+      }
+    })();
+
     return {
       ...formData,
       rides: {
