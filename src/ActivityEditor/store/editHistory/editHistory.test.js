@@ -2654,8 +2654,6 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert edit
       expect(editHasRelatedChanges).toBe(true)
 
       // undo edit
@@ -2675,8 +2673,6 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert undo edit
       expect(undoEditHasRelatedChanges).toBe(false)
     })
     test('Conflict has related change: remove', () => {
@@ -2726,8 +2722,6 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert remove
       expect(removeHasRelatedChanges).toBe(true)
 
       // undo remove
@@ -2747,8 +2741,6 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert undo remove
       expect(undoRemoveHasRelatedChanges).toBe(false)
     })
   })
@@ -3006,8 +2998,6 @@ describe('Remove Ride', () => {
 
       // edit
       activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'big blue car'))
-
-      // assert edit
       const stateEdit = activityEditorStore.getState()
       const conflictOperationEdit = stateEdit.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
@@ -3027,8 +3017,6 @@ describe('Remove Ride', () => {
 
       // undoEdit
       activityEditorStore.dispatch(undo())
-
-      // assert undoEdit
       const stateUndoEdit = activityEditorStore.getState()
       const conflictOperationUndoEdit = stateUndoEdit.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
@@ -3755,8 +3743,175 @@ describe('Move Rides', () => {
       expect(actualState.currentStepIndex).toBe(2)
       expect(actualState.versions.length).toEqual(2)
     })
-    //   Conflict
-    //   Unapply re-apply undo redo
+    test('Unapply re-apply undo redo', () => {
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red car",
+              sequence: 1
+            },
+            {
+              id: "UpW9WgVUNXeYB3w8S0flu",
+              description: "train",
+              sequence: 2
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 3
+            },
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+
+      // unapply
+      activityEditorStore.dispatch(unApplyConflict(2, 0))
+      const stateUnapply = activityEditorStore.getState()
+      expect(stateUnapply.formData.name).toEqual("some activity unrelated change")
+      expect(stateUnapply.formData.rides).toEqual({
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // undo unapply
+      activityEditorStore.dispatch(undo())
+      const stateUndoUnapply = activityEditorStore.getState()
+      expect(stateUndoUnapply.formData.name).toEqual("some activity")
+      expect(stateUndoUnapply.formData.rides).toEqual({
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+      expect(stateUndoUnapply.currentStepIndex).toBe(1)
+      
+      // redo unapply
+      activityEditorStore.dispatch(redo())
+      const stateRedoUnapply = activityEditorStore.getState()
+      expect(stateRedoUnapply.formData.name).toEqual("some activity unrelated change")
+      expect(stateRedoUnapply.formData.rides).toEqual({
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+      expect(stateRedoUnapply.currentStepIndex).toBe(2)
+      
+      // reapply
+      activityEditorStore.dispatch(applyConflict(2, 0))
+      const stateReapply = activityEditorStore.getState()
+      expect(stateReapply.formData.name).toEqual("some activity unrelated change")
+      expect(stateReapply.formData.rides).toEqual({
+        ids: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+
+      // undo reapply
+      activityEditorStore.dispatch(undo())
+      const stateUndoReapply = activityEditorStore.getState()
+      expect(stateUndoReapply.formData.name).toEqual("some activity")
+      expect(stateUndoReapply.formData.rides).toEqual({
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+      expect(stateUndoUnapply.currentStepIndex).toBe(1)
+      
+      // redo reapply
+      activityEditorStore.dispatch(redo())
+      const stateRedoReapply = activityEditorStore.getState()
+      expect(stateRedoReapply.formData.name).toEqual("some activity unrelated change")
+      expect(stateRedoReapply.formData.rides).toEqual({
+        ids: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      })
+      expect(stateRedoReapply.currentStepIndex).toBe(2)
+    })
     //   Conflict has related change: remove
     //   Conflict has related change: add
     //   Conflict has related change: move
