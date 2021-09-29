@@ -368,6 +368,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       if (state.steps[stepIndex].mergeBehaviour !== 'merge') {
         return
       }
+      state.steps.splice(state.currentStepIndex + 1)
+
       // undo all subsequent steps and the refreshed step
       // then update step's conflict's conflictApplied and apply
       // then redo the refreshed step and subsequent steps
@@ -399,6 +401,8 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       if (state.steps[stepIndex].mergeBehaviour !== 'merge') {
         return
       }
+      state.steps.splice(state.currentStepIndex + 1)
+
       // undo all subsequent steps and the refreshed step
       // then update step's conflict's conflictApplied and apply
       // then redo the refreshed step and subsequent steps
