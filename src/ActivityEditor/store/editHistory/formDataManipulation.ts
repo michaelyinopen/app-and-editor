@@ -55,110 +55,72 @@ function redoRideIdFieldChanges(
   }
   const appliedMoveFieldChangeIndex = rideIdFieldChangeApplies
     .findIndex(ca => ca.fieldChange.collectionChange?.type === 'move' && ca.applied)
-  if (appliedMoveFieldChangeIndex !== -1) {
-    let rideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue;
-
-    (function redoAdd() {
-      let addRideIdOffset = 0
-      const addedFieldChangeApplies = rideIdFieldChangeApplies
-        .filter(c => c.fieldChange.collectionChange?.type === 'add')
-      for (const { fieldChange, applied } of addedFieldChangeApplies) {
-        const collectionChange = fieldChange.collectionChange as CollectionAddChange
-        if (applied) {
-          const addedRideIdIndex = collectionChange.index - addRideIdOffset
-          rideIds = [
-            ...rideIds.slice(0, addedRideIdIndex),
-            collectionChange.id,
-            ...rideIds.slice(addedRideIdIndex + 1),
-          ]
-        }
-        else {
-          addRideIdOffset = addRideIdOffset + 1
-        }
+  let rideIds: string[]
+  if (appliedMoveFieldChangeIndex === -1) {
+    rideIds = formData.rides.ids
+  } else {
+    const previousMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue
+    const newMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue
+    rideIds = previousMoveRideIds.reduce(
+      (accRideIds, pRid, index) => {
+        // swap the moved items according to unaltered formData.ride.ids
+        accRideIds[formData.rides.ids.indexOf(pRid)] = newMoveRideIds[index]
+        return accRideIds
+      },
+      [...formData.rides.ids]
+    )
+  }
+  let rideIdAdjusts: RideIdAdjust[] = []
+  for (const { fieldChange, applied } of rideIdFieldChangeApplies) {
+    const collectionChange = fieldChange.collectionChange
+    if (applied) {
+      // applied, apply fieldChange to rideIds
+      if (collectionChange?.type === 'remove') {
+        const removedRideId = collectionChange.id
+        rideIds = rideIds.filter(rid => rid !== removedRideId)
+      } else if (collectionChange?.type === 'add') {
+        const removeAdjustsOffset = rideIdAdjusts
+          .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
+          .length
+        const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
+        const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
+        const addedRideIdIndex = collectionChange.index + accumulatedOffset
+        rideIds = [
+          ...rideIds.slice(0, addedRideIdIndex),
+          collectionChange.id,
+          ...rideIds.slice(addedRideIdIndex),
+        ]
       }
-    })();
-
-    (function reverseUnappliedRemove() {
-      let removeRideIdOffset = 0
-      const removedFieldChanges = rideIdFieldChangeApplies
-        .filter(c => c.fieldChange.collectionChange?.type === 'remove')
-      for (const { fieldChange, applied } of removedFieldChanges) {
-        const collectionChange = fieldChange.collectionChange as CollectionRemoveChange
-        if (!applied) {
-          const removedRideIdIndex = collectionChange.index + removeRideIdOffset
-          rideIds = [
-            ...rideIds.slice(0, removedRideIdIndex),
-            collectionChange.id,
-            ...rideIds.slice(removedRideIdIndex + 1),
-          ]
-          removeRideIdOffset = removeRideIdOffset + 1
+    } else {
+      // not applied, calculate rideIdAdjusts
+      if (collectionChange?.type === 'remove') {
+        const accumulatedOffset = rideIdAdjusts.length
+        const rideIdAdjust = {
+          type: 'remove' as const,
+          id: collectionChange.id,
+          index: collectionChange.index + accumulatedOffset
         }
-      }
-    })();
-
-    return {
-      ...formData,
-      rides: {
-        ...formData.rides,
-        ids: rideIds
+        rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
+      } else if (collectionChange?.type === 'add') {
+        const removeAdjustsOffset = rideIdAdjusts
+          .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
+          .length
+        const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
+        const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
+        const rideIdAdjust = {
+          type: 'add' as const,
+          id: collectionChange.id,
+          index: collectionChange.index + accumulatedOffset
+        }
+        rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
       }
     }
   }
-  else {
-    // no move field change
-    let rideIds = formData.rides.ids
-    let rideIdAdjusts: RideIdAdjust[] = []
-    for (const { fieldChange, applied } of rideIdFieldChangeApplies) {
-      const collectionChange = fieldChange.collectionChange
-      if (applied) {
-        // applied, apply fieldChange to rideIds
-        if (collectionChange?.type === 'remove') {
-          const removedRideId = collectionChange.id
-          rideIds = rideIds.filter(rid => rid !== removedRideId)
-        } else if (collectionChange?.type === 'add') {
-          const removeAdjustsOffset = rideIdAdjusts
-            .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
-            .length
-          const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
-          const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
-          const addedRideIdIndex = collectionChange.index + accumulatedOffset
-          rideIds = [
-            ...rideIds.slice(0, addedRideIdIndex),
-            collectionChange.id,
-            ...rideIds.slice(addedRideIdIndex),
-          ]
-        }
-      } else {
-        // not applied, calculate rideIdAdjusts
-        if (collectionChange?.type === 'remove') {
-          const accumulatedOffset = rideIdAdjusts.length
-          const rideIdAdjust = {
-            type: 'remove' as const,
-            id: collectionChange.id,
-            index: collectionChange.index + accumulatedOffset
-          }
-          rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
-        } else if (collectionChange?.type === 'add') {
-          const removeAdjustsOffset = rideIdAdjusts
-            .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
-            .length
-          const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
-          const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
-          const rideIdAdjust = {
-            type: 'add' as const,
-            id: collectionChange.id,
-            index: collectionChange.index + accumulatedOffset
-          }
-          rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
-        }
-      }
-    }
-    return {
-      ...formData,
-      rides: {
-        ...formData.rides,
-        ids: rideIds
-      }
+  return {
+    ...formData,
+    rides: {
+      ...formData.rides,
+      ids: rideIds
     }
   }
 }
@@ -226,112 +188,78 @@ function undoRideIdFieldChanges(
   }
   const appliedMoveFieldChangeIndex = rideIdFieldChangeApplies
     .findIndex(ca => ca.fieldChange.collectionChange?.type === 'move' && ca.applied)
-  if (appliedMoveFieldChangeIndex !== -1) {
-    let rideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue;
+  let rideIds: string[]
+  if (appliedMoveFieldChangeIndex === -1) {
+    rideIds = formData.rides.ids
+  } else {
+    const newMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue
+    const previousMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue
+    rideIds = newMoveRideIds.reduce(
+      (accRideIds, nRid, index) => {
+        // swap the moved items according to unaltered formData.ride.ids
+        accRideIds[formData.rides.ids.indexOf(nRid)] = previousMoveRideIds[index]
+        return accRideIds
+      },
+      [...formData.rides.ids]
+    )
+  }
 
-    (function undoRemove() {
-      const removedFieldChangeApplies = rideIdFieldChangeApplies
-        .filter(c => c.fieldChange.collectionChange?.type === 'remove')
-        .reverse()
-      for (const { fieldChange, applied } of removedFieldChangeApplies) {
-        const collectionChange = fieldChange.collectionChange as CollectionRemoveChange
-        if (applied) {
-          const removedRideIdIndex = collectionChange.index
-          rideIds = [
-            ...rideIds.slice(0, removedRideIdIndex),
-            collectionChange.id,
-            ...rideIds.slice(removedRideIdIndex + 1),
-          ]
+  // no move field change
+  let removedIdAndIndices: { id: string, index: number }[] = []
+  let addedIds: string[] = []
+  let rideIdAdjusts: RideIdAdjust[] = []
+  for (const { fieldChange, applied } of rideIdFieldChangeApplies) {
+    const collectionChange = fieldChange.collectionChange
+    if (applied) {
+      // applied, apply fieldChange to rideIds
+      if (collectionChange?.type === 'remove') {
+        const accumulatedOffset = rideIdAdjusts.length
+        const removedIdAndIndex = {
+          id: collectionChange.id,
+          index: collectionChange.index + accumulatedOffset
         }
+        removedIdAndIndices = [removedIdAndIndex, ...removedIdAndIndices] // add to beginning
+      } else if (collectionChange?.type === 'add') {
+        addedIds = [...addedIds, collectionChange.id]
       }
-    })();
-
-    (function reverseUnappliedRemove() {
-      let removeRideIdOffset = 0
-      const removedFieldChanges = rideIdFieldChangeApplies
-        .filter(c => c.fieldChange.collectionChange?.type === 'remove')
-        .reverse()
-      for (const { fieldChange, applied } of removedFieldChanges) {
-        const collectionChange = fieldChange.collectionChange as CollectionRemoveChange
-        if (!applied) {
-          const removedRideIdIndex = collectionChange.index + removeRideIdOffset
-          rideIds = [
-            ...rideIds.slice(0, removedRideIdIndex),
-            collectionChange.id,
-            ...rideIds.slice(removedRideIdIndex + 1),
-          ]
-          removeRideIdOffset = removeRideIdOffset + 1
+    } else {
+      // not applied, calculate rideIdAdjusts
+      if (collectionChange?.type === 'remove') {
+        const accumulatedOffset = rideIdAdjusts.length
+        const rideIdAdjust = {
+          type: 'remove' as const,
+          id: collectionChange.id,
+          index: collectionChange.index + accumulatedOffset
         }
-      }
-    })();
-
-    return {
-      ...formData,
-      rides: {
-        ...formData.rides,
-        ids: rideIds
+        rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
+      } else if (collectionChange?.type === 'add') {
+        const removeAdjustsOffset = rideIdAdjusts
+          .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
+          .length
+        const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
+        const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
+        const rideIdAdjust = {
+          type: 'add' as const,
+          id: collectionChange.id,
+          index: collectionChange.index + accumulatedOffset
+        }
+        rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
       }
     }
   }
-  else {
-    // no move field change
-    let removedIdAndIndices: { id: string, index: number }[] = []
-    let addedIds: string[] = []
-    let rideIdAdjusts: RideIdAdjust[] = []
-    for (const { fieldChange, applied } of rideIdFieldChangeApplies) {
-      const collectionChange = fieldChange.collectionChange
-      if (applied) {
-        // applied, apply fieldChange to rideIds
-        if (collectionChange?.type === 'remove') {
-          const accumulatedOffset = rideIdAdjusts.length
-          const removedIdAndIndex = {
-            id: collectionChange.id,
-            index: collectionChange.index + accumulatedOffset
-          }
-          removedIdAndIndices = [removedIdAndIndex, ...removedIdAndIndices] // add to beginning
-        } else if (collectionChange?.type === 'add') {
-          addedIds = [...addedIds, collectionChange.id]
-        }
-      } else {
-        // not applied, calculate rideIdAdjusts
-        if (collectionChange?.type === 'remove') {
-          const accumulatedOffset = rideIdAdjusts.length
-          const rideIdAdjust = {
-            type: 'remove' as const,
-            id: collectionChange.id,
-            index: collectionChange.index + accumulatedOffset
-          }
-          rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
-        } else if (collectionChange?.type === 'add') {
-          const removeAdjustsOffset = rideIdAdjusts
-            .filter(a => a.type === 'remove' && a.index <= collectionChange.index)
-            .length
-          const addAdjustsOffset = rideIdAdjusts.filter(a => a.type === 'add').length
-          const accumulatedOffset = removeAdjustsOffset - addAdjustsOffset
-          const rideIdAdjust = {
-            type: 'add' as const,
-            id: collectionChange.id,
-            index: collectionChange.index + accumulatedOffset
-          }
-          rideIdAdjusts = [...rideIdAdjusts, rideIdAdjust]
-        }
-      }
-    }
-    let rideIds = formData.rides.ids
-    rideIds = rideIds.filter(rid => !addedIds.includes(rid))
-    for (const { id, index } of removedIdAndIndices) {
-      rideIds = [
-        ...rideIds.slice(0, index),
-        id,
-        ...rideIds.slice(index),
-      ]
-    }
-    return {
-      ...formData,
-      rides: {
-        ...formData.rides,
-        ids: rideIds
-      }
+  rideIds = rideIds.filter(rid => !addedIds.includes(rid))
+  for (const { id, index } of removedIdAndIndices) {
+    rideIds = [
+      ...rideIds.slice(0, index),
+      id,
+      ...rideIds.slice(index),
+    ]
+  }
+  return {
+    ...formData,
+    rides: {
+      ...formData.rides,
+      ids: rideIds
     }
   }
 }

@@ -5894,13 +5894,13 @@ describe('Mixed Rides', () => {
       addedFive2ThirdActionRideId,
       'DBkR9-vuKdJFzV6AWMPQ4', // five 1/2 R
     ]
-    // const stateRefreshed = activityEditorStore.getState()
-    // expect(stateRefreshed.formData.rides.ids).toEqual(expectedRideIdsRefreshed)
+    const stateRefreshed = activityEditorStore.getState()
+    expect(stateRefreshed.formData.rides.ids).toEqual(expectedRideIdsRefreshed)
 
     // undo
     activityEditorStore.dispatch(undo())
-    // const stateUndo = activityEditorStore.getState()
-    // expect(stateUndo.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
+    const stateUndo = activityEditorStore.getState()
+    expect(stateUndo.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
 
     // redo
     activityEditorStore.dispatch(redo())
