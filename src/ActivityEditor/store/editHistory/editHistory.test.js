@@ -3820,7 +3820,7 @@ describe('Move Rides', () => {
         }
       })
       expect(stateUndoUnapply.currentStepIndex).toBe(1)
-      
+
       // redo unapply
       activityEditorStore.dispatch(redo())
       const stateRedoUnapply = activityEditorStore.getState()
@@ -3843,7 +3843,7 @@ describe('Move Rides', () => {
         }
       })
       expect(stateRedoUnapply.currentStepIndex).toBe(2)
-      
+
       // reapply
       activityEditorStore.dispatch(applyConflict(2, 0))
       const stateReapply = activityEditorStore.getState()
@@ -3888,7 +3888,7 @@ describe('Move Rides', () => {
         }
       })
       expect(stateUndoUnapply.currentStepIndex).toBe(1)
-      
+
       // redo reapply
       activityEditorStore.dispatch(redo())
       const stateRedoReapply = activityEditorStore.getState()
@@ -3912,10 +3912,280 @@ describe('Move Rides', () => {
       })
       expect(stateRedoReapply.currentStepIndex).toBe(2)
     })
-    //   Conflict has related change: remove
-    //   Conflict has related change: add
-    //   Conflict has related change: move
-    //   Conflict does not has related change: update
+    test('Conflict has related change: remove', () => {
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red car",
+              sequence: 1
+            },
+            {
+              id: "UpW9WgVUNXeYB3w8S0flu",
+              description: "train",
+              sequence: 2
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 3
+            },
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      
+      // remove
+      activityEditorStore.dispatch(removeRide("zUxqlLLtWWjOdvHfAa1Vx"))
+      const stateRemove = activityEditorStore.getState()
+      const conflictOperationRemove = stateRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesRemove = (() => {
+        for (const step of stateRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesRemove).toBe(true)
+
+      // undo remove
+      activityEditorStore.dispatch(undo())
+      const stateUndoRemove = activityEditorStore.getState()
+      const conflictOperationUndoRemove = stateUndoRemove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoRemove = (() => {
+        for (const step of stateUndoRemove.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoRemove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoRemove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesUndoRemove).toBe(false)
+    })
+    test('Conflict has related change',()=>{
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red car",
+              sequence: 1
+            },
+            {
+              id: "UpW9WgVUNXeYB3w8S0flu",
+              description: "train",
+              sequence: 2
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 3
+            },
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      
+      // add
+      activityEditorStore.dispatch(addRide())
+      const stateAdd = activityEditorStore.getState()
+      const conflictOperationAdd = stateAdd.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesAdd = (() => {
+        for (const step of stateAdd.steps.slice(
+          conflictStepIndex + 1,
+          stateAdd.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationAdd, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesAdd).toBe(true)
+
+      // undo add
+      activityEditorStore.dispatch(undo())
+      const stateUndoAdd = activityEditorStore.getState()
+      const conflictOperationUndoAdd = stateUndoAdd.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoAdd = (() => {
+        for (const step of stateUndoAdd.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoAdd.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoAdd, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesUndoAdd).toBe(false)
+    })
+    test('Conflict has related change: move', ()=>{
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red car",
+              sequence: 1
+            },
+            {
+              id: "UpW9WgVUNXeYB3w8S0flu",
+              description: "train",
+              sequence: 2
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 3
+            },
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      
+      // move
+      activityEditorStore.dispatch(moveRide("zUxqlLLtWWjOdvHfAa1Vx", 0))
+      const stateMove = activityEditorStore.getState()
+      const conflictOperationMove = stateMove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesMove = (() => {
+        for (const step of stateMove.steps.slice(
+          conflictStepIndex + 1,
+          stateMove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationMove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesMove).toBe(true)
+
+      // undo move
+      activityEditorStore.dispatch(undo())
+      const stateUndoMove = activityEditorStore.getState()
+      const conflictOperationUndoMove = stateUndoMove.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoMove = (() => {
+        for (const step of stateUndoMove.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoMove.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoMove, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesUndoMove).toBe(false)
+    })
+    test('Conflict does not has related change: update', ()=>{
+      
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "GFqbzNATDKY8pKRAZV3ko",
+              description: "red car",
+              sequence: 1
+            },
+            {
+              id: "UpW9WgVUNXeYB3w8S0flu",
+              description: "train",
+              sequence: 2
+            },
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 3
+            },
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      
+      // set ride description
+      activityEditorStore.dispatch(setRideDescription("zUxqlLLtWWjOdvHfAa1Vx", "harbour ferry"))
+      const stateUpdate = activityEditorStore.getState()
+      const conflictOperationUpdate = stateUpdate.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUpdate = (() => {
+        for (const step of stateUpdate.steps.slice(
+          conflictStepIndex + 1,
+          stateUpdate.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUpdate, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesUpdate).toBe(false)
+    })
   })
   // describe('Refreshed local move remote remove', () => {
   //   Refreshed
