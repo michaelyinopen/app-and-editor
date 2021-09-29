@@ -5492,10 +5492,424 @@ describe('Move Rides', () => {
   })
 })
 
-// describe('Refreshed multiple removes and multiple adds', () => {
-//   Refreshed
-//   undo redo
+describe('Mixed Rides', () => {
+  test('Refreshed multiple removes and multiple adds', () => {
+    const activityEditorStore = createStore(
+      activityEditorReducer,
+      applyMiddleware(editHistoryMiddleware)
+    )
+    activityEditorStore.dispatch(setActivityEditorId(1))
+    activityEditorStore.dispatch(setActivityEditorIsEdit(true))
+    activityEditorStore.dispatch(loadedActivity())
 
-// describe('Refreshed move, multiple removes and multiple adds', () => {
-//   Refreshed
-//   undo redo
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "1",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "xTeNMT9AkwtZ42xEuFoPT",
+            description: "one",
+            sequence: 1
+          },
+          {
+            id: "ZWQBVB1A-adzEwduLhxNf",
+            description: "two",
+            sequence: 2
+          },
+          {
+            id: "zDkTPEbQtEKxScVreX_Dl",
+            description: "three",
+            sequence: 3
+          },
+          {
+            id: "o3NqKgABfB-Dr1-Mer6Uo",
+            description: "four",
+            sequence: 4
+          },
+          {
+            id: "Ef5dR1fB057_8_SuTDyIw",
+            description: "five",
+            sequence: 5
+          },
+          {
+            id: "Jhi0UAsCAGKN9GkGEwhhB",
+            description: "six",
+            sequence: 6
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+    // [
+    //   'xTeNMT9AkwtZ42xEuFoPT', // one
+    //   'T0DmAxA1muFhfDA6OSjuo', // one 1/3 R
+    //   '9SooxKVP__O33gevSAfSU', // one 2/3 R
+    //   'ZWQBVB1A-adzEwduLhxNf', // two
+    //   addedTwoHalfRideId,
+    //   'zDkTPEbQtEKxScVreX_Dl', // three
+    //   'o3NqKgABfB-Dr1-Mer6Uo', // four
+    //   'Ef5dR1fB057_8_SuTDyIw', // five
+    //   addedFive1ThirdActionRideId,
+    //   'DBkR9-vuKdJFzV6AWMPQ4', // five 1/2 R
+    //   addedFive2ThirdActionRideId,
+    //   'Jhi0UAsCAGKN9GkGEwhhB', // six
+    // ],
+
+    // local changes
+    // remove one, two and five
+    // add 'two 1/2', 'five 1/3' and 'five 2/3'
+    activityEditorStore.dispatch(removeRide('xTeNMT9AkwtZ42xEuFoPT'))
+    activityEditorStore.dispatch(removeRide('ZWQBVB1A-adzEwduLhxNf'))
+    activityEditorStore.dispatch(removeRide('Ef5dR1fB057_8_SuTDyIw'))
+
+    const addedTwoHalfAction = addRide()
+    const addedTwoHalfRideId = addedTwoHalfAction.payload.id
+    activityEditorStore.dispatch(addedTwoHalfAction)
+    activityEditorStore.dispatch(setRideDescription(addedTwoHalfRideId, 'two 1/2'))
+    activityEditorStore.dispatch(moveRide(addedTwoHalfRideId, 0))
+
+    const addedFive1ThirdAction = addRide()
+    const addedFive1ThirdActionRideId = addedFive1ThirdAction.payload.id
+    activityEditorStore.dispatch(addedFive1ThirdAction)
+    activityEditorStore.dispatch(setRideDescription(addedFive1ThirdActionRideId, 'five 1/3'))
+    activityEditorStore.dispatch(moveRide(addedFive1ThirdActionRideId, 3))
+
+    const addedFive2ThirdAction = addRide()
+    const addedFive2ThirdActionRideId = addedFive2ThirdAction.payload.id
+    activityEditorStore.dispatch(addedFive2ThirdAction)
+    activityEditorStore.dispatch(setRideDescription(addedFive2ThirdActionRideId, 'five 2/3'))
+    activityEditorStore.dispatch(moveRide(addedFive2ThirdActionRideId, 4))
+
+    const expectedRidesLocalChanged = {
+      ids: [
+        addedTwoHalfRideId,
+        'zDkTPEbQtEKxScVreX_Dl', // three
+        'o3NqKgABfB-Dr1-Mer6Uo', // four
+        addedFive1ThirdActionRideId,
+        addedFive2ThirdActionRideId,
+        'Jhi0UAsCAGKN9GkGEwhhB', // six
+      ],
+      entities: {
+        [addedTwoHalfRideId]: {
+          id: addedTwoHalfRideId,
+          description: 'two 1/2'
+        },
+        'zDkTPEbQtEKxScVreX_Dl': {
+          id: 'zDkTPEbQtEKxScVreX_Dl',
+          description: 'three'
+        },
+        'o3NqKgABfB-Dr1-Mer6Uo': {
+          id: 'o3NqKgABfB-Dr1-Mer6Uo',
+          description: 'four'
+        },
+        [addedFive1ThirdActionRideId]: {
+          id: addedFive1ThirdActionRideId,
+          description: 'five 1/3'
+        },
+        [addedFive2ThirdActionRideId]: {
+          id: addedFive2ThirdActionRideId,
+          description: 'five 2/3'
+        },
+        'Jhi0UAsCAGKN9GkGEwhhB': {
+          id: 'Jhi0UAsCAGKN9GkGEwhhB',
+          description: 'six'
+        }
+      }
+    }
+    const stateLocalChanges = activityEditorStore.getState()
+    expect(stateLocalChanges.formData.rides).toEqual(expectedRidesLocalChanged)
+
+    // remote changes
+    // remove one and six
+    // add 'one 1/3 R', 'one 2/3 R' and 'five 1/2 R'
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "T0DmAxA1muFhfDA6OSjuo",
+            description: "one 1/3 R",
+            sequence: 1
+          },
+          {
+            id: "9SooxKVP__O33gevSAfSU",
+            description: "one 2/3 R",
+            sequence: 2
+          },
+          {
+            id: "ZWQBVB1A-adzEwduLhxNf",
+            description: "two",
+            sequence: 3
+          },
+          {
+            id: "zDkTPEbQtEKxScVreX_Dl",
+            description: "three",
+            sequence: 4
+          },
+          {
+            id: "o3NqKgABfB-Dr1-Mer6Uo",
+            description: "four",
+            sequence: 5
+          },
+          {
+            id: "Ef5dR1fB057_8_SuTDyIw",
+            description: "five",
+            sequence: 6
+          },
+          {
+            id: "DBkR9-vuKdJFzV6AWMPQ4",
+            description: "five 1/2 R",
+            sequence: 7
+          },
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    const expectedRidesRefreshed = {
+      ids: [
+        addedTwoHalfRideId,
+        'T0DmAxA1muFhfDA6OSjuo', // one 1/3 R
+        '9SooxKVP__O33gevSAfSU', // one 2/3 R
+        'zDkTPEbQtEKxScVreX_Dl', // three
+        'o3NqKgABfB-Dr1-Mer6Uo', // four
+        addedFive1ThirdActionRideId,
+        addedFive2ThirdActionRideId,
+        'DBkR9-vuKdJFzV6AWMPQ4', // five 1/2 R
+      ],
+      entities: {
+        [addedTwoHalfRideId]: {
+          id: addedTwoHalfRideId,
+          description: 'two 1/2'
+        },
+        'T0DmAxA1muFhfDA6OSjuo': {
+          id: "T0DmAxA1muFhfDA6OSjuo",
+          description: "one 1/3 R"
+        },
+        '9SooxKVP__O33gevSAfSU': {
+          id: "9SooxKVP__O33gevSAfSU",
+          description: "one 2/3 R"
+        },
+        'zDkTPEbQtEKxScVreX_Dl': {
+          id: 'zDkTPEbQtEKxScVreX_Dl',
+          description: 'three'
+        },
+        'o3NqKgABfB-Dr1-Mer6Uo': {
+          id: 'o3NqKgABfB-Dr1-Mer6Uo',
+          description: 'four'
+        },
+        [addedFive1ThirdActionRideId]: {
+          id: addedFive1ThirdActionRideId,
+          description: 'five 1/3'
+        },
+        [addedFive2ThirdActionRideId]: {
+          id: addedFive2ThirdActionRideId,
+          description: 'five 2/3'
+        },
+        'DBkR9-vuKdJFzV6AWMPQ4': {
+          id: "DBkR9-vuKdJFzV6AWMPQ4",
+          description: "five 1/2 R"
+        }
+      }
+    }
+    const stateRefreshed = activityEditorStore.getState()
+    expect(stateRefreshed.formData.rides).toEqual(expectedRidesRefreshed)
+
+    // undo
+    activityEditorStore.dispatch(undo())
+    const stateUndo = activityEditorStore.getState()
+    expect(stateUndo.formData.rides).toEqual(expectedRidesLocalChanged)
+
+    // redo
+    activityEditorStore.dispatch(redo())
+    const stateRedo = activityEditorStore.getState()
+    expect(stateRedo.formData.rides).toEqual(expectedRidesRefreshed)
+  })
+
+  test('Refreshed move, multiple removes and multiple adds', () => {
+    const activityEditorStore = createStore(
+      activityEditorReducer,
+      applyMiddleware(editHistoryMiddleware)
+    )
+    activityEditorStore.dispatch(setActivityEditorId(1))
+    activityEditorStore.dispatch(setActivityEditorIsEdit(true))
+    activityEditorStore.dispatch(loadedActivity())
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "1",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "xTeNMT9AkwtZ42xEuFoPT",
+            description: "one",
+            sequence: 1
+          },
+          {
+            id: "ZWQBVB1A-adzEwduLhxNf",
+            description: "two",
+            sequence: 2
+          },
+          {
+            id: "zDkTPEbQtEKxScVreX_Dl",
+            description: "three",
+            sequence: 3
+          },
+          {
+            id: "o3NqKgABfB-Dr1-Mer6Uo",
+            description: "four",
+            sequence: 4
+          },
+          {
+            id: "Ef5dR1fB057_8_SuTDyIw",
+            description: "five",
+            sequence: 5
+          },
+          {
+            id: "Jhi0UAsCAGKN9GkGEwhhB",
+            description: "six",
+            sequence: 6
+          }
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // local changes
+    // remove one, two and five
+    // add 'two 1/2', 'five 1/3' and 'five 2/3'
+    activityEditorStore.dispatch(removeRide('xTeNMT9AkwtZ42xEuFoPT'))
+    activityEditorStore.dispatch(removeRide('ZWQBVB1A-adzEwduLhxNf'))
+    activityEditorStore.dispatch(removeRide('Ef5dR1fB057_8_SuTDyIw'))
+
+    const addedTwoHalfAction = addRide()
+    const addedTwoHalfRideId = addedTwoHalfAction.payload.id
+    activityEditorStore.dispatch(addedTwoHalfAction)
+    activityEditorStore.dispatch(setRideDescription(addedTwoHalfRideId, 'two 1/2'))
+    activityEditorStore.dispatch(moveRide(addedTwoHalfRideId, 0))
+
+    const addedFive1ThirdAction = addRide()
+    const addedFive1ThirdActionRideId = addedFive1ThirdAction.payload.id
+    activityEditorStore.dispatch(addedFive1ThirdAction)
+    activityEditorStore.dispatch(setRideDescription(addedFive1ThirdActionRideId, 'five 1/3'))
+    activityEditorStore.dispatch(moveRide(addedFive1ThirdActionRideId, 3))
+
+    const addedFive2ThirdAction = addRide()
+    const addedFive2ThirdActionRideId = addedFive2ThirdAction.payload.id
+    activityEditorStore.dispatch(addedFive2ThirdAction)
+    activityEditorStore.dispatch(setRideDescription(addedFive2ThirdActionRideId, 'five 2/3'))
+    activityEditorStore.dispatch(moveRide(addedFive2ThirdActionRideId, 4))
+
+    const expectedRideIdsLocalChanged = [
+      addedTwoHalfRideId,
+      'zDkTPEbQtEKxScVreX_Dl', // three
+      'o3NqKgABfB-Dr1-Mer6Uo', // four
+      addedFive1ThirdActionRideId,
+      addedFive2ThirdActionRideId,
+      'Jhi0UAsCAGKN9GkGEwhhB', // six
+    ]
+    const stateLocalChanges = activityEditorStore.getState()
+    expect(stateLocalChanges.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
+
+    // remote changes
+    // remove one and six
+    // move three and four
+    // add 'one 1/3 R', 'one 2/3 R' and 'five 1/2 R'
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "T0DmAxA1muFhfDA6OSjuo",
+            description: "one 1/3 R",
+            sequence: 1
+          },
+          {
+            id: "9SooxKVP__O33gevSAfSU",
+            description: "one 2/3 R",
+            sequence: 2
+          },
+          {
+            id: "ZWQBVB1A-adzEwduLhxNf",
+            description: "two",
+            sequence: 3
+          },
+          {
+            id: "o3NqKgABfB-Dr1-Mer6Uo",
+            description: "four",
+            sequence: 4
+          },
+          {
+            id: "zDkTPEbQtEKxScVreX_Dl",
+            description: "three",
+            sequence: 5
+          },
+          {
+            id: "Ef5dR1fB057_8_SuTDyIw",
+            description: "five",
+            sequence: 6
+          },
+          {
+            id: "DBkR9-vuKdJFzV6AWMPQ4",
+            description: "five 1/2 R",
+            sequence: 7
+          },
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    const expectedRideIdsRefreshed = [
+      addedTwoHalfRideId,
+      'T0DmAxA1muFhfDA6OSjuo', // one 1/3 R
+      '9SooxKVP__O33gevSAfSU', // one 2/3 R
+      'o3NqKgABfB-Dr1-Mer6Uo', // four
+      'zDkTPEbQtEKxScVreX_Dl', // three
+      addedFive1ThirdActionRideId,
+      addedFive2ThirdActionRideId,
+      'DBkR9-vuKdJFzV6AWMPQ4', // five 1/2 R
+    ]
+    // const stateRefreshed = activityEditorStore.getState()
+    // expect(stateRefreshed.formData.rides.ids).toEqual(expectedRideIdsRefreshed)
+
+    // undo
+    activityEditorStore.dispatch(undo())
+    // const stateUndo = activityEditorStore.getState()
+    // expect(stateUndo.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
+
+    // redo
+    activityEditorStore.dispatch(redo())
+    const stateRedo = activityEditorStore.getState()
+    expect(stateRedo.formData.rides.ids).toEqual(expectedRideIdsRefreshed)
+  })
+
+
+  // test('Refreshed move, multiple removes, multiple adds and conflicts', () => {
+  // local one update, local six update, remote two update, remote five update 
+  // with or withour move
+})
