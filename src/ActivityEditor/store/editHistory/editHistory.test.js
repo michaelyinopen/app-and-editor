@@ -122,25 +122,7 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity edited')
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -175,25 +157,8 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity edited 3',
-      who: "some person also edited",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity edited 3')
+    expect(actualState.formData.who).toEqual("some person also edited")
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -258,25 +223,7 @@ describe('Edit Name', () => {
 
     // assert Undo
     const actualUndoState = activityEditorStore.getState()
-    expect(actualUndoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualUndoState.formData.name).toEqual('some activity')
     expect(actualUndoState.steps).toEqual([
       {
         name: 'initial',
@@ -306,25 +253,7 @@ describe('Edit Name', () => {
 
     // assert Redo
     const actualRedoState = activityEditorStore.getState()
-    expect(actualRedoState.formData).toEqual({
-      name: 'some activity edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualRedoState.formData.name).toEqual('some activity edited')
     expect(actualRedoState.steps).toEqual([
       {
         name: 'initial',
@@ -382,25 +311,7 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity local edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity local edited')
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -423,7 +334,6 @@ describe('Edit Name', () => {
         ]
       },
     ])
-    expect(actualState.currentStepIndex).toBe(1)
   })
   test('Refreshed only remote edit', () => {
     // will create a refreshed step
@@ -457,25 +367,7 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity remote edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity remote edited')
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -580,25 +472,8 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity local edited',
-      who: "some person unrelated update",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity local edited')
+    expect(actualState.formData.who).toEqual("some person unrelated update")
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -688,25 +563,8 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person unrelated update",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity')
+    expect(actualState.formData.who).toEqual("some person unrelated update")
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -794,25 +652,7 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual("some activity edited")
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -846,8 +686,8 @@ describe('Edit Name', () => {
     activityEditorStore.dispatch(setActivityFromAppStore(
       {
         id: 1,
-        name: "some activity remote edited",
         versionToken: "2",
+        name: "some activity remote edited",
         person: "some person",
         place: "some place",
         cost: 99,
@@ -875,25 +715,7 @@ describe('Edit Name', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity remote edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
+    expect(actualState.formData.name).toEqual('some activity remote edited')
     expect(actualState.steps).toEqual([
       {
         name: 'initial',
@@ -946,27 +768,9 @@ describe('Edit Name', () => {
     activityEditorStore.dispatch(unApplyConflict(2, 0))
 
     // assert unapply
-    const actualUnapplyState = activityEditorStore.getState()
-    expect(actualUnapplyState.formData).toEqual({
-      name: 'some activity local edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
-    expect(actualUnapplyState.steps).toEqual([
+    const unapplyState = activityEditorStore.getState()
+    expect(unapplyState.formData.name).toEqual('some activity local edited')
+    expect(unapplyState.steps).toEqual([
       {
         name: 'initial',
         operations: []
@@ -1008,34 +812,16 @@ describe('Edit Name', () => {
         ]
       },
     ])
-    expect(actualUnapplyState.currentStepIndex).toBe(2)
-    expect(actualUnapplyState.versions.length).toEqual(2)
+    expect(unapplyState.currentStepIndex).toBe(2)
+    expect(unapplyState.versions.length).toEqual(2)
 
     //act re-apply
     activityEditorStore.dispatch(applyConflict(2, 0))
 
     // assert re-apply
-    const actualReapplyState = activityEditorStore.getState()
-    expect(actualReapplyState.formData).toEqual({
-      name: 'some activity remote edited',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
-    })
-    expect(actualReapplyState.steps).toEqual([
+    const reapplyState = activityEditorStore.getState()
+    expect(reapplyState.formData.name).toEqual('some activity remote edited')
+    expect(reapplyState.steps).toEqual([
       {
         name: 'initial',
         operations: []
@@ -1077,8 +863,8 @@ describe('Edit Name', () => {
         ]
       },
     ])
-    expect(actualReapplyState.currentStepIndex).toBe(2)
-    expect(actualReapplyState.versions.length).toEqual(2)
+    expect(reapplyState.currentStepIndex).toBe(2)
+    expect(reapplyState.versions.length).toEqual(2)
   })
   test('Conflict has related change', () => {
     const activityEditorStore = createAppStoreWithConflict()
@@ -1087,15 +873,15 @@ describe('Edit Name', () => {
 
     // edit
     activityEditorStore.dispatch(setName('some activity after'))
-    const stateAfterEdit = activityEditorStore.getState()
-    const conflictOperation = stateAfterEdit.steps[conflictStepIndex].operations
+    const editState = activityEditorStore.getState()
+    const editConflictOperation = editState.steps[conflictStepIndex].operations
       .filter(op => op.type === 'conflict')[conflictIndex]
-    const hasRelatedChanges = (() => {
-      for (const step of stateAfterEdit.steps.slice(
+    const editHasRelatedChanges = (() => {
+      for (const step of editState.steps.slice(
         conflictStepIndex + 1,
-        stateAfterEdit.currentStepIndex + 1
+        editState.currentStepIndex + 1
       )) {
-        const stepResult = conflictHasRelatedChanges(conflictOperation, step)
+        const stepResult = conflictHasRelatedChanges(editConflictOperation, step)
         if (stepResult) {
           return true
         }
@@ -1104,19 +890,19 @@ describe('Edit Name', () => {
     })()
 
     // assert edit
-    expect(hasRelatedChanges).toBe(true)
+    expect(editHasRelatedChanges).toBe(true)
 
     // undo edit
     activityEditorStore.dispatch(undo())
-    const stateAfterUndo = activityEditorStore.getState()
-    const conflictOperationAfterUndo = stateAfterUndo.steps[conflictStepIndex].operations
+    const undoState = activityEditorStore.getState()
+    const undoConflictOperation = undoState.steps[conflictStepIndex].operations
       .filter(op => op.type === 'conflict')[conflictIndex]
-    const hasRelatedChangesAfterUndo = (() => {
-      for (const step of stateAfterUndo.steps.slice(
+    const undoHasRelatedChanges = (() => {
+      for (const step of undoState.steps.slice(
         conflictStepIndex + 1,
-        stateAfterUndo.currentStepIndex + 1
+        undoState.currentStepIndex + 1
       )) {
-        const stepResult = conflictHasRelatedChanges(conflictOperationAfterUndo, step)
+        const stepResult = conflictHasRelatedChanges(undoConflictOperation, step)
         if (stepResult) {
           return true
         }
@@ -1125,7 +911,7 @@ describe('Edit Name', () => {
     })()
 
     // assert undo edit
-    expect(hasRelatedChangesAfterUndo).toBe(false)
+    expect(undoHasRelatedChanges).toBe(false)
   })
 })
 
@@ -1176,28 +962,22 @@ describe('Add Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-          [addedRideId]: {
-            id: addedRideId,
-            description: ""
-          },
-        }
-      },
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+        [addedRideId]: {
+          id: addedRideId,
+          description: ""
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -1244,24 +1024,18 @@ describe('Add Ride', () => {
 
     // assert undo
     const undoState = activityEditorStore.getState()
-    expect(undoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          }
+    expect(undoState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
         }
-      },
+      }
     })
     expect(undoState.steps).toEqual([
       {
@@ -1303,28 +1077,22 @@ describe('Add Ride', () => {
 
     // assert redo
     const redoState = activityEditorStore.getState()
-    expect(redoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-          [addedRideId]: {
-            id: addedRideId,
-            description: ""
-          },
-        }
-      },
+    expect(redoState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+        [addedRideId]: {
+          id: addedRideId,
+          description: ""
+        },
+      }
     })
     expect(redoState.steps).toEqual([
       {
@@ -1395,28 +1163,23 @@ describe('Add Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity unrelated change',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-          [addedRideId]: {
-            id: addedRideId,
-            description: ""
-          },
-        }
-      },
+    expect(actualState.formData.name).toEqual('some activity unrelated change')
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx", addedRideId],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+        [addedRideId]: {
+          id: addedRideId,
+          description: ""
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -1649,24 +1412,18 @@ describe('Edit Ride Property', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "big red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "big red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -1703,24 +1460,18 @@ describe('Edit Ride Property', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: 'big fast red car'
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry unrelated"
-          },
-        }
-      },
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: 'big fast red car'
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry unrelated"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -1786,24 +1537,18 @@ describe('Edit Ride Property', () => {
 
     // assert Undo
     const undoState = activityEditorStore.getState()
-    expect(undoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(undoState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(undoState.steps).toEqual([
       {
@@ -1834,24 +1579,18 @@ describe('Edit Ride Property', () => {
 
     // assert Redo
     const redoState = activityEditorStore.getState()
-    expect(redoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "big red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(redoState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "big red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(redoState.steps).toEqual([
       {
@@ -1909,24 +1648,19 @@ describe('Edit Ride Property', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person unrelated update",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "big red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.who).toEqual("some person unrelated update")
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "big red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2013,24 +1747,19 @@ describe('Edit Ride Property', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person unrelated update",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red VAN"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.who).toEqual("some person unrelated update")
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red VAN"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2102,24 +1831,19 @@ describe('Edit Ride Property', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person unrelated update",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red VAN"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.who).toEqual("some person unrelated update")
+    expect(actualState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red VAN"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2224,20 +1948,14 @@ describe('Remove Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.rides).toEqual({
+      ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2281,27 +1999,21 @@ describe('Remove Ride', () => {
     activityEditorStore.dispatch(undo())
 
     // assert Undo
-    const actualUndoState = activityEditorStore.getState()
-    expect(actualUndoState.formData).toEqual({
-      name: 'some activity',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "GFqbzNATDKY8pKRAZV3ko": {
-            id: "GFqbzNATDKY8pKRAZV3ko",
-            description: "red car"
-          },
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    const undoState = activityEditorStore.getState()
+    expect(undoState.formData.rides).toEqual({
+      ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
-    expect(actualUndoState.steps).toEqual([
+    expect(undoState.steps).toEqual([
       {
         name: 'initial',
         operations: []
@@ -2334,14 +2046,14 @@ describe('Remove Ride', () => {
         ]
       },
     ])
-    expect(actualUndoState.currentStepIndex).toBe(0)
+    expect(undoState.currentStepIndex).toBe(0)
 
     // act Redo
     activityEditorStore.dispatch(redo())
 
     // assert Redo
-    const actualRedoState = activityEditorStore.getState()
-    expect(actualRedoState.formData).toEqual({
+    const redoState = activityEditorStore.getState()
+    expect(redoState.formData).toEqual({
       name: 'some activity',
       who: "some person",
       where: "some place",
@@ -2356,7 +2068,7 @@ describe('Remove Ride', () => {
         }
       },
     })
-    expect(actualRedoState.currentStepIndex).toBe(1)
+    expect(redoState.currentStepIndex).toBe(1)
   })
   test('Refreshed merge local remove', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -2390,20 +2102,15 @@ describe('Remove Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity unrelated change',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.name).toEqual('some activity unrelated change')
+    expect(actualState.formData.rides).toEqual({
+      ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2507,20 +2214,15 @@ describe('Remove Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity unrelated change',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.name).toEqual('some activity unrelated change')
+    expect(actualState.formData.rides).toEqual({
+      ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2598,20 +2300,15 @@ describe('Remove Ride', () => {
 
     // assert
     const actualState = activityEditorStore.getState()
-    expect(actualState.formData).toEqual({
-      name: 'some activity unrelated change',
-      who: "some person",
-      where: "some place",
-      howMuch: 99,
-      rides: {
-        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
-        entities: {
-          "zUxqlLLtWWjOdvHfAa1Vx": {
-            id: "zUxqlLLtWWjOdvHfAa1Vx",
-            description: "ferry"
-          },
-        }
-      },
+    expect(actualState.formData.name).toEqual('some activity unrelated change')
+    expect(actualState.formData.rides).toEqual({
+      ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+      entities: {
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
     })
     expect(actualState.steps).toEqual([
       {
@@ -2700,24 +2397,19 @@ describe('Remove Ride', () => {
 
       // assert
       const actualState = activityEditorStore.getState()
-      expect(actualState.formData).toEqual({
-        name: 'some activity unrelated change',
-        who: "some person",
-        where: "some place",
-        howMuch: 99,
-        rides: {
-          ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-          entities: {
-            "GFqbzNATDKY8pKRAZV3ko": {
-              id: "GFqbzNATDKY8pKRAZV3ko",
-              description: "red VAN"
-            },
-            "zUxqlLLtWWjOdvHfAa1Vx": {
-              id: "zUxqlLLtWWjOdvHfAa1Vx",
-              description: "ferry"
-            },
-          }
-        },
+      expect(actualState.formData.name).toEqual('some activity unrelated change')
+      expect(actualState.formData.rides).toEqual({
+        ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red VAN"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
       })
       expect(actualState.steps).toEqual([
         {
@@ -2850,6 +2542,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(undoUnapplyState.currentStepIndex).toBe(1)
 
       // redo unapply
       activityEditorStore.dispatch(redo())
@@ -2863,6 +2556,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(redoUnapplyState.currentStepIndex).toBe(2)
 
       // reapply
       activityEditorStore.dispatch(applyConflict(2, 0))
@@ -2893,6 +2587,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(undoReapplyState.currentStepIndex).toBe(1)
 
       // redo reapply
       activityEditorStore.dispatch(redo())
@@ -2910,6 +2605,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(redoReapplyState.currentStepIndex).toBe(2)
     })
     test('Conflict has related change: edit ride property', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -2943,15 +2639,15 @@ describe('Remove Ride', () => {
 
       // edit
       activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'red TRUCK'))
-      const stateAfterEdit = activityEditorStore.getState()
-      const conflictOperation = stateAfterEdit.steps[conflictStepIndex].operations
+      const editState = activityEditorStore.getState()
+      const editConflictOperation = editState.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
-      const hasRelatedChanges = (() => {
-        for (const step of stateAfterEdit.steps.slice(
+      const editHasRelatedChanges = (() => {
+        for (const step of editState.steps.slice(
           conflictStepIndex + 1,
-          stateAfterEdit.currentStepIndex + 1
+          editState.currentStepIndex + 1
         )) {
-          const stepResult = conflictHasRelatedChanges(conflictOperation, step)
+          const stepResult = conflictHasRelatedChanges(editConflictOperation, step)
           if (stepResult) {
             return true
           }
@@ -2960,19 +2656,19 @@ describe('Remove Ride', () => {
       })()
 
       // assert edit
-      expect(hasRelatedChanges).toBe(true)
+      expect(editHasRelatedChanges).toBe(true)
 
       // undo edit
       activityEditorStore.dispatch(undo())
-      const stateAfterUndoEdit = activityEditorStore.getState()
-      const conflictOperationAfterUndoEdit = stateAfterUndoEdit.steps[conflictStepIndex].operations
+      const undoEditState = activityEditorStore.getState()
+      const undoEditConflictOperation = undoEditState.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
-      const hasRelatedChangesAfterUndoEdit = (() => {
-        for (const step of stateAfterUndoEdit.steps.slice(
+      const undoEditHasRelatedChanges = (() => {
+        for (const step of undoEditState.steps.slice(
           conflictStepIndex + 1,
-          stateAfterUndoEdit.currentStepIndex + 1
+          undoEditState.currentStepIndex + 1
         )) {
-          const stepResult = conflictHasRelatedChanges(conflictOperationAfterUndoEdit, step)
+          const stepResult = conflictHasRelatedChanges(undoEditConflictOperation, step)
           if (stepResult) {
             return true
           }
@@ -2981,7 +2677,7 @@ describe('Remove Ride', () => {
       })()
 
       // assert undo edit
-      expect(hasRelatedChangesAfterUndoEdit).toBe(false)
+      expect(undoEditHasRelatedChanges).toBe(false)
     })
     test('Conflict has related change: remove', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -3015,15 +2711,15 @@ describe('Remove Ride', () => {
 
       // remove
       activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
-      const stateRemove = activityEditorStore.getState()
-      const conflictOperationRemove = stateRemove.steps[conflictStepIndex].operations
+      const removeState = activityEditorStore.getState()
+      const removeConflictOperation = removeState.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
-      const hasRelatedChangesRemove = (() => {
-        for (const step of stateRemove.steps.slice(
+      const removeHasRelatedChanges = (() => {
+        for (const step of removeState.steps.slice(
           conflictStepIndex + 1,
-          stateRemove.currentStepIndex + 1
+          removeState.currentStepIndex + 1
         )) {
-          const stepResult = conflictHasRelatedChanges(conflictOperationRemove, step)
+          const stepResult = conflictHasRelatedChanges(removeConflictOperation, step)
           if (stepResult) {
             return true
           }
@@ -3032,19 +2728,19 @@ describe('Remove Ride', () => {
       })()
 
       // assert remove
-      expect(hasRelatedChangesRemove).toBe(true)
+      expect(removeHasRelatedChanges).toBe(true)
 
       // undo remove
       activityEditorStore.dispatch(undo())
-      const stateUndoRemove = activityEditorStore.getState()
-      const conflictOperationUndoRemove = stateUndoRemove.steps[conflictStepIndex].operations
+      const undoRemoveStat = activityEditorStore.getState()
+      const undoRemoveConflictOperation = undoRemoveStat.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
-      const hasRelatedChangesUndoEdit = (() => {
-        for (const step of stateUndoRemove.steps.slice(
+      const undoRemoveHasRelatedChanges = (() => {
+        for (const step of undoRemoveStat.steps.slice(
           conflictStepIndex + 1,
-          stateUndoRemove.currentStepIndex + 1
+          undoRemoveStat.currentStepIndex + 1
         )) {
-          const stepResult = conflictHasRelatedChanges(conflictOperationUndoRemove, step)
+          const stepResult = conflictHasRelatedChanges(undoRemoveConflictOperation, step)
           if (stepResult) {
             return true
           }
@@ -3053,7 +2749,7 @@ describe('Remove Ride', () => {
       })()
 
       // assert undo remove
-      expect(hasRelatedChangesUndoEdit).toBe(false)
+      expect(undoRemoveHasRelatedChanges).toBe(false)
     })
   })
   describe('Refreshed local update remote remove', () => {
@@ -3084,20 +2780,15 @@ describe('Remove Ride', () => {
 
       // assert
       const actualState = activityEditorStore.getState()
-      expect(actualState.formData).toEqual({
-        name: 'some activity unrelated change',
-        who: "some person",
-        where: "some place",
-        howMuch: 99,
-        rides: {
-          ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
-          entities: {
-            "zUxqlLLtWWjOdvHfAa1Vx": {
-              id: "zUxqlLLtWWjOdvHfAa1Vx",
-              description: "ferry"
-            },
-          }
-        },
+      expect(actualState.formData.name).toEqual('some activity unrelated change')
+      expect(actualState.formData.rides).toEqual({
+        ids: ["zUxqlLLtWWjOdvHfAa1Vx"],
+        entities: {
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
       })
       expect(actualState.steps).toEqual([
         {
@@ -3222,6 +2913,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(undoUnapplyState.currentStepIndex).toBe(1)
 
       // redo unapply
       activityEditorStore.dispatch(redo())
@@ -3239,6 +2931,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(redoUnapplyState.currentStepIndex).toBe(2)
 
       // reapply
       activityEditorStore.dispatch(applyConflict(2, 0))
@@ -3269,6 +2962,7 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(undoReapplyState.currentStepIndex).toBe(1)
 
       // redo reapply
       activityEditorStore.dispatch(redo())
@@ -3282,14 +2976,78 @@ describe('Remove Ride', () => {
           },
         }
       })
+      expect(redoReapplyState.currentStepIndex).toBe(2)
     })
     test('Conflict has related change: edit ride property', () => {
-      // todo 
+      const activityEditorStore = createLoadedAppStore()
+      activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'big red car'))
+      activityEditorStore.dispatch(setActivityFromAppStore(
+        {
+          id: 1,
+          name: "some activity unrelated change",
+          versionToken: "2",
+          person: "some person",
+          place: "some place",
+          cost: 99,
+          rides: [
+            {
+              id: "zUxqlLLtWWjOdvHfAa1Vx",
+              description: "ferry",
+              sequence: 1
+            }
+          ],
+          hasDetail: true,
+        },
+        true
+      ))
+      const conflictStepIndex = 2
+      const conflictIndex = 0
+      activityEditorStore.dispatch(unApplyConflict(conflictStepIndex, conflictIndex))
+
+      // edit
+      activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'big blue car'))
+
+      // assert edit
+      const stateEdit = activityEditorStore.getState()
+      const conflictOperationEdit = stateEdit.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesEdit = (() => {
+        for (const step of stateEdit.steps.slice(
+          conflictStepIndex + 1,
+          stateEdit.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationEdit, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesEdit).toBe(true)
+      
+      // undoEdit
+      activityEditorStore.dispatch(undo())
+
+      // assert undoEdit
+      const stateUndoEdit = activityEditorStore.getState()
+      const conflictOperationUndoEdit = stateUndoEdit.steps[conflictStepIndex].operations
+        .filter(op => op.type === 'conflict')[conflictIndex]
+      const hasRelatedChangesUndoEdit = (() => {
+        for (const step of stateUndoEdit.steps.slice(
+          conflictStepIndex + 1,
+          stateUndoEdit.currentStepIndex + 1
+        )) {
+          const stepResult = conflictHasRelatedChanges(conflictOperationUndoEdit, step)
+          if (stepResult) {
+            return true
+          }
+        }
+        return false
+      })()
+      expect(hasRelatedChangesUndoEdit).toBe(false)
     })
     test('Conflict has related change: remove', () => {
       const activityEditorStore = createLoadedAppStore()
-
-      // act
       activityEditorStore.dispatch(setRideDescription('GFqbzNATDKY8pKRAZV3ko', 'big red car'))
       activityEditorStore.dispatch(setActivityFromAppStore(
         {
@@ -3316,6 +3074,8 @@ describe('Remove Ride', () => {
 
       // remove
       activityEditorStore.dispatch(removeRide('GFqbzNATDKY8pKRAZV3ko'))
+
+      // assert remove
       const stateRemove = activityEditorStore.getState()
       const conflictOperationRemove = stateRemove.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
@@ -3331,12 +3091,12 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert remove
       expect(hasRelatedChangesRemove).toBe(true)
 
       // undo remove
       activityEditorStore.dispatch(undo())
+
+      // assert undo remove
       const stateUndoRemove = activityEditorStore.getState()
       const conflictOperationUndoRemove = stateUndoRemove.steps[conflictStepIndex].operations
         .filter(op => op.type === 'conflict')[conflictIndex]
@@ -3352,8 +3112,6 @@ describe('Remove Ride', () => {
         }
         return false
       })()
-
-      // assert undo remove
       expect(hasRelatedChangesUndoEdit).toBe(false)
     })
   })
@@ -3516,9 +3274,180 @@ describe('Move Rides', () => {
       },
     ])
   })
-  // test('Refreshed merge local remove', () => {
-  // test('Refreshed only remote remove', () => {
-  // test('Refreshed local and remote both remove', () => {
+  test('Undo Redo Move', () => {
+    const activityEditorStore = createLoadedAppStore()
+    activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+
+    // act undo
+    activityEditorStore.dispatch(undo())
+
+    // assert undo
+    const undoState = activityEditorStore.getState()
+    expect(undoState.formData.rides).toEqual({
+      ids: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+      entities: {
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+        "UpW9WgVUNXeYB3w8S0flu": {
+          id: "UpW9WgVUNXeYB3w8S0flu",
+          description: "train"
+        },
+      }
+    })
+    expect(undoState.currentStepIndex).toBe(0)
+
+    // act redo
+    activityEditorStore.dispatch(redo())
+
+    // assert redo
+    const redoState = activityEditorStore.getState()
+    expect(redoState.formData.rides).toEqual({
+      ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+      entities: {
+        "UpW9WgVUNXeYB3w8S0flu": {
+          id: "UpW9WgVUNXeYB3w8S0flu",
+          description: "train"
+        },
+        "GFqbzNATDKY8pKRAZV3ko": {
+          id: "GFqbzNATDKY8pKRAZV3ko",
+          description: "red car"
+        },
+        "zUxqlLLtWWjOdvHfAa1Vx": {
+          id: "zUxqlLLtWWjOdvHfAa1Vx",
+          description: "ferry"
+        },
+      }
+    })
+    expect(redoState.currentStepIndex).toBe(1)
+  })
+  test('Refreshed merge local move', () => {
+    const activityEditorStore = createLoadedAppStore()
+    activityEditorStore.dispatch(moveRide('UpW9WgVUNXeYB3w8S0flu', 0))
+
+    // act
+    activityEditorStore.dispatch(setActivityFromAppStore(
+      {
+        id: 1,
+        name: "some activity unrelated change",
+        versionToken: "2",
+        person: "some person",
+        place: "some place",
+        cost: 99,
+        rides: [
+          {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car",
+            sequence: 1
+          },
+          {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry",
+            sequence: 2
+          },
+          {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train",
+            sequence: 3
+          },
+        ],
+        hasDetail: true,
+      },
+      true
+    ))
+
+    // assert
+    const actualState = activityEditorStore.getState()
+    expect(actualState.formData).toEqual({
+      name: 'some activity unrelated change',
+      who: "some person",
+      where: "some place",
+      howMuch: 99,
+      rides: {
+        ids: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+        entities: {
+          "UpW9WgVUNXeYB3w8S0flu": {
+            id: "UpW9WgVUNXeYB3w8S0flu",
+            description: "train"
+          },
+          "GFqbzNATDKY8pKRAZV3ko": {
+            id: "GFqbzNATDKY8pKRAZV3ko",
+            description: "red car"
+          },
+          "zUxqlLLtWWjOdvHfAa1Vx": {
+            id: "zUxqlLLtWWjOdvHfAa1Vx",
+            description: "ferry"
+          },
+        }
+      },
+    })
+    expect(actualState.steps).toEqual([
+      {
+        name: 'initial',
+        operations: []
+      },
+      {
+        name: 'Move rides',
+        operations: [
+          {
+            type: 'edit',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'move'
+                },
+                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+              }
+            ],
+            applied: true
+          }
+        ]
+      },
+      {
+        name: 'Refreshed',
+        operations: [
+          {
+            type: 'merge',
+            fieldChanges: [
+              {
+                path: '/name',
+                previousValue: 'some activity',
+                newValue: 'some activity unrelated change'
+              }
+            ],
+            applied: true
+          },
+          {
+            type: 'reverse local',
+            fieldChanges: [
+              {
+                path: '/rides/ids',
+                collectionChange: {
+                  type: 'move'
+                },
+                previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+              }
+            ],
+            applied: false
+          },
+        ],
+        versionToken: '2',
+        mergeBehaviour: 'merge',
+      },
+    ])
+    expect(actualState.currentStepIndex).toBe(2)
+    expect(actualState.versions.length).toEqual(2)
+  })
+  // test('Refreshed only remote move', () => {
+  // test('Refreshed local and remote both move', () => {
   // describe('Refreshed remote and local conflicting move', () => {
   //   Conflict
   //   Unapply re-apply undo redo
@@ -3544,10 +3473,12 @@ describe('Move Rides', () => {
   // describe('Refreshed remote move local add', () => {
   //   Refreshed
   //   undo redo
-  // describe('Refreshed multiple removes and multiple adds', () => {
-  //   Refreshed
-  //   undo redo
-  // describe('Refreshed move, multiple removes and multiple adds', () => {
-  //   Refreshed
-  //   undo redo
 })
+
+// describe('Refreshed multiple removes and multiple adds', () => {
+//   Refreshed
+//   undo redo
+
+// describe('Refreshed move, multiple removes and multiple adds', () => {
+//   Refreshed
+//   undo redo
