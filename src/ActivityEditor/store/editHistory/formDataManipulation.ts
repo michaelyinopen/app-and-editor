@@ -281,5 +281,3 @@ export function undoStep(step: Step, previousFormData: FormData): FormData {
   }
   return formData
 }
-
-

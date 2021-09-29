@@ -42,22 +42,19 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
     const currentRideIds = currentFormData.rides.ids
 
     let rideFieldChanges: Array<FieldChange | GroupedFieldChanges> = []
-    let calculationRideIds: string[] = previousRideIds;
+    const previousRideIdAndIndices: Array<{ id: string, index: number }> =
+      previousRideIds.map((id, index) => ({ id, index }));
 
     (function removeRideFieldChanges() {
       const removedRideIds = previousRideIds.filter(pRId => !currentRideIds.includes(pRId))
       for (const removedRideId of removedRideIds) {
-        const removedIndex = calculationRideIds.indexOf(removedRideId)
-        const newCalculationRideIds = [
-          ...calculationRideIds.slice(0, removedIndex),
-          ...calculationRideIds.slice(removedIndex + 1)
-        ]
+        const removedIdIndex = previousRideIdAndIndices.find(i => i.id === removedRideId)
         const idFieldChange = {
           path: '/rides/ids',
           collectionChange: {
             type: 'remove' as const,
             id: removedRideId,
-            index: removedIndex
+            index: removedIdIndex?.index
           }
         }
         const entityFieldChange = {
@@ -80,6 +77,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
           newValue: correspondingCurrentRideIds,
           collectionChange: { type: 'move' as const }
         })
+        calculationRideIds = correspondingCurrentRideIds
       }
     })();
 
