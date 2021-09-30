@@ -151,7 +151,7 @@ function calculateOperationFromRefreshedFieldChange(
       return {
         type: 'conflict' as const,
         fieldChanges: [change].flat(),
-        conflictName: 'Reverse delete ride',
+        conflictName: 'Reverse remove ride',
         conflictApplied: true,
         applied: true
       }
