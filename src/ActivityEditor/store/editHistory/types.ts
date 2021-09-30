@@ -24,7 +24,7 @@ export type FieldChange = {
 
 export type CollectionChange = CollectionRemoveChange | CollectionMoveChange | CollectionAddChange
 
-export type CollectionAddChange = { type: 'add', id: string, position: { index: number, subindex: number }, }
+export type CollectionAddChange = { type: 'add', id: string, position: { index: number | 'beginning', subindex: number }, }
 export type CollectionMoveChange = { type: 'move' }
 export type CollectionRemoveChange = { type: 'remove', id: string, index: number, }
 

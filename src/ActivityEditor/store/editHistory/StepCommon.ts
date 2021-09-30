@@ -10,13 +10,13 @@ export function numberOfSlashes(value: string): number {
 
 export function arraysEqual(a, b) {
   if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
+  if (a == null || b == null) return false
+  if (a.length !== b.length) return false
 
   for (var i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;
   }
-  return true;
+  return true
 }
 
 export function getFieldChanges(previousFormData: FormData, currentFormData: FormData): Array<FieldChange | GroupedFieldChanges> {
@@ -41,11 +41,11 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
     const previousRideIds = previousFormData.rides.ids
     const currentRideIds = currentFormData.rides.ids
 
-    let rideFieldChanges: Array<FieldChange | GroupedFieldChanges> = []
-    const previousRideIdAndIndices: Array<{ id: string, index: number }> =
-      previousRideIds.map((id, index) => ({ id, index }));
+    let rideFieldChanges: Array<FieldChange | GroupedFieldChanges> = [];
 
     (function removeRideFieldChanges() {
+      const previousRideIdAndIndices: Array<{ id: string, index: number }> =
+        previousRideIds.map((id, index) => ({ id, index }))
       const removedRideIds = previousRideIds.filter(pRId => !currentRideIds.includes(pRId))
       for (const removedRideId of removedRideIds) {
         const removedIdIndex = previousRideIdAndIndices.find(i => i.id === removedRideId)
@@ -54,7 +54,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
           collectionChange: {
             type: 'remove' as const,
             id: removedRideId,
-            index: removedIdIndex?.index
+            index: removedIdIndex!.index
           }
         }
         const entityFieldChange = {
@@ -62,22 +62,21 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
           previousValue: previousFormData.rides.entities[removedRideId],
           newValue: undefined
         }
-        calculationRideIds = newCalculationRideIds
         rideFieldChanges.push([idFieldChange, entityFieldChange])
       }
     })();
 
     (function moveRideFieldChanges() {
       // rides that are not added or removed
+      const correspondingPreviousRideIds = previousRideIds.filter(cRId => currentRideIds.includes(cRId))
       const correspondingCurrentRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
-      if (!arraysEqual(calculationRideIds, correspondingCurrentRideIds)) {
+      if (!arraysEqual(correspondingPreviousRideIds, correspondingCurrentRideIds)) {
         rideFieldChanges.push({
           path: '/rides/ids',
-          previousValue: calculationRideIds,
+          previousValue: correspondingPreviousRideIds,
           newValue: correspondingCurrentRideIds,
           collectionChange: { type: 'move' as const }
         })
-        calculationRideIds = correspondingCurrentRideIds
       }
     })();
 
@@ -97,28 +96,53 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
     })();
 
     (function addRidePropertiesFieldChanges() {
-      const addedRideIds = currentRideIds.filter(cRId => !previousRideIds.includes(cRId))
-      for (const addedRideId of addedRideIds) {
-        const addedIndex = currentRideIds.indexOf(addedRideId)
-        const newCalculationRideIds = [
-          ...calculationRideIds.slice(0, addedIndex),
-          addedRideId,
-          ...calculationRideIds.slice(addedIndex)
-        ]
+      const correspondingCurrentRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
+      // currentIds with index of the previous position before any removal
+      const referenceRideIdIndices: Array<{ id: string, index: number }> =
+        previousRideIds
+          .map((id, index) => ({ id, index }))
+          .filter(pIdIndex => currentRideIds.includes(pIdIndex.id))
+          .map((pIdIndex, j) => ({
+            id: correspondingCurrentRideIds[j],
+            index: pIdIndex.index
+          }))
+
+      let addedRideIdIndices: Array<{ id: string, index: number | 'beginning', subindex: number }> = []
+      let currentIndex: number | 'beginning' = 'beginning'
+      let subindex = 0
+      for (const currentRideId of currentRideIds) {
+        const matchingReference = referenceRideIdIndices.find(rIdIndex => rIdIndex.id === currentRideId)
+        if (matchingReference) {
+          currentIndex = matchingReference.index
+          subindex = 0
+        } else {
+          addedRideIdIndices.push({
+            id: currentRideId,
+            index: currentIndex,
+            subindex
+          })
+          subindex = subindex + 1
+        }
+      }
+
+      for (const { id: addedId, index, subindex } of addedRideIdIndices) {
         const idFieldChange = {
           path: '/rides/ids',
           collectionChange: {
             type: 'add' as const,
-            id: addedRideId,
-            index: addedIndex
+            id: addedId,
+            position: {
+              index: index,
+              subindex: subindex
+            }
+
           }
         }
         const entityFieldChange = {
-          path: `/rides/entities/${addedRideId}`,
+          path: `/rides/entities/${addedId}`,
           previousValue: undefined,
-          newValue: currentFormData.rides.entities[addedRideId]
+          newValue: currentFormData.rides.entities[addedId]
         }
-        calculationRideIds = newCalculationRideIds
         rideFieldChanges.push([idFieldChange, entityFieldChange])
       }
     })();
@@ -132,7 +156,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
 
 export function calculateStepName(fieldChanges: FieldChange[]): string {
   if (fieldChanges.length === 0) {
-    return '';
+    return ''
   }
 
   if (fieldChanges.length === 2 && fieldChanges.some(c => c.path === '/rides/ids')) {
