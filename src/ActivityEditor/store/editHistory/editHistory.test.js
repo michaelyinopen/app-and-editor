@@ -995,7 +995,10 @@ describe('Add Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: addedRideId,
-                  index: 2
+                  position: {
+                    index: 1,
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -1053,7 +1056,10 @@ describe('Add Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: addedRideId,
-                  index: 2
+                  position: {
+                    index: 1,
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -1110,7 +1116,10 @@ describe('Add Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: addedRideId,
-                  index: 2
+                  position: {
+                    index: 1,
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -1197,7 +1206,10 @@ describe('Add Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: addedRideId,
-                  index: 2
+                  position: {
+                    index: 1,
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -1343,7 +1355,10 @@ describe('Add Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: 'Uho4iijucZABUUpPeg0cU',
-                  index: 1
+                  position: {
+                    index: 0,
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -2166,7 +2181,10 @@ describe('Remove Ride', () => {
                 collectionChange: {
                   type: 'add',
                   id: "GFqbzNATDKY8pKRAZV3ko",
-                  index: 0
+                  position: {
+                    index: 'beginning',
+                    subindex: 0,
+                  }
                 }
               },
               {
@@ -2465,7 +2483,10 @@ describe('Remove Ride', () => {
                   collectionChange: {
                     type: 'add',
                     id: 'GFqbzNATDKY8pKRAZV3ko',
-                    index: 0
+                    position: {
+                      index: 'beginning',
+                      'subindex': 0,
+                    },
                   }
                 },
                 {
@@ -4719,7 +4740,10 @@ describe('Move Rides', () => {
                   collectionChange: {
                     type: 'add',
                     id: 'Uho4iijucZABUUpPeg0cU',
-                    index: 1
+                    position: {
+                      index: 0,
+                      subindex: 0,
+                    }
                   }
                 },
                 {
@@ -4950,7 +4974,10 @@ describe('Move Rides', () => {
                   collectionChange: {
                     type: 'add',
                     id: 'GFqbzNATDKY8pKRAZV3ko',
-                    index: 0
+                    position: {
+                      index: 'beginning',
+                      subindex: 0,
+                    }
                   }
                 },
                 {
@@ -5326,7 +5353,10 @@ describe('Move Rides', () => {
                   collectionChange: {
                     type: 'add',
                     id: addedRideId,
-                    index: 3
+                    position: {
+                      index: 2,
+                      subindex: 0
+                    }
                   }
                 },
                 {
@@ -6093,7 +6123,7 @@ describe('Mixed Rides', () => {
       'DBkR9-vuKdJFzV6AWMPQ4', // five 1/2 R
     ]
     const stateUnapplyRemoveOne = activityEditorStore.getState()
-    console.log({stateUnapplyRemoveOne: JSON.stringify(stateUnapplyRemoveOne.steps)})
+    console.log({ stateUnapplyRemoveOne: JSON.stringify(stateUnapplyRemoveOne.steps) })
     expect(stateUnapplyRemoveOne.formData.rides.ids).toEqual(expectedRideIdsUnapplyRemoveOne)
 
     // unapply remove six

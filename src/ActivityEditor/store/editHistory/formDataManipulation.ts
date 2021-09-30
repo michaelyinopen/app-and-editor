@@ -90,7 +90,7 @@ function redoRideIdFieldChanges(
     const rideIdAndIndices: Array<{ id: string, index: number }> =
       rideIds.map((id, index) => ({ id, index }))
     const groupedAddChanges = groupby(appliedCollectionAddChanges, c => c.position.index)
-    for (const change of groupedAddChanges['beginning']) {
+    for (const change of groupedAddChanges['beginning'] ?? []) {
       rideIdsWithAdd.push(change.id)
     }
     for (const { id, index } of rideIdAndIndices) {
