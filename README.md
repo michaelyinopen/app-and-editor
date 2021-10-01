@@ -68,7 +68,7 @@ I believe specific solutions to handle complex and unique scenarios, could be ea
 
 E.g. hard-code the path of each field, is much easier than calculating the paths of an unknown JSON object or a JSON schema.
 
-This specific solution comes with the price of requiring knowledge all the parts, before someone making any change. For example: [Changes required to add a form field](./formField.README.md)
+This specific solution comes with the price of requiring knowledge all the parts, before someone makes any change. For example: [Changes required to add a form field](./formField.README.md)
 
 ### Form has a separate redux store
 The app's redux store keeps the result of api requests and is used to show the list page.
