@@ -39,8 +39,30 @@ If the a field's value changes consecutively, it will count as one field change.
 ### Grouped Field Changes
 Field changes of different paths, that are inseparable. The changes will undo or redo together, and apply or unapply together.
 
+### Operation
+```
+{
+  type: 'edit' | 'merge' | 'conflict' | 'reverse local'
+  fieldChanges
+  conflictName?
+  conflictApplied?
+  applied
+}
+```
+
+Operation conatins one or more field changes. If an operation contains more than one field change, the field changes are inseparable.
+
 ### Step
-Related and consecutive field changes will count as one step. One step can have one field change, or multiple field changes. It is implemented my merging the new change with the last step. `calculateSteps`
+```
+{
+  name
+  operations
+  versionToken?
+  mergeBehaviour?: 'merge' | 'discard local changes'
+  saveStatus?: 'saving' | 'saved'
+}
+```
+An edit step will have only one operation, that operation can have one or more field changes.
 
 If a step has `versionToken`, the step is a "Refreshed" step. `mergeBehaviour` can either be `merge` or `discard local changes`.
 
@@ -48,16 +70,11 @@ When `mergeBehaviour` is `merge`, operations with type `merge`, and `conflict` w
 
 When `mergeBehaviour` is `discard local changes`, all operation types `merge`, `conflict` and `reverse local` are applied. The result formData will be the remote's formData.
 
+A refreshed step can many one or more operations.
+
+Operartions in a step are ordered.
+
 `saveStatus` shows that the formData at that step is saved by the user, and that step will not merge with later changes. `saveStatus` is not reliable, and is intended only for giving the user a hint.
-
-### Operation
-type: 'edit' | 'merge' | 'conflict' | 'reverse local'
-fieldChanges
-applied: all field changes must be applied or unapplied together
-
-Operartions in a step are ordered
-
-An edit step will have only one operation, that operation can have one or more field changes
 
 ### Conflict
 A conflict is a special kind of Operation. It has a name, similar to step name. It contains one or more field changes. When the step's `mergeBehaviour` is `merge`, the user can choose to apply or unapply the conflict with a checkbox. Apply a conflict means take remote's version of the data, unapply means take the local version.
