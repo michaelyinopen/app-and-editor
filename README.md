@@ -51,7 +51,7 @@ I found it easier to
 
 I believe specific solutions to handle complex and unique scenarios, could be easier to understand and easier to extend. 
 
-E.g. hard-code the path of each field, is much easier than calculating the paths of an unknown JSON object.
+E.g. hard-code the path of each field, is much easier than calculating the paths of an unknown JSON object or a JSON schema.
 
 ### Form has a separate redux store
 The app's redux store keeps the result of api requests and is used to show the list page.
@@ -60,7 +60,7 @@ The form has a separate redux store, primarily to organize the code, and also al
 
 The app's store and the form's store are coordinated by the lifecycle hooks of `<ActivityEditor/>`.
 
-### Edit history: undo redo
+## Edit history: undo redo
 Customized undo and redo, and able to view the edit history of the current session (not persisted).
 
 ## Concurrency Handling
@@ -68,38 +68,14 @@ Detect changes using `versionToken`, that updates everytime the data is saved.
 
 Merge changes, manully resolve conflicts, and save again.
 
-
-
 ### Comparison: block saving
 Block saving if data was updated by someone else, would lose all local changes.
 
 ### Comparison: naive last save wins
 If any save just overrides other user's changes, user might miss important changes.
 
+### Solution
 This project's implementation is also "last save wins", but the experience is improved by notifying the user, and providing change merging and conflict resolution.
 
-//////////////////////////////////
-
-
-### Example: use local
-
-### Example: merge changes
-
-### Example: merge changes with conflict resolution(apply/unapply + manual edit)
-
-### Example: discard local changes
-
-## Edit History
-// add link
-
-
-
-// todo lifecycle flow of refreshed
-// todo lifecycle flow of create
-
-// todo types of changes:
-- property field change
-- add to collection
-- collection item property change
-- collection items sequence change
-- remove from collection
+## Edit history: merge and conflict resolution
+see link [edit history README](.\src\ActivityEditor\store\editHistory\editHistory.README.md)
