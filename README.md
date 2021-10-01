@@ -1,6 +1,21 @@
 # app-and-editor
 Proof of concept of job-shop-collection's Job Set Editor's edit history and interactions with other parts of the app.
 
+* [Run with MSW mocked responses](#run-with-msw-mocked-responses)
+* [Run with a server](#run-with-a-server)
+* [Motivation](#motivation)
+* [The Web App](#the-web-app)
+  + [List and item views](#list-and-item-views)
+  + [Routing](#routing)
+* [Specialized form solution](#specialized-form-solution)
+  + [Form has a separate redux store](#form-has-a-separate-redux-store)
+* [Edit history: undo redo](#edit-history--undo-redo)
+* [Concurrency Handling](#concurrency-handling)
+  + [Comparison: block saving](#comparison--block-saving)
+  + [Comparison: naive last save wins](#comparison--naive-last-save-wins)
+  + [Solution](#solution)
+* [Edit history: merge and conflict resolution](#edit-history--merge-and-conflict-resolution)
+
 ## Run with MSW mocked responses
 Can query but will not save.
 ```
@@ -52,6 +67,8 @@ I found it easier to
 I believe specific solutions to handle complex and unique scenarios, could be easier to understand and easier to extend. 
 
 E.g. hard-code the path of each field, is much easier than calculating the paths of an unknown JSON object or a JSON schema.
+
+This specific solution comes with the price of requiring knowledge all the parts, before someone making any change. For example: [Changes required to add a form field](./formField.README.md)
 
 ### Form has a separate redux store
 The app's redux store keeps the result of api requests and is used to show the list page.
