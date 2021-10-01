@@ -64,6 +64,35 @@ All Actions that chould change formData will have editHistory middleware calcula
 Must use draft update pattern for formData manipulation
 need to use produce for every field change, because there can be replacement of an object property (collection add) and the new part is not drafted
 
+///////////////////
+//////////////////////////////////
+
+
+### Example: use local
+
+### Example: merge changes
+
+### Example: merge changes with conflict resolution(apply/unapply + manual edit)
+
+### Example: discard local changes
+
+## Edit History
+// add link
+
+
+
+// todo lifecycle flow of refreshed
+// todo lifecycle flow of create
+
+// todo types of changes:
+- property field change
+- add to collection
+- collection item property change
+- collection items sequence change
+- remove from collection
+
+
+
 ///////////
 ## Edit patterns
 ### Edit field
@@ -88,12 +117,10 @@ API types
 - refreshed data
   - refreshed step(different local/remote changes)
 
+### Remove item from collection
 
-
-### Edit remove item from collection
-
-### Edit move items' sequence in collection
+### Move items in collection
 
 ### Edit collection's item's field
 
-### Edit add item to collection
+### Add item to collection

@@ -4301,7 +4301,7 @@ describe('Move Rides', () => {
                   collectionChange: {
                     type: 'remove',
                     id: "GFqbzNATDKY8pKRAZV3ko",
-                    index: 1 // todo check?
+                    index: 1
                   }
                 },
                 {
