@@ -95,4 +95,4 @@ If any save just overrides other user's changes, user might miss important chang
 This project's implementation is also "last save wins", but the experience is improved by notifying the user, and providing change merging and conflict resolution.
 
 ## Edit history: merge and conflict resolution
-see link [edit history README](./src/ActivityEditor/store/editHistory/editHistory.README.md)
+see [edit history](./src/ActivityEditor/store/editHistory/editHistory.README.md).

@@ -14,22 +14,11 @@
   + [Refreshed Step](#refreshed-step)
   + [Use of immer](#use-of-immer)
 * [Concurrency handling](#concurrency-handling)
-  + [Example: use local](#example--use-local)
   + [Example: merge changes](#example--merge-changes)
-  + [Example: merge changes with conflict resolution(apply/unapply + manual edit)](#example--merge-changes-with-conflict-resolution-apply-unapply---manual-edit-)
+  + [Example: merge changes with conflict resolution](#example--merge-changes-with-conflict-resolution)
   + [Example: discard local changes](#example--discard-local-changes)
-+ [Stepping through execution](#stepping-through-execution)
-  + [Stepping through loading](#stepping-through-loading)
-  + [Stepping through creation](#stepping-through-creation)
-  + [Stepping through refreshed](#stepping-through-refreshed)
-  + [Stepping through save](#stepping-through-save)
-  + [Stepping through save with remote concurrent changes](#stepping-through-save-with-remote-concurrent-changes)
+  + [Example: use local](#example--use-local)
 * [Edit patterns](#edit-patterns)
-  + [Edit field](#edit-field)
-  + [Remove item from collection](#remove-item-from-collection)
-  + [Move items in collection](#move-items-in-collection)
-  + [Edit collection's item's field](#edit-collection-s-item-s-field)
-  + [Add item to collection](#add-item-to-collection)
 
 ## Key concepts
 
@@ -88,29 +77,31 @@ For action `setActivityFromAppStore`, the App's formData might merge with the lo
 `undoFieldChange` and `redoFieldChange` uses immer to calculate new formData. `produce` is called for each field change, because there can be replacements of an object properties (collection add) and the new part is not drafted.
 
 ## Concurrency handling
-### Example: use local
 
 ### Example: merge changes
+When user click refresh or try to save, but there is remote changes, a new 'Refershed' step might be added, and the remote's form data is merged with the local changes. e.g.
+![merge changes](./documentationImages/MergeChanges.png)
 
-### Example: merge changes with conflict resolution(apply/unapply + manual edit)
+### Example: merge changes with conflict resolution
+Choose to apply or unapply a conflict with the checkbox.
+Manually edit if neither remote or local is wanted.
+![merge changes with conflict resolution](./documentationImages/MergeChangesWithConflictResolution.png)
 
 ### Example: discard local changes
+Choose to use the entire remote form data with 'Discard local changes' option.
+![discard local changes](./documentationImages/DiscardLocalChanges.png)
 
-### Stepping through execution
-
-### Stepping through loading
-### Stepping through creation
-### Stepping through refreshed
-### Stepping through save
-### Stepping through save with remote concurrent changes
+### Example: use local
+Choose to use the entire local form data by undoing the refreshed step.
+![use local](./documentationImages/UseLocal.png)
 
 ## Edit patterns
-### Edit field
+Check `editHistory.test.js`
+- Edit field
+- Remove item from collection
+- Move items in collection
+- Edit collection's item's field
+- Add item to collection
 
-### Remove item from collection
-
-### Move items in collection
-
-### Edit collection's item's field
-
-### Add item to collection
+Refresh Collection Operations
+![Refresh Collection Operations](./documentationImages/RefreshCollectionOperations.png)

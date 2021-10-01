@@ -20,3 +20,5 @@ API types
 
 - refreshed data
   - refreshed step(different local/remote changes)
+
+Check the [edit pattern](./src/ActivityEditor/store/editHistory/editHistory.README.md#edit-patterns)
