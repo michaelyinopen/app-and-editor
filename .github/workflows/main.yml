@@ -67,16 +67,4 @@ jobs:
         rsync -avzr --delete -e "ssh -p ${remote_port} -i ~/.ssh/gh_actions_key -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
         
     - name: npm install
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.LINODE_HOST }}
-        username: ${{ secrets.LINODE_USER }}
-        key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
-        port: ${{ secrets.LINODE_PORT }}
-        script: |
-            cd /var/www/app-and-editor-api
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            npm --version
-            npm install
+      run: ssh -p ${remote_port} -i ~/.ssh/gh_actions_key -o StrictHostKeyChecking=no ${remote_user}@${remote_host} 'cd ${remote_dir} && npm install'
