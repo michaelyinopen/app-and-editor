@@ -1,0 +1,49 @@
+name: build and deploy on linode
+
+on:
+    push:
+        branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+        REACT_APP_HOST: "linode"
+    steps:            
+    - name: Checkout the repo
+      uses: actions/checkout@v1
+
+    - name: Install npm packages
+      run: npm install
+
+    - name: Build app
+      run: npm run build
+      
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: .build-app
+        path: ./build
+        
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:            
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v2
+      with:
+        name: .build-app
+
+    - name: Upload
+      env:
+        remote_host: ${{ secrets.LINODE_HOST }}
+        remote_port: ${{ secrets.LINODE_PORT }}
+        remote_user: ${{ secrets.LINODE_USER }}
+        remote_key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
+        local_dir: "."
+        remote_dir: ${{secrets.LINODE_DIRECTORY}}
+      run: |
+        mkdir ~/.ssh
+        echo "$remote_key" > ~/.ssh/gh_actions_key
+        chmod 600 ~/.ssh/gh_actions_key
+        rsync -avzr --delete -e "ssh -p ${remote_port} -i ~/.ssh/gh_actions_key -o StrictHostKeyChecking=no" ${local_dir} ${remote_user}@${remote_host}:${remote_dir}
