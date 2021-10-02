@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-        REACT_APP_HOST: "linode"
     steps:            
     - name: Checkout the repo
       uses: actions/checkout@v1
