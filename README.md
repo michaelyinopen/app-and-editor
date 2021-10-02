@@ -10,12 +10,12 @@ Proof of concept of job-shop-collection's Job Set Editor's edit history and inte
   + [Routing](#routing)
 * [Specialized form solution](#specialized-form-solution)
   + [Form has a separate redux store](#form-has-a-separate-redux-store)
-* [Edit history: undo redo](#edit-history--undo-redo)
+* [Edit history: undo redo](#edit-history-undo-redo)
 * [Concurrency Handling](#concurrency-handling)
-  + [Comparison: block saving](#comparison--block-saving)
-  + [Comparison: naive last save wins](#comparison--naive-last-save-wins)
+  + [Comparison: block saving](#comparison-block-saving)
+  + [Comparison: naive last save wins](#comparison-naive-last-save-wins)
   + [Solution](#solution)
-* [Edit history: merge and conflict resolution](#edit-history--merge-and-conflict-resolution)
+* [Edit history: merge and conflict resolution](#edit-history-merge-and-conflict-resolution)
 
 ## Live Demo
 [Live demo](https://app-and-editor.michael-yin.net/activities)
