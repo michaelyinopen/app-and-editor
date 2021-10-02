@@ -1,6 +1,7 @@
 # app-and-editor
 Proof of concept of job-shop-collection's Job Set Editor's edit history and interactions with other parts of the app.
 
+* [Live Demo](#live-demo)
 * [Run with MSW mocked responses](#run-with-msw-mocked-responses)
 * [Run with a server](#run-with-a-server)
 * [Motivation](#motivation)
@@ -15,6 +16,9 @@ Proof of concept of job-shop-collection's Job Set Editor's edit history and inte
   + [Comparison: naive last save wins](#comparison--naive-last-save-wins)
   + [Solution](#solution)
 * [Edit history: merge and conflict resolution](#edit-history--merge-and-conflict-resolution)
+
+## Live Demo
+[Live demo](https://app-and-editor.michael-yin.net/activities)
 
 ## Run with MSW mocked responses
 Can query but will not save.
