@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {
-  if (!process.env.REACT_APP_MSW_MOCK) {
+  if (process.env.NODE_ENV === 'development' && !process.env.REACT_APP_MSW_MOCK) {
     app.use(
       '/api',
       createProxyMiddleware({
