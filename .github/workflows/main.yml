@@ -75,4 +75,6 @@ jobs:
         port: ${{ secrets.LINODE_PORT }}
         script: |
             cd /var/www/app-and-editor-api
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             npm install
