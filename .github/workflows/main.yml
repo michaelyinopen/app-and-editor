@@ -48,18 +48,18 @@ jobs:
 
   deploy-api-server:
     runs-on: ubuntu-latest
-    steps:            
-    - name: Checkout the repo
-      uses: actions/checkout@v1
-
-    - name: Upload
-      env:
+    env:
         remote_host: ${{ secrets.LINODE_HOST }}
         remote_port: ${{ secrets.LINODE_PORT }}
         remote_user: ${{ secrets.LINODE_USER }}
         remote_key: ${{ secrets.LINODE_SSH_PRIVATE_KEY }}
         local_dir: "server/"
         remote_dir: ${{secrets.LINODE_API_DIRECTORY}}
+    steps:            
+    - name: Checkout the repo
+      uses: actions/checkout@v1
+
+    - name: Upload
       run: |
         mkdir ~/.ssh
         echo "$remote_key" > ~/.ssh/gh_actions_key
