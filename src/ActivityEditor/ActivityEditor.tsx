@@ -344,6 +344,7 @@ export const ActivityEditor: FunctionComponent<ActivityEditorProps> = WithJobSet
           })
           .catch(() => {
             dispatch(addNotification(`Failed to get Activity #${id}`))
+            editorDispatch(failedToLoadActivity())
           })
       }
     }, [dispatch, editorDispatch, isNew, id, isLoaded])
