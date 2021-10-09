@@ -23,12 +23,14 @@ Proof of concept of job-shop-collection's Job Set Editor's edit history and inte
 ## Run with MSW mocked responses
 Can query but will not save.
 ```
+npm install
 npm start
 ```
 
 ## Run with a server
 Can query and save.
 ```
+npm install
 npm run start-server
 npm run start-web
 ```

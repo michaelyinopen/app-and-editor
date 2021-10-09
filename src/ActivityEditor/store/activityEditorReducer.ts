@@ -165,7 +165,6 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       }
       else { //state.initialized === true
         if (!activity
-          || activity.versionToken === state.versions[state.versions.length - 1].versionToken
           || !activity.hasDetail) {
           return
         }
