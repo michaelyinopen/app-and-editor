@@ -73,9 +73,11 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
       if (!arraysEqual(correspondingPreviousRideIds, correspondingCurrentRideIds)) {
         rideFieldChanges.push({
           path: '/rides/ids',
-          previousValue: correspondingPreviousRideIds,
-          newValue: correspondingCurrentRideIds,
-          collectionChange: { type: 'move' as const }
+          collectionChange: {
+            type: 'move' as const,
+            previousValue: correspondingPreviousRideIds,
+            newValue: correspondingCurrentRideIds,
+          }
         })
       }
     })();
@@ -161,10 +163,10 @@ export function calculateStepName(fieldChanges: FieldChange[]): string {
 
   if (fieldChanges.length === 2 && fieldChanges.some(c => c.path === '/rides/ids')) {
     const idsChange = fieldChanges.find(c => c.path === '/rides/ids')!
-    if (idsChange?.collectionChange?.type === 'add') {
+    if (idsChange && 'collectionChange' in idsChange && idsChange.collectionChange.type === 'add') {
       return 'Add ride'
     }
-    if (idsChange?.collectionChange?.type === 'remove') {
+    if (idsChange && 'collectionChange' in idsChange && idsChange.collectionChange.type === 'remove') {
       return 'Remove ride'
     }
   }

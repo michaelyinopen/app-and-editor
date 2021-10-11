@@ -13,8 +13,8 @@ import {
 } from '../actions'
 import {
   calculateStepName,
+  getFieldChanges,
   arraysEqual,
-  getFieldChanges
 } from './StepCommon'
 import {
   FormData,
@@ -37,12 +37,30 @@ const excludeActionTypes = [
 ].map(a => a.type)
 
 function combineFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
-  return (a.path === b.path)
-    ? a.previousValue === b.newValue
-      || (Array.isArray(a) && Array.isArray(b) && arraysEqual(a, b))
+  if (a.path !== b.path) {
+    return [a, b] // not combined
+  }
+  if (('previousValue' in a) && ('previousValue' in b)) {
+    return a.previousValue === b.newValue
       ? [] // combined resulting in no-op
       : [{ ...a, previousValue: a.previousValue, newValue: b.newValue }] // merged
-    : [a, b] // not combined
+  }
+  if (('collectionChange' in a)
+    && ('collectionChange' in b)
+    && a.collectionChange.type === 'move'
+    && b.collectionChange.type === 'move') {
+    return Array.isArray(a) && Array.isArray(b) && arraysEqual(a.collectionChange.previousValue, b.collectionChange.newValue)
+      ? [] // combined resulting in no-op
+      : [{
+        ...a,
+        collectionChange: {
+          ...a.collectionChange,
+          previousValue: a.collectionChange.previousValue,
+          newValue: b.collectionChange.newValue
+        }
+      }] // merged
+  }
+  return [a, b] // not combined
 }
 
 export function calculateEditSteps(

@@ -333,6 +333,24 @@ describe('Edit Name', () => {
           }
         ]
       },
+      {
+        name: 'Refreshed',
+        versionToken: "1",
+        mergeBehaviour: "merge",
+        operations: [
+          {
+            type: "reverse local",
+            fieldChanges: [
+              {
+                path: "/name",
+                previousValue: "some activity local edited",
+                newValue: "some activity",
+              },
+            ],
+            applied: false,
+          },
+        ],
+      },
     ])
   })
   test('Refreshed only remote edit', () => {
@@ -3213,10 +3231,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
+                  type: 'move',
+                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
                 },
-                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
               }
             ],
             applied: true
@@ -3271,10 +3289,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
+                  type: 'move',
+                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx', 'GFqbzNATDKY8pKRAZV3ko']
                 },
-                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx', 'GFqbzNATDKY8pKRAZV3ko']
               }
             ],
             applied: true
@@ -3404,10 +3422,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
-                },
-                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  type: 'move',
+                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                }
               }
             ],
             applied: true
@@ -3434,10 +3452,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
-                },
-                previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
-                newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  type: 'move',
+                  previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                }
               }
             ],
             applied: false
@@ -3529,10 +3547,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
-                },
-                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  type: 'move',
+                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                }
               }
             ],
             applied: true
@@ -3614,10 +3632,10 @@ describe('Move Rides', () => {
               {
                 path: '/rides/ids',
                 collectionChange: {
-                  type: 'move'
-                },
-                previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  type: 'move',
+                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                }
               }
             ],
             applied: true
@@ -3716,10 +3734,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  }
                 }
               ],
               applied: true
@@ -3746,10 +3764,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
-                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    type: 'move',
+                    previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  }
                 }
               ],
               conflictName: 'Move rides',
@@ -4269,10 +4287,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  }
                 }
               ],
               applied: true
@@ -4321,10 +4339,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
-                  newValue: ['zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    type: 'move',
+                    previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    newValue: ['zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  }
                 }
               ],
               applied: false
@@ -4478,10 +4496,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  }
                 }
               ],
               applied: true
@@ -4508,10 +4526,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
-                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    type: 'move',
+                    previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  }
                 }
               ],
               applied: false
@@ -4694,10 +4712,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx']
+                  }
                 }
               ],
               applied: true
@@ -4724,10 +4742,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
-                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    type: 'move',
+                    previousValue: ['UpW9WgVUNXeYB3w8S0flu', 'GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    newValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                  }
                 }
               ],
               applied: false
@@ -4958,10 +4976,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    type: 'move',
+                    previousValue: ['zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  }
                 }
               ],
               applied: true
@@ -5168,10 +5186,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  }
                 }
               ],
               applied: true
@@ -5414,10 +5432,10 @@ describe('Move Rides', () => {
                 {
                   path: '/rides/ids',
                   collectionChange: {
-                    type: 'move'
-                  },
-                  previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
-                  newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                    type: 'move',
+                    previousValue: ['GFqbzNATDKY8pKRAZV3ko', 'zUxqlLLtWWjOdvHfAa1Vx', 'UpW9WgVUNXeYB3w8S0flu'],
+                    newValue: ['GFqbzNATDKY8pKRAZV3ko', 'UpW9WgVUNXeYB3w8S0flu', 'zUxqlLLtWWjOdvHfAa1Vx'],
+                  }
                 }
               ],
               applied: true
@@ -6156,7 +6174,7 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoUnapplyRemoveOne = activityEditorStore.getState()
     expect(stateUndoUnapplyRemoveOne.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoUnapplyRemoveOne = activityEditorStore.getState()
     expect(stateRedoUnapplyRemoveOne.formData.rides.ids).toEqual(expectedRideIdsUnapplyRemoveOne)
@@ -6183,7 +6201,7 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoUnapplyRemoveSix = activityEditorStore.getState()
     expect(stateUndoUnapplyRemoveSix.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoUnapplyRemoveSix = activityEditorStore.getState()
     expect(stateRedoUnapplyRemoveSix.formData.rides.ids).toEqual(expectedRideIdsUnapplyRemoveSix)
@@ -6209,7 +6227,7 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoUnapplyReverseRemoveFive = activityEditorStore.getState()
     expect(stateUndoUnapplyReverseRemoveFive.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoUnapplyReverseRemoveFive = activityEditorStore.getState()
     expect(stateRedoUnapplyReverseRemoveFive.formData.rides.ids).toEqual(expectedRideIdsUnapplyReverseRemoveFive)
@@ -6234,11 +6252,11 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoUnapplyReverseRemoveTwo = activityEditorStore.getState()
     expect(stateUndoUnapplyReverseRemoveTwo.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoUnapplyReverseRemoveTwo = activityEditorStore.getState()
     expect(stateRedoUnapplyReverseRemoveTwo.formData.rides.ids).toEqual(expectedRideIdsUnapplyReverseRemoveTwo)
-    
+
     // reapply remove six
     activityEditorStore.dispatch(applyConflict(refreshedStepIndex, removeSixConflcitIndex))
     const expectedRideIdsReapplyRemoveSix = [
@@ -6258,11 +6276,11 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoReapplyRemoveSix = activityEditorStore.getState()
     expect(stateUndoReapplyRemoveSix.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoReapplyRemoveSix = activityEditorStore.getState()
     expect(stateRedoReapplyRemoveSix.formData.rides.ids).toEqual(expectedRideIdsReapplyRemoveSix)
-    
+
     // reapply reverse remove five
     activityEditorStore.dispatch(applyConflict(refreshedStepIndex, reverseRemoveFiveConflcitIndex))
     const expectedRideIdsReapplyReverseRemoveFive = [
@@ -6283,7 +6301,7 @@ describe('Mixed Rides', () => {
     activityEditorStore.dispatch(undo())
     const stateUndoReapplyReverseRemoveFive = activityEditorStore.getState()
     expect(stateUndoReapplyReverseRemoveFive.formData.rides.ids).toEqual(expectedRideIdsLocalChanged)
-    
+
     activityEditorStore.dispatch(redo())
     const stateRedoReapplyReverseRemoveFive = activityEditorStore.getState()
     expect(stateRedoReapplyReverseRemoveFive.formData.rides.ids).toEqual(expectedRideIdsReapplyReverseRemoveFive)

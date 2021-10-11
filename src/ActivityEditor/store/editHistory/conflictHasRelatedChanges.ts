@@ -1,6 +1,7 @@
 import { numberOfSlashes } from './StepCommon'
 import {
   CollectionAddChange,
+  CollectionFieldChange,
   CollectionRemoveChange,
   FieldChange,
   Operation,
@@ -17,8 +18,9 @@ function hasRelatedChanges(
   // add or remove conflicts with update ride property
   const addOrRemoveRideAChanges = aChanges.filter(ac =>
     ac.path === '/rides/ids'
-    && (ac.collectionChange?.type === 'add' || ac.collectionChange?.type === 'remove')
-  )
+    && ('collectionChange' in ac && (ac.collectionChange?.type === 'add' || ac.collectionChange?.type === 'remove'))
+  ) as CollectionFieldChange[]
+
   for (const aChange of addOrRemoveRideAChanges) {
     const aRideId = (aChange.collectionChange as (CollectionAddChange | CollectionRemoveChange)).id
     if (bChanges.some(bc =>
@@ -38,7 +40,8 @@ function hasRelatedChanges(
     const indexOf4thSlash = aChange.path.indexOf('/', indexOf3rdSlash + 1)
     const aRideId = aChange.path.substring('/rides/entities/'.length + 1, indexOf4thSlash)
     if (bChanges.some(bc =>
-      bc.collectionChange?.type === 'remove'
+      'collectionChange' in bc
+      && bc.collectionChange?.type === 'remove'
       && (bc.collectionChange as (CollectionRemoveChange)).id === aRideId
     )) {
       return true

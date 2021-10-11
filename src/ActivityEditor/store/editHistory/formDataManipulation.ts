@@ -1,8 +1,10 @@
 import { produce } from "immer"
 import type {
-  FieldChange,
   FormData,
   Step,
+  ValueFieldChange,
+  CollectionFieldChange,
+  CollectionMoveChange,
   CollectionAddChange,
   CollectionRemoveChange,
 } from './types'
@@ -24,7 +26,7 @@ function groupby<T, K extends string | number>(
   }, {} as { [key in K]: T[] })
 }
 
-function redoFieldChange(fieldChange: FieldChange, formData: FormData): FormData {
+function redoFieldChange(fieldChange: ValueFieldChange, formData: FormData): FormData {
   const { path, newValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -56,7 +58,7 @@ function redoFieldChange(fieldChange: FieldChange, formData: FormData): FormData
 
 function redoRideIdFieldChanges(
   formData: FormData,
-  rideIdFieldChangeApplies: { fieldChange: FieldChange, applied: boolean }[]
+  rideIdFieldChangeApplies: { fieldChange: CollectionFieldChange, applied: boolean }[]
 ): FormData {
   if (rideIdFieldChangeApplies.length === 0) {
     return formData
@@ -69,8 +71,10 @@ function redoRideIdFieldChanges(
   if (appliedMoveFieldChangeIndex === -1) {
     rideIds = formData.rides.ids
   } else {
-    const previousMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue
-    const newMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue
+    const previousMoveRideIds: string[] =
+      (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).previousValue
+    const newMoveRideIds: string[] =
+      (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).newValue
     rideIds = previousMoveRideIds.reduce(
       (accRideIds, pRid, index) => {
         // swap the moved items according to unaltered formData.ride.ids
@@ -125,19 +129,20 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
   const fieldChangeApplied = step.operations
     .flatMap(op => op.fieldChanges.map(fc => ({ fieldChange: fc, applied: op.applied })))
 
-  const rideIdFieldChanges = fieldChangeApplied.filter(ca => ca.fieldChange.path === '/rides/ids')
+  const rideIdFieldChanges = fieldChangeApplied
+    .filter(ca => ca.fieldChange.path === '/rides/ids') as { fieldChange: CollectionFieldChange, applied: boolean }[]
   formData = redoRideIdFieldChanges(formData, rideIdFieldChanges)
 
   const ordinaryFieldChanges = fieldChangeApplied.filter(ca => ca.fieldChange.path !== '/rides/ids')
   for (const { fieldChange, applied } of ordinaryFieldChanges) {
     if (applied) {
-      formData = redoFieldChange(fieldChange, formData)
+      formData = redoFieldChange(fieldChange as ValueFieldChange, formData)
     }
   }
   return formData
 }
 
-function undoFieldChange(fieldChange: FieldChange, formData: FormData): FormData {
+function undoFieldChange(fieldChange: ValueFieldChange, formData: FormData): FormData {
   const { path, previousValue } = fieldChange
   return produce(formData, (draft) => {
     if (path === '/name') {
@@ -172,7 +177,7 @@ function undoFieldChange(fieldChange: FieldChange, formData: FormData): FormData
 
 function undoRideIdFieldChanges(
   formData: FormData,
-  rideIdFieldChangeApplies: { fieldChange: FieldChange, applied: boolean }[]
+  rideIdFieldChangeApplies: { fieldChange: CollectionFieldChange, applied: boolean }[]
 ): FormData {
   if (rideIdFieldChangeApplies.length === 0) {
     return formData
@@ -185,8 +190,10 @@ function undoRideIdFieldChanges(
   if (appliedMoveFieldChangeIndex === -1) {
     rideIds = formData.rides.ids
   } else {
-    const newMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.newValue
-    const previousMoveRideIds: string[] = rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.previousValue
+    const newMoveRideIds: string[] =
+      (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).newValue
+    const previousMoveRideIds: string[] =
+      (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).previousValue
     rideIds = newMoveRideIds.reduce(
       (accRideIds, nRid, index) => {
         // swap the moved items according to unaltered formData.ride.ids
@@ -232,13 +239,14 @@ export function undoStep(step: Step, previousFormData: FormData): FormData {
   const fieldChangeApplied = step.operations
     .flatMap(op => op.fieldChanges.map(fc => ({ fieldChange: fc, applied: op.applied })))
 
-  const rideIdFieldChanges = fieldChangeApplied.filter(ca => ca.fieldChange.path === '/rides/ids')
+  const rideIdFieldChanges = fieldChangeApplied
+    .filter(ca => ca.fieldChange.path === '/rides/ids') as { fieldChange: CollectionFieldChange, applied: boolean }[]
   formData = undoRideIdFieldChanges(formData, rideIdFieldChanges)
 
   const ordinaryFieldChanges = fieldChangeApplied.filter(ca => ca.fieldChange.path !== '/rides/ids')
   for (const { fieldChange, applied } of ordinaryFieldChanges) {
     if (applied) {
-      formData = undoFieldChange(fieldChange, formData)
+      formData = undoFieldChange(fieldChange as ValueFieldChange, formData)
     }
   }
   return formData
