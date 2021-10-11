@@ -13,6 +13,7 @@ import {
   getFieldChanges,
   numberOfSlashes,
 } from "./StepCommon"
+import { CollectionFieldChange } from "."
 
 export function ActivityToFormData(activity: ActivityWithDetailFromStore): FormData {
   return {
@@ -40,7 +41,8 @@ function isRemovedRide(change: FieldChange | GroupedFieldChanges): [true, string
   if (Array.isArray(change)) {
     const removalIdsFieldChange = change.find(c =>
       c.path === '/rides/ids'
-      && c.collectionChange?.type === 'remove')
+      && 'collectionChange' in c
+      && c.collectionChange?.type === 'remove') as CollectionFieldChange
     if (removalIdsFieldChange) {
       const removedId = (removalIdsFieldChange.collectionChange as CollectionRemoveChange).id
       return [true, removedId]
@@ -57,7 +59,8 @@ function isAddedRide(change: FieldChange | GroupedFieldChanges): [true, string] 
   if (Array.isArray(change)) {
     const additionIdsFieldChange = change.find(c =>
       c.path === '/rides/ids'
-      && c.collectionChange?.type === 'add')
+      && 'collectionChange' in c
+      && c.collectionChange?.type === 'add') as CollectionFieldChange
     if (additionIdsFieldChange) {
       const addedId = (additionIdsFieldChange.collectionChange as CollectionAddChange).id
       return [true, addedId]
@@ -76,6 +79,7 @@ function isRemovedRideFor(rideId: string, change: FieldChange | GroupedFieldChan
   return Array.isArray(change)
     && change.some(c =>
       c.path === '/rides/ids'
+      && 'collectionChange' in c
       && c.collectionChange?.type === 'remove'
       && c.collectionChange.id === rideId
     )
@@ -85,6 +89,7 @@ function isAddedRideFor(rideId: string, change: FieldChange | GroupedFieldChange
   return Array.isArray(change)
     && change.some(c =>
       c.path === '/rides/ids'
+      && 'collectionChange' in c
       && c.collectionChange?.type === 'add'
       && c.collectionChange.id === rideId
     )
