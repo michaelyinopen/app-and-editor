@@ -97,7 +97,7 @@ export function getFieldChanges(previousFormData: FormData, currentFormData: For
       }
     })();
 
-    (function addRidePropertiesFieldChanges() {
+    (function addRideFieldChanges() {
       const correspondingCurrentRideIds = currentRideIds.filter(cRId => previousRideIds.includes(cRId))
       // currentIds with index of the previous position before any removal
       const referenceRideIdIndices: Array<{ id: string, index: number }> =
