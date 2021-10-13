@@ -49,7 +49,11 @@ function combineFieldChanges(a: FieldChange, b: FieldChange): FieldChange[] {
     && ('collectionChange' in b)
     && a.collectionChange.type === 'move'
     && b.collectionChange.type === 'move') {
-    return Array.isArray(a) && Array.isArray(b) && arraysEqual(a.collectionChange.previousValue, b.collectionChange.newValue)
+    return (
+      Array.isArray(a.collectionChange.previousValue)
+      && Array.isArray(b.collectionChange.newValue)
+      && arraysEqual(a.collectionChange.previousValue, b.collectionChange.newValue)
+    )
       ? [] // combined resulting in no-op
       : [{
         ...a,

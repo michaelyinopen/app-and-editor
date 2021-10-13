@@ -46,6 +46,18 @@ export const handlers = [
           person: 'some person',
           place: 'some place',
           cost: 99,
+          rides: [
+            {
+              id: 'GFqbzNATDKY8pKRAZV3ko',
+              description: 'red car',
+              sequence: 1
+            },
+            {
+              id: 'zUxqlLLtWWjOdvHfAa1Vx',
+              description: 'ferry',
+              sequence: 2
+            },
+          ],
           versionToken: '1',
         }),
       )
@@ -59,6 +71,7 @@ export const handlers = [
           person: 'snail',
           place: 'leaf',
           cost: 8,
+          rides: [],
           versionToken: '1',
         }),
       )
@@ -74,6 +87,7 @@ export const handlers = [
             person: 'resolver',
             place: 'happy',
             cost: 3838,
+            rides: [],
             versionToken: '1',
           }),
         )
@@ -94,6 +108,7 @@ export const handlers = [
           person: 'chance',
           place: 'casino',
           cost: (Math.floor(activityFourUpdateMarker / 3) + 1),
+          rides: [],
           versionToken: (Math.floor(activityFourUpdateMarker / 3) + 1).toString(),
         }),
       )
