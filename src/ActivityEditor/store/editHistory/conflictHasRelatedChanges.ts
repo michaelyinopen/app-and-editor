@@ -36,9 +36,9 @@ function hasRelatedChanges(
     && numberOfSlashes(ac.path) > 3
   )
   for (const aChange of editRidePropertyAChanges) {
-    const indexAfter3rdSlash = '/rides/entities/'.length
-    const indexOf4thSlash = aChange.path.indexOf('/', indexAfter3rdSlash)
-    const aRideId = aChange.path.substring(indexAfter3rdSlash, indexOf4thSlash)
+    const indexOf3rdSlash = '/rides/entities/'.length - 1
+    const indexOf4thSlash = aChange.path.indexOf('/', indexAfter3rdSlash + 1)
+    const aRideId = aChange.path.substring(indexOf3rdSlash + 1, indexOf4thSlash)
     if (bChanges.some(bc =>
       'collectionChange' in bc
       && bc.collectionChange?.type === 'remove'
