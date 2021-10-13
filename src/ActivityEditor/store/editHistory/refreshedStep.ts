@@ -97,13 +97,13 @@ function isAddedRideFor(rideId: string, change: FieldChange | GroupedFieldChange
 
 function calculateOperationFromRefreshedFieldChange(
   change: FieldChange | GroupedFieldChanges,
-  currentVsPreviousVersion: (FieldChange | GroupedFieldChanges)[],
+  localVsPreviousVersion: (FieldChange | GroupedFieldChanges)[],
   remoteVsPreviousVersion: (FieldChange | GroupedFieldChanges)[]
 ): Operation {
   const isRemoveRideResult = isRemovedRide(change)
   if (isRemoveRideResult[0]) {
     const removedRideId = isRemoveRideResult[1]
-    if (currentVsPreviousVersion.some(cs => isEditRideFor(removedRideId, cs))) {
+    if (localVsPreviousVersion.some(cs => isEditRideFor(removedRideId, cs))) {
       return {
         type: 'conflict' as const,
         fieldChanges: [change].flat(),
@@ -127,7 +127,7 @@ function calculateOperationFromRefreshedFieldChange(
   }
   if (isMovedRides(change)) {
     if (remoteVsPreviousVersion.some(cs => isMovedRides(cs))
-      && currentVsPreviousVersion.some(cs => isMovedRides(cs))) {
+      && localVsPreviousVersion.some(cs => isMovedRides(cs))) {
       return {
         type: 'conflict' as const,
         fieldChanges: [change].flat(),
@@ -177,7 +177,7 @@ function calculateOperationFromRefreshedFieldChange(
 
   // changes not related to rideIds
   const fieldChange = change as FieldChange
-  if (!currentVsPreviousVersion.flat().some(c => c.path === fieldChange.path)) {
+  if (!localVsPreviousVersion.flat().some(c => c.path === fieldChange.path)) {
     // remote activity changed and there are no local edits
     return {
       type: 'merge' as const,
@@ -213,7 +213,7 @@ export function calculateRefreshedStep(
   const remoteFormData = ActivityToFormData(remoteActivity)
 
   const remoteVsLocal = getFieldChanges(localFormData, remoteFormData)
-  const currentVsPreviousVersion = getFieldChanges(previousVersionFormData, localFormData)
+  const localVsPreviousVersion = getFieldChanges(previousVersionFormData, localFormData)
   const remoteVsPreviousVersion = getFieldChanges(previousVersionFormData, remoteFormData)
 
   const operations: Operation[] = []
@@ -221,7 +221,7 @@ export function calculateRefreshedStep(
   for (const change of remoteVsLocal) {
     const operation = calculateOperationFromRefreshedFieldChange(
       change,
-      currentVsPreviousVersion,
+      localVsPreviousVersion,
       remoteVsPreviousVersion)
     operations.push(operation)
   }
