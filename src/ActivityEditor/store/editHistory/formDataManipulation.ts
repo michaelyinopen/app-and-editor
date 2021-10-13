@@ -10,12 +10,6 @@ import type {
 } from './types'
 import { numberOfSlashes } from "./StepCommon"
 
-export type RideIdAdjust = {
-  type: 'remove' | 'add',
-  id: string,
-  index: number,
-}
-
 function groupby<T, K extends string | number>(
   array: T[],
   f: (item: T) => K
