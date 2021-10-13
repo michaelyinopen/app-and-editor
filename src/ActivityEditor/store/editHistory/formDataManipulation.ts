@@ -1,4 +1,4 @@
-import { produce } from "immer"
+import { produce, isDraft, current } from "immer"
 import type {
   FormData,
   Step,
@@ -22,32 +22,72 @@ function groupby<T, K extends string | number>(
 
 function redoFieldChange(fieldChange: ValueFieldChange, formData: FormData): FormData {
   const { path, newValue } = fieldChange
-  return produce(formData, (draft) => {
-    if (path === '/name') {
-      draft.name = newValue
+  if (path === '/name') {
+    return {
+      ...formData,
+      name: newValue
     }
-    else if (path === '/who') {
-      draft.who = newValue
+  }
+  else if (path === '/who') {
+    return {
+      ...formData,
+      who: newValue
     }
-    else if (path === '/where') {
-      draft.where = newValue
+  }
+  else if (path === '/where') {
+    return {
+      ...formData,
+      where: newValue
     }
-    else if (path === '/howMuch') {
-      draft.howMuch = newValue
+  }
+  else if (path === '/howMuch') {
+    return {
+      ...formData,
+      howMuch: newValue
     }
-    else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
-      const rideId = path.substring('/rides/entities/'.length)
-      if (newValue === undefined) {
-        delete draft.rides.entities[rideId]
-      } else {
-        draft.rides.entities[rideId] = newValue
+  }
+  else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+    const rideId = path.substring('/rides/entities/'.length)
+    if (newValue === undefined) {
+      let newRideEntities = { ...formData.rides.entities }
+      delete newRideEntities[rideId]
+      return {
+        ...formData,
+        rides: {
+          ...formData.rides,
+          entities: newRideEntities
+        }
+      }
+    } else {
+      return {
+        ...formData,
+        rides: {
+          ...formData.rides,
+          entities: {
+            ...formData.rides.entities,
+            [rideId]: newValue
+          }
+        }
       }
     }
-    else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
-      const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
-      draft.rides.entities[rideId].description = newValue
+  }
+  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
+    return {
+      ...formData,
+      rides: {
+        ...formData.rides,
+        entities: {
+          ...formData.rides.entities,
+          [rideId]: {
+            ...formData.rides.entities[rideId],
+            description: newValue
+          }
+        }
+      }
     }
-  })
+  }
+  return formData
 }
 
 function redoRideIdFieldChanges(
@@ -57,6 +97,7 @@ function redoRideIdFieldChanges(
   if (rideIdFieldChangeApplies.length === 0) {
     return formData
   }
+
   let rideIds: string[]
 
   // move
@@ -71,7 +112,7 @@ function redoRideIdFieldChanges(
       (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).newValue
     rideIds = previousMoveRideIds.reduce(
       (accRideIds, pRid, index) => {
-        // swap the moved items according to unaltered formData.ride.ids
+        // swap the moved items according to unaltered originalFormData.ride.ids
         accRideIds[formData.rides.ids.indexOf(pRid)] = newMoveRideIds[index]
         return accRideIds
       },
@@ -118,7 +159,9 @@ function redoRideIdFieldChanges(
 }
 
 export function redoStep(step: Step, previousFormData: FormData): FormData {
-  let formData = previousFormData
+  let formData = isDraft(previousFormData)
+    ? current(previousFormData)
+    : previousFormData
 
   const fieldChangeApplied = step.operations
     .flatMap(op => op.fieldChanges.map(fc => ({ fieldChange: fc, applied: op.applied })))
@@ -138,35 +181,72 @@ export function redoStep(step: Step, previousFormData: FormData): FormData {
 
 function undoFieldChange(fieldChange: ValueFieldChange, formData: FormData): FormData {
   const { path, previousValue } = fieldChange
-  return produce(formData, (draft) => {
-    if (path === '/name') {
-      draft.name = previousValue
+  if (path === '/name') {
+    return {
+      ...formData,
+      name: previousValue
     }
-    else if (path === '/who') {
-      draft.who = previousValue
+  }
+  else if (path === '/who') {
+    return {
+      ...formData,
+      who: previousValue
     }
-    else if (path === '/where') {
-      draft.where = previousValue
+  }
+  else if (path === '/where') {
+    return {
+      ...formData,
+      where: previousValue
     }
-    else if (path === '/howMuch') {
-      draft.howMuch = previousValue
+  }
+  else if (path === '/howMuch') {
+    return {
+      ...formData,
+      howMuch: previousValue
     }
-    else if (path === '/howMuch') {
-      draft.howMuch = previousValue
-    }
-    else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
-      const rideId = path.substring('/rides/entities/'.length)
-      if (previousValue === undefined) {
-        delete draft.rides.entities[rideId]
-      } else {
-        draft.rides.entities[rideId] = previousValue
+  }
+  else if (path.startsWith('/rides/entities/') && numberOfSlashes(path) === 3) {
+    const rideId = path.substring('/rides/entities/'.length)
+    if (previousValue === undefined) {
+      let newRideEntities = { ...formData.rides.entities }
+      delete newRideEntities[rideId]
+      return {
+        ...formData,
+        rides: {
+          ...formData.rides,
+          entities: newRideEntities
+        }
+      }
+    } else {
+      return {
+        ...formData,
+        rides: {
+          ...formData.rides,
+          entities: {
+            ...formData.rides.entities,
+            [rideId]: previousValue
+          }
+        }
       }
     }
-    else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
-      const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
-      draft.rides.entities[rideId].description = previousValue
+  }
+  else if (path.startsWith('/rides/entities/') && path.endsWith('description')) {
+    const rideId = path.substring('/rides/entities/'.length, path.length - 'description'.length - 1)
+    return {
+      ...formData,
+      rides: {
+        ...formData.rides,
+        entities: {
+          ...formData.rides.entities,
+          [rideId]: {
+            ...formData.rides.entities[rideId],
+            description: previousValue
+          }
+        }
+      }
     }
-  })
+  }
+  return formData
 }
 
 function undoRideIdFieldChanges(
@@ -190,7 +270,7 @@ function undoRideIdFieldChanges(
       (rideIdFieldChangeApplies[appliedMoveFieldChangeIndex].fieldChange.collectionChange as CollectionMoveChange).previousValue
     rideIds = newMoveRideIds.reduce(
       (accRideIds, nRid, index) => {
-        // swap the moved items according to unaltered formData.ride.ids
+        // swap the moved items according to unaltered originalFormData.ride.ids
         accRideIds[formData.rides.ids.indexOf(nRid)] = previousMoveRideIds[index]
         return accRideIds
       },
@@ -228,7 +308,9 @@ function undoRideIdFieldChanges(
 }
 
 export function undoStep(step: Step, previousFormData: FormData): FormData {
-  let formData = previousFormData
+  let formData = isDraft(previousFormData)
+    ? current(previousFormData)
+    : previousFormData
 
   const fieldChangeApplied = step.operations
     .flatMap(op => op.fieldChanges.map(fc => ({ fieldChange: fc, applied: op.applied })))
