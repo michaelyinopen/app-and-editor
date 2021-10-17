@@ -51,10 +51,10 @@ type FormDataState = {
 
 type ActivityEditorState = {
   id?: number
-  versions: {
+  lastVersion?: {
     versionToken: string,
     formData: FormDataState
-  }[],
+  },
   isEdit: boolean
   hasDetail: boolean
   loadStatus: 'not loaded' | 'loaded' | 'failed'
@@ -66,7 +66,7 @@ type ActivityEditorState = {
 
 const activityEditorInitialState: ActivityEditorState = {
   id: undefined,
-  versions: [],
+  lastVersion: undefined,
   isEdit: false,
   hasDetail: false,
   loadStatus: 'not loaded',
@@ -136,30 +136,28 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           // if loaded, it is garunteed that (activity && activity.hasDetail) === true
           const activityWithDetail = activity as ActivityWithDetailFromStore
           state.initialized = true
-          state.versions = [
-            {
-              versionToken: activityWithDetail.versionToken,
-              formData: {
-                name: activityWithDetail.name,
-                who: activityWithDetail.person,
-                where: activityWithDetail.place,
-                howMuch: activityWithDetail.cost,
-                rides: {
-                  ids: [...activityWithDetail.rides]
-                    .sort((a, b) => a.sequence - b.sequence)
-                    .map(r => r.id),
-                  entities:
-                    Object.fromEntries(activityWithDetail.rides.map(r => [
-                      r.id,
-                      {
-                        id: r.id,
-                        description: r.description
-                      }
-                    ]))
-                }
+          state.lastVersion = {
+            versionToken: activityWithDetail.versionToken,
+            formData: {
+              name: activityWithDetail.name,
+              who: activityWithDetail.person,
+              where: activityWithDetail.place,
+              howMuch: activityWithDetail.cost,
+              rides: {
+                ids: [...activityWithDetail.rides]
+                  .sort((a, b) => a.sequence - b.sequence)
+                  .map(r => r.id),
+                entities:
+                  Object.fromEntries(activityWithDetail.rides.map(r => [
+                    r.id,
+                    {
+                      id: r.id,
+                      description: r.description
+                    }
+                  ]))
               }
             }
-          ]
+          }
         }
         return
       }
@@ -169,7 +167,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
           return
         }
         const refreshedStep = calculateRefreshedStep(
-          state.versions[state.versions.length - 1].formData,
+          state.lastVersion!.formData,
           state.formData,
           activity
         )
@@ -182,7 +180,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
             step.saveStatus = undefined
           }
         }
-        state.versions.push({
+        state.lastVersion = {
           versionToken: activity.versionToken,
           formData: {
             name: activity.name,
@@ -203,7 +201,7 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
                 ]))
             }
           }
-        })
+        }
       }
     })
     .addCase(setName, (state, { payload }) => {

@@ -65,7 +65,7 @@ describe('Edit Name', () => {
     const actualState = activityEditorStore.getState()
     expect(actualState).toEqual({
       id: 1,
-      versions: [{
+      lastVersion: {
         versionToken: '1',
         formData: {
           name: 'some activity',
@@ -86,7 +86,7 @@ describe('Edit Name', () => {
             }
           },
         }
-      }],
+      },
       isEdit: true,
       hasDetail: true,
       loadStatus: 'loaded',
@@ -411,50 +411,29 @@ describe('Edit Name', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions).toEqual([{
-      versionToken: '1',
-      formData: {
-        name: 'some activity',
-        who: "some person",
-        where: "some place",
-        howMuch: 99,
-        rides: {
-          ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-          entities: {
-            "GFqbzNATDKY8pKRAZV3ko": {
-              id: "GFqbzNATDKY8pKRAZV3ko",
-              description: "red car"
-            },
-            "zUxqlLLtWWjOdvHfAa1Vx": {
-              id: "zUxqlLLtWWjOdvHfAa1Vx",
-              description: "ferry"
-            },
-          }
-        },
-      }
-    },
-    {
-      versionToken: '2',
-      formData: {
-        name: 'some activity remote edited',
-        who: "some person",
-        where: "some place",
-        howMuch: 99,
-        rides: {
-          ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
-          entities: {
-            "GFqbzNATDKY8pKRAZV3ko": {
-              id: "GFqbzNATDKY8pKRAZV3ko",
-              description: "red car"
-            },
-            "zUxqlLLtWWjOdvHfAa1Vx": {
-              id: "zUxqlLLtWWjOdvHfAa1Vx",
-              description: "ferry"
-            },
-          }
-        },
-      }
-    }])
+    expect(actualState.lastVersion).toEqual(
+      {
+        versionToken: '2',
+        formData: {
+          name: 'some activity remote edited',
+          who: "some person",
+          where: "some place",
+          howMuch: 99,
+          rides: {
+            ids: ["GFqbzNATDKY8pKRAZV3ko", "zUxqlLLtWWjOdvHfAa1Vx"],
+            entities: {
+              "GFqbzNATDKY8pKRAZV3ko": {
+                id: "GFqbzNATDKY8pKRAZV3ko",
+                description: "red car"
+              },
+              "zUxqlLLtWWjOdvHfAa1Vx": {
+                id: "zUxqlLLtWWjOdvHfAa1Vx",
+                description: "ferry"
+              },
+            }
+          },
+        }
+      })
   })
   test('Refreshed merge local edit', () => {
     // if 'name' was edited locally but not remotely
@@ -544,7 +523,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Discard local changes', () => {
     // if 'name' was edited locally but not remotely
@@ -635,7 +614,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed local and remote same update', () => {
     // will update versions but will not create any new step
@@ -694,7 +673,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   const createAppStoreWithConflict = () => {
     const activityEditorStore = createLoadedAppStore()
@@ -777,7 +756,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Unapply re-apply Conflict', () => {
     const activityEditorStore = createAppStoreWithConflict()
@@ -831,7 +810,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(unapplyState.currentStepIndex).toBe(2)
-    expect(unapplyState.versions.length).toEqual(2)
+    expect(unapplyState.lastVersion?.versionToken).toEqual('2')
 
     //act re-apply
     activityEditorStore.dispatch(applyConflict(2, 0))
@@ -882,7 +861,7 @@ describe('Edit Name', () => {
       },
     ])
     expect(reapplyState.currentStepIndex).toBe(2)
-    expect(reapplyState.versions.length).toEqual(2)
+    expect(reapplyState.lastVersion?.versionToken).toEqual('2')
   })
   test('Conflict has related change', () => {
     const activityEditorStore = createAppStoreWithConflict()
@@ -1285,7 +1264,7 @@ describe('Add Ride', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed only remote Add', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -1396,7 +1375,7 @@ describe('Add Ride', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
 })
 
@@ -1747,7 +1726,7 @@ describe('Edit Ride Property', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed only remote edit', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -1830,7 +1809,7 @@ describe('Edit Ride Property', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed remote and local conflicting edit', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -1932,7 +1911,7 @@ describe('Edit Ride Property', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
 })
 
@@ -2222,7 +2201,7 @@ describe('Remove Ride', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed only remote remove', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -2307,7 +2286,7 @@ describe('Remove Ride', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed local and remote both remove', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -2398,7 +2377,7 @@ describe('Remove Ride', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   describe('Refreshed local remove remote update', () => {
     test('Conflict', () => {
@@ -2526,7 +2505,7 @@ describe('Remove Ride', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('Unapply re-apply undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -2886,7 +2865,7 @@ describe('Remove Ride', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('Unapply re-apply undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -3466,7 +3445,7 @@ describe('Move Rides', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed only remote move', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -3561,7 +3540,7 @@ describe('Move Rides', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(1)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   test('Refreshed local and remote both move', () => {
     const activityEditorStore = createLoadedAppStore()
@@ -3662,7 +3641,7 @@ describe('Move Rides', () => {
       },
     ])
     expect(actualState.currentStepIndex).toBe(2)
-    expect(actualState.versions.length).toEqual(2)
+    expect(actualState.lastVersion?.versionToken).toEqual('2')
   })
   describe('Refreshed remote and local conflicting move', () => {
     test('Conflict', () => {
@@ -3780,7 +3759,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('Unapply re-apply undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -4353,7 +4332,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -4551,7 +4530,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -4781,7 +4760,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -5015,7 +4994,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -5211,7 +5190,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()
@@ -5446,7 +5425,7 @@ describe('Move Rides', () => {
         },
       ])
       expect(actualState.currentStepIndex).toBe(2)
-      expect(actualState.versions.length).toEqual(2)
+      expect(actualState.lastVersion?.versionToken).toEqual('2')
     })
     test('undo redo', () => {
       const activityEditorStore = createLoadedAppStore()

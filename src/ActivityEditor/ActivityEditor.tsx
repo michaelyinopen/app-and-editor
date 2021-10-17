@@ -70,7 +70,7 @@ const ExitPrompt = () => {
   const isInitialStep = useActivityEditorSelector(es => es.currentStepIndex === 0)
   const isCurrentStepDiscardLocalChanges = useActivityEditorSelector(es =>
     es.steps[es.currentStepIndex].mergeBehaviour === 'discard local changes'
-    && es.steps[es.currentStepIndex].versionToken === es.versions[es.versions.length - 1]?.versionToken)
+    && es.steps[es.currentStepIndex].versionToken === es.lastVersion?.versionToken)
   const loadedFromRemote = isInitialStep || isCurrentStepDiscardLocalChanges
   const condition = isEdit
     && !isCurrentStepSaved
@@ -135,7 +135,7 @@ const Save = () => {
   const initialized = useActivityEditorSelector(es => es.initialized)
 
   const formData = useActivityEditorSelector(es => es.formData)
-  const versionToken = useActivityEditorSelector(es => es.versions[es.versions.length - 1]?.versionToken)
+  const versionToken = useActivityEditorSelector(es => es.lastVersion?.versionToken)
   const currentStepIndex = useActivityEditorSelector(es => es.currentStepIndex)
 
   const isDeleting = useAppSelector(createActivityIsDeletingSelector(id))
@@ -167,7 +167,7 @@ const Save = () => {
               description: formData.rides.entities[rid].description,
               sequence: index + 1
             })),
-            versionToken,
+            versionToken: versionToken!,
           }
           editorDispatch(savingStep(currentStepIndex, true))
           dispatch(updateActivityTakingThunkAction(id, activity))
