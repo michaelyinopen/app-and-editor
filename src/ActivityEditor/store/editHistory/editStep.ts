@@ -5,6 +5,7 @@ import {
   redo,
   replaceLastStep,
   resetActivityEditor,
+  setActivityEditorIsEdit,
   setActivityFromAppStore,
   setMergeBehaviourDiscardLocal,
   setMergeBehaviourMerge,
@@ -26,6 +27,7 @@ const excludeActionTypes = [
   replaceLastStep,
   setActivityFromAppStore,
   resetActivityEditor,
+  setActivityEditorIsEdit,
 
   undo,
   redo,
