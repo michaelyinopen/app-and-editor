@@ -94,7 +94,15 @@ export const activityEditorReducer = createReducer(activityEditorInitialState, (
       state.id = id
     })
     .addCase(setActivityEditorIsEdit, (state, { payload: isEdit }) => {
-      state.isEdit = isEdit
+      if (isEdit && !state.isEdit) {
+        state.isEdit = true
+      }
+      else if (!isEdit && state.isEdit) {
+        state.isEdit = false
+        state.steps = activityEditorInitialState.steps
+        state.currentStepIndex = activityEditorInitialState.currentStepIndex
+        state.formData = state.lastVersion?.formData ?? activityEditorInitialState.formData
+      }
     })
     .addCase(loadedActivity, (state) => {
       state.loadStatus = 'loaded'
