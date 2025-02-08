@@ -37,7 +37,7 @@ Can undo and redo each field change.
 If the a field's value changes consecutively, it will count as one field change. It is implemented by combining the new change with the last field change. `combineFieldChanges`
 
 ### Grouped Field Changes
-Field changes of different paths, that are inseparable. The changes will undo or redo together, and apply or unapply together.
+Field changes of different paths, that are inseparable. The changes will undo or redo together, and apply or unapply together. e.g. removing and adding from a collection. Grouped together for implementation convenience (easier than 2 field changes in an operation).
 
 ### Operation
 ```
@@ -50,7 +50,7 @@ Field changes of different paths, that are inseparable. The changes will undo or
 }
 ```
 
-Operation conatins one or more field changes. If an operation contains more than one field change, the field changes are inseparable.
+Operation conatins one or more field changes. If an operation contains more than one field change, the field changes are inseparable. e.g. ???
 
 ### Step
 ```
