@@ -50,7 +50,7 @@ Field changes of different paths, that are inseparable. The changes will undo or
 }
 ```
 
-Operation conatins one or more field changes. If an operation contains more than one field change, the field changes are inseparable, (becomes a gropued field changes for processing???).
+Operation conatins one or more field changes. If an operation contains more than one field change(Grouped field changes), the field changes are inseparable.
 
 ### Step
 ```
