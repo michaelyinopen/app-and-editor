@@ -102,3 +102,5 @@ This project's implementation is also "last save wins", but the experience is im
 
 ## Edit history: merge and conflict resolution
 see [edit history](./src/ActivityEditor/store/editHistory/editHistory.README.md).
+
+.
